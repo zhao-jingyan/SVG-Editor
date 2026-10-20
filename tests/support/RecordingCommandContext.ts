@@ -1,7 +1,7 @@
 import type { CommandContext } from "../../src/protocol/CommandContext";
 import type { CommandResult } from "../../src/protocol/CommandResult";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
-import type { ShapeSpec } from "../../src/protocol/ShapeSpec";
+import type { Shape } from "../../src/protocol/shapes/Shape";
 
 export interface ContextCall {
   readonly method: string;
@@ -31,7 +31,7 @@ export class RecordingCommandContext implements CommandContext {
     return this.record("canvas", [width, height]);
   }
 
-  public createShape(shape: ShapeSpec, parentId?: string): Promise<CommandResult> {
+  public createShape(shape: Shape, parentId?: string): Promise<CommandResult> {
     return this.record("createShape", [shape, parentId]);
   }
 

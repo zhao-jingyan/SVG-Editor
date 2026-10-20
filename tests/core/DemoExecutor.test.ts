@@ -5,6 +5,7 @@ import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
 import { ExitCommand } from "../../src/protocol/commands/ExitCommand";
 import { InitCommand } from "../../src/protocol/commands/InitCommand";
 import { HelpCommand } from "../../src/protocol/commands/HelpCommand";
+import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 
 describe("DemoExecutor", () => {
   const executor = new DemoExecutor(new DemoCommandContext());
@@ -15,7 +16,7 @@ describe("DemoExecutor", () => {
       message: "received command: init",
     });
     await expect(
-      executor.execute(new CreateCommand({ type: "g", id: "g1" })),
+      executor.execute(new CreateCommand(new GroupShape("g1"))),
     ).resolves.toEqual({
       type: "success",
       message: "received command: create",

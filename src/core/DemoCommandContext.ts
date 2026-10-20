@@ -1,7 +1,7 @@
 import type { CommandContext } from "../protocol/CommandContext";
 import type { CommandResult } from "../protocol/CommandResult";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
-import type { ShapeSpec } from "../protocol/ShapeSpec";
+import type { Shape } from "../protocol/shapes/Shape";
 
 export class DemoCommandContext implements CommandContext {
   public async init(_width?: number, _height?: number): Promise<CommandResult> {
@@ -20,7 +20,7 @@ export class DemoCommandContext implements CommandContext {
     return this.success("canvas");
   }
 
-  public async createShape(_shape: ShapeSpec, _parentId?: string): Promise<CommandResult> {
+  public async createShape(_shape: Shape, _parentId?: string): Promise<CommandResult> {
     return this.success("create");
   }
 

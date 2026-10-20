@@ -1,13 +1,13 @@
 import type { CommandResult } from "./CommandResult";
 import type { EditableAttribute } from "./EditableAttribute";
-import type { ShapeSpec } from "./ShapeSpec";
+import type { Shape } from "./shapes/Shape";
 
 export interface CommandContext {
   init(width?: number, height?: number): Promise<CommandResult>;
   read(path: string): Promise<CommandResult>;
   save(path?: string): Promise<CommandResult>;
   canvas(width?: number, height?: number): Promise<CommandResult>;
-  createShape(shape: ShapeSpec, parentId?: string): Promise<CommandResult>;
+  createShape(shape: Shape, parentId?: string): Promise<CommandResult>;
   deleteShape(shapeId: string): Promise<CommandResult>;
   moveShape(shapeId: string, dx: number, dy: number): Promise<CommandResult>;
   scaleShape(shapeId: string, factor: number): Promise<CommandResult>;

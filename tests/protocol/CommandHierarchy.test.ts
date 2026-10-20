@@ -20,12 +20,13 @@ import { TreeCommand } from "../../src/protocol/commands/TreeCommand";
 import { UndoCommand } from "../../src/protocol/commands/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/UngroupCommand";
 import { UndoableCommand } from "../../src/protocol/UndoableCommand";
+import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 import { RecordingCommandContext } from "../support/RecordingCommandContext";
 
 describe("Command 类层次", () => {
   it("编辑命令继承 UndoableCommand", () => {
     const commands: Command[] = [
-      new CreateCommand({ type: "g", id: "g1" }),
+      new CreateCommand(new GroupShape("g1")),
       new DeleteCommand("r1"),
       new MoveCommand("r1", 1, 2),
       new ScaleCommand("r1", 2),

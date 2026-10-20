@@ -1,15 +1,9 @@
 import type { CommandError } from "../protocol/CommandError";
 import type { CommandErrorCode } from "../protocol/CommandErrorCode";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
-import type {
-  CircleShapeSpec,
-  ContainerShapeSpec,
-  EllipseShapeSpec,
-  LineShapeSpec,
-  RectShapeSpec,
-  ShapeSpec,
-  TextShapeSpec,
-} from "../protocol/ShapeSpec";
+import type { Shape } from "../protocol/shapes/Shape";
+import { ShapeError } from "../protocol/shapes/ShapeError";
+import type { ShapeFactory } from "../protocol/shapes/ShapeFactory";
 import { AddToCommand } from "../protocol/commands/AddToCommand";
 import { CanvasCommand } from "../protocol/commands/CanvasCommand";
 import { CreateCommand } from "../protocol/commands/CreateCommand";
@@ -70,6 +64,8 @@ export class CommandLineParser implements CommandParser {
     "y2",
   ]);
 
+  public constructor(private readonly shapeFactory: ShapeFactory) {}
+
   public parse(line: string): CommandParseResult {
     const trimmed = line.trim();
 
@@ -83,10 +79,10 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(tokens);
     }
 
-    return CommandLineParser.parseTokens(tokens);
+    return this.parseTokens(tokens);
   }
 
-  private static parseTokens(tokens: string[]): CommandParseResult {
+  private parseTokens(tokens: string[]): CommandParseResult {
     switch (tokens[0]) {
       case "init":
         return CommandLineParser.parseInit(tokens);
@@ -97,7 +93,7 @@ export class CommandLineParser implements CommandParser {
       case "canvas":
         return CommandLineParser.parseCanvas(tokens);
       case "create":
-        return CommandLineParser.parseCreate(tokens);
+        return this.parseCreate(tokens);
       case "delete":
         return CommandLineParser.parseDelete(tokens);
       case "move":
@@ -204,7 +200,7 @@ export class CommandLineParser implements CommandParser {
     };
   }
 
-  private static parseCreate(tokens: string[]): CommandParseResult {
+  private parseCreate(tokens: string[]): CommandParseResult {
     if (tokens.length < 3) {
       return CommandLineParser.invalidArguments(
         "create <type> <id> [params...] [in <containerId>]",
@@ -217,234 +213,53 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(shapeId);
     }
 
-    switch (tokens[1]) {
-      case "rect":
-        return CommandLineParser.parseRect(tokens, shapeId);
-      case "circle":
-        return CommandLineParser.parseCircle(tokens, shapeId);
-      case "ellipse":
-        return CommandLineParser.parseEllipse(tokens, shapeId);
-      case "line":
-        return CommandLineParser.parseLine(tokens, shapeId);
-      case "text":
-        return CommandLineParser.parseText(tokens, shapeId);
-      case "g":
-        return CommandLineParser.parseContainer(tokens, shapeId);
-      default:
-        return CommandLineParser.failure(
-          "unknown-shape-type",
-          `unknown shape type: ${tokens[1]}`,
-        );
-    }
-  }
+    const parsedArguments = this.parseCreateArguments(tokens);
 
-  private static parseRect(tokens: string[], id: string): CommandParseResult {
-    const numbers = CommandLineParser.parseNumbers(tokens, 3, 4);
-
-    if (CommandLineParser.isCommandError(numbers)) {
-      return CommandLineParser.errorResult(numbers);
+    if (CommandLineParser.isCommandError(parsedArguments)) {
+      return CommandLineParser.errorResult(parsedArguments);
     }
 
-    const tail = CommandLineParser.parseCreateTail(tokens, 7, "fill");
-
-    if (CommandLineParser.isCommandError(tail)) {
-      return CommandLineParser.errorResult(tail);
-    }
-
-    const shape: RectShapeSpec = {
-      type: "rect",
-      id,
-      x: numbers[0],
-      y: numbers[1],
-      width: numbers[2],
-      height: numbers[3],
-      ...(tail.style === undefined ? {} : { fill: tail.style }),
-    };
-
-    return CommandLineParser.createResult(shape, tail.parentId);
-  }
-
-  private static parseCircle(tokens: string[], id: string): CommandParseResult {
-    const numbers = CommandLineParser.parseNumbers(tokens, 3, 3);
-
-    if (CommandLineParser.isCommandError(numbers)) {
-      return CommandLineParser.errorResult(numbers);
-    }
-
-    const tail = CommandLineParser.parseCreateTail(tokens, 6, "fill");
-
-    if (CommandLineParser.isCommandError(tail)) {
-      return CommandLineParser.errorResult(tail);
-    }
-
-    const shape: CircleShapeSpec = {
-      type: "circle",
-      id,
-      cx: numbers[0],
-      cy: numbers[1],
-      r: numbers[2],
-      ...(tail.style === undefined ? {} : { fill: tail.style }),
-    };
-
-    return CommandLineParser.createResult(shape, tail.parentId);
-  }
-
-  private static parseEllipse(tokens: string[], id: string): CommandParseResult {
-    const numbers = CommandLineParser.parseNumbers(tokens, 3, 4);
-
-    if (CommandLineParser.isCommandError(numbers)) {
-      return CommandLineParser.errorResult(numbers);
-    }
-
-    const tail = CommandLineParser.parseCreateTail(tokens, 7, "fill");
-
-    if (CommandLineParser.isCommandError(tail)) {
-      return CommandLineParser.errorResult(tail);
-    }
-
-    const shape: EllipseShapeSpec = {
-      type: "ellipse",
-      id,
-      cx: numbers[0],
-      cy: numbers[1],
-      rx: numbers[2],
-      ry: numbers[3],
-      ...(tail.style === undefined ? {} : { fill: tail.style }),
-    };
-
-    return CommandLineParser.createResult(shape, tail.parentId);
-  }
-
-  private static parseLine(tokens: string[], id: string): CommandParseResult {
-    const numbers = CommandLineParser.parseNumbers(tokens, 3, 4);
-
-    if (CommandLineParser.isCommandError(numbers)) {
-      return CommandLineParser.errorResult(numbers);
-    }
-
-    const tail = CommandLineParser.parseCreateTail(tokens, 7, "stroke");
-
-    if (CommandLineParser.isCommandError(tail)) {
-      return CommandLineParser.errorResult(tail);
-    }
-
-    const shape: LineShapeSpec = {
-      type: "line",
-      id,
-      x1: numbers[0],
-      y1: numbers[1],
-      x2: numbers[2],
-      y2: numbers[3],
-      ...(tail.style === undefined ? {} : { stroke: tail.style }),
-    };
-
-    return CommandLineParser.createResult(shape, tail.parentId);
-  }
-
-  private static parseText(tokens: string[], id: string): CommandParseResult {
-    const numbers = CommandLineParser.parseNumbers(tokens, 3, 2);
-
-    if (CommandLineParser.isCommandError(numbers)) {
-      return CommandLineParser.errorResult(numbers);
-    }
-
-    if (tokens[5] === undefined) {
-      return CommandLineParser.invalidArguments(
-        'create text <id> <x> <y> "content" [in <containerId>]',
+    try {
+      const shape = this.shapeFactory.create(
+        tokens[1],
+        shapeId,
+        parsedArguments.arguments,
       );
-    }
-
-    const parent = CommandLineParser.parseParent(tokens, 6);
-
-    if (CommandLineParser.isCommandError(parent)) {
-      return CommandLineParser.errorResult(parent);
-    }
-
-    const shape: TextShapeSpec = {
-      type: "text",
-      id,
-      x: numbers[0],
-      y: numbers[1],
-      content: tokens[5],
-    };
-
-    return CommandLineParser.createResult(shape, parent.parentId);
-  }
-
-  private static parseContainer(tokens: string[], id: string): CommandParseResult {
-    const parent = CommandLineParser.parseParent(tokens, 3);
-
-    if (CommandLineParser.isCommandError(parent)) {
-      return CommandLineParser.errorResult(parent);
-    }
-
-    const shape: ContainerShapeSpec = { type: "g", id };
-    return CommandLineParser.createResult(shape, parent.parentId);
-  }
-
-  private static parseCreateTail(
-    tokens: string[],
-    styleIndex: number,
-    styleName: "fill" | "stroke",
-  ): { style?: string; parentId?: string } | CommandError {
-    let nextIndex = styleIndex;
-    let style: string | undefined;
-
-    if (tokens[nextIndex] !== undefined && tokens[nextIndex] !== "in") {
-      const parsedStyle = CommandLineParser.nonEmptyToken(tokens[nextIndex], styleName);
-
-      if (CommandLineParser.isCommandError(parsedStyle)) {
-        return parsedStyle;
+      return this.createResult(shape, parsedArguments.parentId);
+    } catch (error: unknown) {
+      if (error instanceof ShapeError) {
+        return CommandLineParser.failure(error.getCode(), error.message);
       }
 
-      style = parsedStyle;
-      nextIndex += 1;
+      throw error;
     }
-
-    const parent = CommandLineParser.parseParent(tokens, nextIndex);
-
-    if (CommandLineParser.isCommandError(parent)) {
-      return parent;
-    }
-
-    return {
-      ...(style === undefined ? {} : { style }),
-      ...(parent.parentId === undefined ? {} : { parentId: parent.parentId }),
-    };
   }
 
-  private static parseParent(
+  private parseCreateArguments(
     tokens: string[],
-    startIndex: number,
-  ): { parentId?: string } | CommandError {
-    if (startIndex >= tokens.length) {
-      return {};
+  ): { arguments: readonly string[]; parentId?: string } | CommandError {
+    const parentKeywordIndex = tokens.length - 2;
+
+    if (tokens[parentKeywordIndex] !== "in") {
+      return { arguments: tokens.slice(3) };
     }
 
-    if (tokens[startIndex] !== "in") {
-      return {
-        code: "invalid-argument",
-        message: `unexpected token: ${tokens[startIndex]}`,
-      };
-    }
-
-    if (startIndex + 2 !== tokens.length) {
-      return {
-        code: "invalid-argument",
-        message: "expected 'in <containerId>' at the end of the command",
-      };
-    }
-
-    const parentId = CommandLineParser.nonEmptyToken(tokens[startIndex + 1], "container id");
+    const parentId = CommandLineParser.nonEmptyToken(
+      tokens[parentKeywordIndex + 1],
+      "container id",
+    );
 
     if (CommandLineParser.isCommandError(parentId)) {
       return parentId;
     }
 
-    return { parentId };
+    return {
+      arguments: tokens.slice(3, parentKeywordIndex),
+      parentId,
+    };
   }
 
-  private static createResult(shape: ShapeSpec, parentId?: string): CommandParseResult {
+  private createResult(shape: Shape, parentId?: string): CommandParseResult {
     return { type: "command", command: new CreateCommand(shape, parentId) };
   }
 

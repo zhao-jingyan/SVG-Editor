@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CommandLineParser } from "../../src/cli/CommandLineParser";
 import type { Command } from "../../src/protocol/Command";
 import type { CommandResult } from "../../src/protocol/CommandResult";
+import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
 import { AddToCommand } from "../../src/protocol/commands/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/CanvasCommand";
 import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
@@ -21,14 +22,23 @@ import { ShowCommand } from "../../src/protocol/commands/ShowCommand";
 import { TreeCommand } from "../../src/protocol/commands/TreeCommand";
 import { UndoCommand } from "../../src/protocol/commands/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/UngroupCommand";
+import { CircleShape } from "../../src/protocol/shapes/CircleShape";
+import { EllipseShape } from "../../src/protocol/shapes/EllipseShape";
+import { GroupShape } from "../../src/protocol/shapes/GroupShape";
+import { LineShape } from "../../src/protocol/shapes/LineShape";
+import { RectShape } from "../../src/protocol/shapes/RectShape";
+import { Shape } from "../../src/protocol/shapes/Shape";
+import { ShapeFactory } from "../../src/protocol/shapes/ShapeFactory";
+import { TextShape } from "../../src/protocol/shapes/TextShape";
 import {
   RecordingCommandContext,
   type ContextCall,
 } from "../support/RecordingCommandContext";
 
 type CommandConstructor = new (...args: any[]) => Command;
+type ShapeConstructor = new (...args: any[]) => Shape;
 
-const parser = new CommandLineParser();
+const parser = new CommandLineParser(new ShapeFactory());
 
 function parseCommand(input: string): Command {
   const result = parser.parse(input);
@@ -61,6 +71,35 @@ async function expectCommand(
   expect(calls).toEqual([{ method, args }]);
 }
 
+async function expectCreateCommand(
+  input: string,
+  constructor: ShapeConstructor,
+  id: string,
+  attributes: readonly (readonly [EditableAttribute, string | number])[],
+  parentId?: string,
+): Promise<void> {
+  const { command, calls } = await execute(input);
+
+  expect(command).toBeInstanceOf(CreateCommand);
+  expect(calls).toHaveLength(1);
+  expect(calls[0].method).toBe("createShape");
+  expect(calls[0].args[1]).toBe(parentId);
+
+  const shape = calls[0].args[0];
+  expect(shape).toBeInstanceOf(constructor);
+  expect(shape).toBeInstanceOf(Shape);
+
+  if (!(shape instanceof Shape)) {
+    throw new Error("expected shape instance");
+  }
+
+  expect(shape.getId()).toBe(id);
+
+  for (const [attribute, value] of attributes) {
+    expect(shape.getAttribute(attribute)).toBe(value);
+  }
+}
+
 describe("CommandLineParser", () => {
   it("解析文档命令并调用对应 Context 方法", async () => {
     await expectCommand("init", InitCommand, "init", [undefined, undefined]);
@@ -80,32 +119,84 @@ describe("CommandLineParser", () => {
   });
 
   it("解析全部内置图形并创建具体 CreateCommand", async () => {
-    await expectCommand("create rect r1 10 20 100 50 #fff in g1", CreateCommand, "createShape", [
-      { type: "rect", id: "r1", x: 10, y: 20, width: 100, height: 50, fill: "#fff" },
+    await expectCreateCommand(
+      "create rect r1 10 20 100 50 #fff in g1",
+      RectShape,
+      "r1",
+      [
+        ["x", 10],
+        ["y", 20],
+        ["width", 100],
+        ["height", 50],
+        ["fill", "#fff"],
+      ],
       "g1",
-    ]);
-    await expectCommand("create circle c1 100 100 20", CreateCommand, "createShape", [
-      { type: "circle", id: "c1", cx: 100, cy: 100, r: 20 },
-      undefined,
-    ]);
-    await expectCommand("create ellipse e1 1 2 3 4 red in g1", CreateCommand, "createShape", [
-      { type: "ellipse", id: "e1", cx: 1, cy: 2, rx: 3, ry: 4, fill: "red" },
-      "g1",
-    ]);
-    await expectCommand("create line l1 0 0 10 10 black", CreateCommand, "createShape", [
-      { type: "line", id: "l1", x1: 0, y1: 0, x2: 10, y2: 10, stroke: "black" },
-      undefined,
-    ]);
-    await expectCommand(
-      'create text t1 20 40 "My Diagram" in g1',
-      CreateCommand,
-      "createShape",
-      [{ type: "text", id: "t1", x: 20, y: 40, content: "My Diagram" }, "g1"],
     );
-    await expectCommand("create g g1", CreateCommand, "createShape", [
-      { type: "g", id: "g1" },
-      undefined,
+    await expectCreateCommand("create circle c1 100 100 20", CircleShape, "c1", [
+      ["cx", 100],
+      ["cy", 100],
+      ["r", 20],
     ]);
+    await expectCreateCommand(
+      "create ellipse e1 1 2 3 4 red in g1",
+      EllipseShape,
+      "e1",
+      [
+        ["cx", 1],
+        ["cy", 2],
+        ["rx", 3],
+        ["ry", 4],
+        ["fill", "red"],
+      ],
+      "g1",
+    );
+    await expectCreateCommand("create line l1 0 0 10 10 black", LineShape, "l1", [
+      ["x1", 0],
+      ["y1", 0],
+      ["x2", 10],
+      ["y2", 10],
+      ["stroke", "black"],
+    ]);
+    await expectCreateCommand(
+      'create text t1 20 40 "My Diagram" in g1',
+      TextShape,
+      "t1",
+      [
+        ["x", 20],
+        ["y", 40],
+        ["text", "My Diagram"],
+      ],
+      "g1",
+    );
+    await expectCreateCommand("create g g1", GroupShape, "g1", []);
+
+    const emptyText = await execute('create text empty 0 0 ""');
+    const emptyTextShape = emptyText.calls[0].args[0];
+    expect(emptyTextShape).toBeInstanceOf(TextShape);
+    expect((emptyTextShape as TextShape).getAttribute("text")).toBe("");
+  });
+
+  it("报告图形工厂的参数错误", () => {
+    expect(parser.parse("create hexagon h1 0 0")).toMatchObject({
+      type: "error",
+      error: { code: "unknown-shape-type" },
+    });
+    expect(parser.parse("create rect r1 nope 0 10 10")).toMatchObject({
+      type: "error",
+      error: { code: "invalid-number" },
+    });
+    expect(parser.parse("create circle c1 0 0")).toMatchObject({
+      type: "error",
+      error: { code: "invalid-argument" },
+    });
+    expect(parser.parse("create g g1 extra")).toMatchObject({
+      type: "error",
+      error: { code: "invalid-argument" },
+    });
+    expect(parser.parse("create rect r1 0 0 10 10 in")).toMatchObject({
+      type: "error",
+      error: { code: "invalid-argument" },
+    });
   });
 
   it("解析图形编辑命令并调用对应 Context 方法", async () => {
