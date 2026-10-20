@@ -16,4 +16,8 @@ export class CreateCommand extends UndoableCommand {
   public execute(context: CommandContext): Promise<CommandResult> {
     return context.createShape(this.shape, this.parentId);
   }
+
+  public override undo(context: CommandContext): Promise<CommandResult> {
+    return context.deleteShape(this.shape.getId());
+  }
 }

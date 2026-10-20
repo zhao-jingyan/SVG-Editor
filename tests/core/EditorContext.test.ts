@@ -1,0 +1,326 @@
+import { describe, expect, it } from "vitest";
+import { CommandExecutor } from "../../src/core/CommandExecutor";
+import { EditorContext } from "../../src/core/EditorContext";
+import { Command } from "../../src/protocol/Command";
+import { AddToCommand } from "../../src/protocol/commands/AddToCommand";
+import { CanvasCommand } from "../../src/protocol/commands/CanvasCommand";
+import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
+import { DeleteCommand } from "../../src/protocol/commands/DeleteCommand";
+import { GroupCommand } from "../../src/protocol/commands/GroupCommand";
+import { HelpCommand } from "../../src/protocol/commands/HelpCommand";
+import { InitCommand } from "../../src/protocol/commands/InitCommand";
+import { MoveCommand } from "../../src/protocol/commands/MoveCommand";
+import { ReadCommand } from "../../src/protocol/commands/ReadCommand";
+import { RedoCommand } from "../../src/protocol/commands/RedoCommand";
+import { ReorderCommand } from "../../src/protocol/commands/ReorderCommand";
+import { SaveCommand } from "../../src/protocol/commands/SaveCommand";
+import { ScaleCommand } from "../../src/protocol/commands/ScaleCommand";
+import { SetCommand } from "../../src/protocol/commands/SetCommand";
+import { ShowCommand } from "../../src/protocol/commands/ShowCommand";
+import { TreeCommand } from "../../src/protocol/commands/TreeCommand";
+import { UndoCommand } from "../../src/protocol/commands/UndoCommand";
+import { UngroupCommand } from "../../src/protocol/commands/UngroupCommand";
+import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
+import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
+import type { CommandResult } from "../../src/protocol/results/CommandResult";
+import { CircleShape } from "../../src/protocol/shapes/CircleShape";
+import { GroupShape } from "../../src/protocol/shapes/GroupShape";
+import { RectShape } from "../../src/protocol/shapes/RectShape";
+import { TextShape } from "../../src/protocol/shapes/TextShape";
+
+function expectErrorMessage(
+  result: CommandResult,
+  code: CommandErrorCode,
+  message: string,
+): void {
+  expect(result).toBeInstanceOf(CommandErrorResult);
+  expect(result.toCommandResultDto()).toEqual({
+    type: "error",
+    error: { code, message },
+  });
+}
+
+function createEditor(): {
+  context: EditorContext;
+  executor: CommandExecutor;
+} {
+  const context = new EditorContext();
+  return { context, executor: new CommandExecutor(context) };
+}
+
+async function initialize(
+  executor: CommandExecutor,
+  width = 800,
+  height = 600,
+): Promise<void> {
+  const result = await executor.execute(new InitCommand(width, height));
+  expect(result.toCommandResultDto()).toEqual({
+    type: "success",
+    message: `canvas ${width}x${height} created`,
+  });
+}
+
+describe("EditorContext", () => {
+  it("管理文档生命周期、画布查询和历史锁", async () => {
+    const { executor } = createEditor();
+
+    expectErrorMessage(
+      await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10))),
+      CommandErrorCode.NoDocument,
+      "no document. use 'init' or 'read' first",
+    );
+
+    await initialize(executor, 1024, 768);
+    expect((await executor.execute(new CanvasCommand())).toCommandResultDto()).toEqual({
+      type: "success",
+      message: "canvas 1024x768",
+    });
+    expect(
+      (await executor.execute(new CanvasCommand(800, 600))).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "canvas 800x600 resized" });
+
+    expectErrorMessage(
+      await executor.execute(new UndoCommand()),
+      CommandErrorCode.HistoryUnavailable,
+      "undo not allowed after io command",
+    );
+  });
+
+  it("执行 move 后撤销和重做", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10)));
+
+    expect(
+      (await executor.execute(new MoveCommand("r1", 5, 5))).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 moved by (5,5)" });
+    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
+
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 moved back by (-5,-5)" });
+    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(0);
+
+    expect(
+      (await executor.execute(new RedoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 moved by (5,5)" });
+    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
+  });
+
+  it("执行 scale 后撤销，并支持创建命令的撤销与重做", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10)));
+
+    expect(
+      (await executor.execute(new ScaleCommand("r1", 2))).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 scaled by 2" });
+    expect(context.captureAttribute("r1", "width").getValue("r1")).toBe(20);
+
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 scaled back by 0.5" });
+    expect(context.captureAttribute("r1", "width").getValue("r1")).toBe(10);
+
+    await executor.execute(new RedoCommand());
+    expect(context.captureAttribute("r1", "width").getValue("r1")).toBe(20);
+    await executor.execute(new UndoCommand());
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 deleted" });
+    expect(() => context.capturePlacement("r1")).toThrow("no such shape: r1");
+
+    expect(
+      (await executor.execute(new RedoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 created" });
+    expect(context.capturePlacement("r1").getIndex()).toBe(0);
+  });
+
+  it("删除后精确恢复原父级和索引", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("first", 0, 0, 1, 1)));
+    await executor.execute(new CreateCommand(new RectShape("second", 0, 0, 1, 1)));
+    await executor.execute(new CreateCommand(new RectShape("third", 0, 0, 1, 1)));
+
+    expect(
+      (await executor.execute(new DeleteCommand("second"))).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#second deleted" });
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#second restored" });
+    expect(context.capturePlacement("second").getIndex()).toBe(1);
+
+    await executor.execute(new RedoCommand());
+    expect(() => context.capturePlacement("second")).toThrow(
+      "no such shape: second",
+    );
+  });
+
+  it("group 撤销恢复成员顺序，redo 重建容器", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+    await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1)));
+    await executor.execute(new CreateCommand(new TextShape("r3", 0, 0, "text")));
+
+    expect(
+      (await executor.execute(new GroupCommand("g1", ["r3", "r1"]))).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "g#g1 created with 2 children" });
+    expect(context.capturePlacement("r1").getParentId()).toBe("g1");
+
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "g#g1 removed" });
+    expect(() => context.capturePlacement("g1")).toThrow("no such shape: g1");
+    expect(context.capturePlacement("r1").getIndex()).toBe(0);
+    expect(context.capturePlacement("r2").getIndex()).toBe(1);
+    expect(context.capturePlacement("r3").getIndex()).toBe(2);
+
+    await executor.execute(new RedoCommand());
+    expect(context.capturePlacement("r1").getParentId()).toBe("g1");
+    expect(context.capturePlacement("r3").getParentId()).toBe("g1");
+  });
+
+  it("ungroup 撤销恢复容器结构", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new GroupShape("outer")));
+    await executor.execute(new CreateCommand(new GroupShape("inner"), "outer"));
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1), "inner"));
+    await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1), "inner"));
+
+    expect(
+      (await executor.execute(new UngroupCommand("inner"))).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "g#inner ungrouped into 2 children" });
+    expect(context.capturePlacement("r1").getParentId()).toBe("outer");
+
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "g#inner restored" });
+    const placement = context.capturePlacement("inner");
+    expect(placement.getParentId()).toBe("outer");
+    expect(placement.getIndex()).toBe(0);
+    expect(context.capturePlacement("r1").getParentId()).toBe("inner");
+
+    await executor.execute(new RedoCommand());
+    expect(context.capturePlacement("r1").getParentId()).toBe("outer");
+  });
+
+  it("addto 和 reorder 撤销恢复原索引", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new GroupShape("g1")));
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+    await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1)));
+
+    await executor.execute(new AddToCommand("g1", "r1"));
+    expect(context.capturePlacement("r1").getParentId()).toBe("g1");
+    await executor.execute(new UndoCommand());
+    expect(context.capturePlacement("r1").getParentId()).toBeUndefined();
+    expect(context.capturePlacement("r1").getIndex()).toBe(1);
+
+    await executor.execute(new ReorderCommand("r2", "front"));
+    expect(context.capturePlacement("r2").getIndex()).toBe(0);
+    await executor.execute(new UndoCommand());
+    expect(context.capturePlacement("r2").getIndex()).toBe(2);
+  });
+
+  it("set 撤销恢复叶子旧值，并按叶子恢复容器的不同旧值", async () => {
+    const { context, executor } = createEditor();
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1, "red")));
+    await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1)));
+    await executor.execute(new CreateCommand(new TextShape("t1", 0, 0, "old")));
+    await executor.execute(new GroupCommand("g1", ["r1", "r2"]));
+
+    await executor.execute(new SetCommand("g1", "fill", "blue"));
+    expect(context.captureAttribute("r1", "fill").getValue("r1")).toBe("blue");
+    expect(context.captureAttribute("r2", "fill").getValue("r2")).toBe("blue");
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "g#g1 updated: fill unset" });
+    expect(context.captureAttribute("r1", "fill").getValue("r1")).toBe("red");
+    expect(context.captureAttribute("r2", "fill").getValue("r2")).toBeUndefined();
+
+    await executor.execute(new SetCommand("t1", "text", "new"));
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: 'text#t1 updated: text="old"' });
+  });
+
+  it("失败编辑不入栈且不会解除历史锁", async () => {
+    const { executor } = createEditor();
+    await initialize(executor);
+
+    expectErrorMessage(
+      await executor.execute(new MoveCommand("missing", 1, 1)),
+      CommandErrorCode.ShapeNotFound,
+      "no such shape: missing",
+    );
+    expectErrorMessage(
+      await executor.execute(new UndoCommand()),
+      CommandErrorCode.HistoryUnavailable,
+      "undo not allowed after io command",
+    );
+
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 deleted" });
+  });
+
+  it("未执行的状态型命令不能直接撤销", async () => {
+    const { context } = createEditor();
+    const commands = [
+      new DeleteCommand("r1"),
+      new GroupCommand("g1", ["r1", "r2"]),
+      new UngroupCommand("g1"),
+      new AddToCommand("g1", "r1"),
+      new ReorderCommand("r1", "front"),
+      new SetCommand("r1", "fill", "red"),
+    ];
+
+    for (const command of commands) {
+      const result = await command.undo(context);
+      expectErrorMessage(
+        result,
+        CommandErrorCode.InvalidArgument,
+        `command has not been executed: ${command.type}`,
+      );
+    }
+  });
+
+  it("未实现的文档与显示命令返回稳定错误", async () => {
+    const { executor } = createEditor();
+    const commands: readonly [Command, string][] = [
+      [new ReadCommand("demo.svg"), "read"],
+      [new SaveCommand("demo.svg"), "save"],
+      [new TreeCommand(), "tree"],
+      [new ShowCommand("r1"), "show"],
+      [new HelpCommand(), "help"],
+    ];
+
+    for (const [command, name] of commands) {
+      expectErrorMessage(
+        await executor.execute(command),
+        CommandErrorCode.CommandNotImplemented,
+        `${name} is not implemented yet`,
+      );
+    }
+  });
+
+  it("CommandExecutor 只转换协议错误，未知异常继续上抛", async () => {
+    const { executor } = createEditor();
+
+    class ExplodingCommand extends Command {
+      public readonly type = "help";
+
+      public async execute(): Promise<CommandResult> {
+        throw new Error("boom");
+      }
+    }
+
+    await expect(executor.execute(new ExplodingCommand())).rejects.toThrow("boom");
+  });
+});

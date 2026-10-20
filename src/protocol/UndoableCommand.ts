@@ -14,4 +14,13 @@ export abstract class UndoableCommand extends Command {
       ),
     );
   }
+
+  protected notExecutedResult(): CommandResult {
+    return new CommandErrorResult(
+      new CommandExecutionError(
+        CommandErrorCode.InvalidArgument,
+        `command has not been executed: ${this.type}`,
+      ),
+    );
+  }
 }

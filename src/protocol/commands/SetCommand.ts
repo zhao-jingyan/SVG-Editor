@@ -1,3 +1,5 @@
+import { CommandSuccessResult } from "../results/CommandSuccessResult";
+import type { ShapeAttributeSnapshot } from "./ShapeAttributeSnapshot";
 import type { CommandContext } from "../CommandContext";
 import type { CommandResult } from "../results/CommandResult";
 import type { EditableAttribute } from "../EditableAttribute";
@@ -5,6 +7,7 @@ import { UndoableCommand } from "../UndoableCommand";
 
 export class SetCommand extends UndoableCommand {
   public readonly type = "set";
+  private snapshot?: ShapeAttributeSnapshot;
 
   public constructor(
     private readonly shapeId: string,
@@ -15,6 +18,33 @@ export class SetCommand extends UndoableCommand {
   }
 
   public execute(context: CommandContext): Promise<CommandResult> {
+    this.snapshot = context.captureAttribute(this.shapeId, this.attribute);
     return context.setAttribute(this.shapeId, this.attribute, this.value);
+  }
+
+  public override undo(context: CommandContext): Promise<CommandResult> {
+    const snapshot = this.snapshot;
+
+    if (snapshot === undefined) {
+      return Promise.resolve(this.notExecutedResult());
+    }
+
+    context.restoreAttribute(snapshot);
+    return Promise.resolve(
+      new CommandSuccessResult(
+        `${snapshot.getShapeType()}#${this.shapeId} updated: ${
+          this.formatAttributeValue(snapshot.getValue(snapshot.getShapeId()))
+        }`,
+      ),
+    );
+  }
+
+  private formatAttributeValue(value: string | number | undefined): string {
+    if (value === undefined) {
+      return `${this.attribute} unset`;
+    }
+
+    const formatted = typeof value === "string" ? `"${value}"` : `${value}`;
+    return `${this.attribute}=${formatted}`;
   }
 }

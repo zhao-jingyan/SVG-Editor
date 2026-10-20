@@ -1,8 +1,12 @@
 import type { CommandContext } from "../../src/protocol/CommandContext";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
+import { ShapeAttributeSnapshot } from "../../src/protocol/commands/ShapeAttributeSnapshot";
+import { ShapePlacement } from "../../src/protocol/commands/ShapePlacement";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
+import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 import type { Shape } from "../../src/protocol/shapes/Shape";
+import { ShapeType } from "../../src/protocol/shapes/ShapeType";
 
 export interface ContextCall {
   readonly method: string;
@@ -77,6 +81,28 @@ export class RecordingCommandContext implements CommandContext {
   ): Promise<CommandResult> {
     return this.record("reorderShape", [shapeId, position]);
   }
+
+  public capturePlacement(shapeId: string): ShapePlacement {
+    return new ShapePlacement(new GroupShape(shapeId), undefined, 0);
+  }
+
+  public restorePlacements(_placements: readonly ShapePlacement[]): void {}
+
+  public restoreGroup(_placement: ShapePlacement): void {}
+
+  public captureAttribute(
+    shapeId: string,
+    attribute: EditableAttribute,
+  ): ShapeAttributeSnapshot {
+    return new ShapeAttributeSnapshot(
+      shapeId,
+      ShapeType.Group,
+      attribute,
+      new Map(),
+    );
+  }
+
+  public restoreAttribute(_snapshot: ShapeAttributeSnapshot): void {}
 
   public tree(shapeId?: string): Promise<CommandResult> {
     return this.record("tree", [shapeId]);
