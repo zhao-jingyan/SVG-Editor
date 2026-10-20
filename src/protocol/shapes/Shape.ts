@@ -32,6 +32,8 @@ export abstract class Shape {
     value: string | number,
   ): void;
 
+  public abstract unsetAttribute(attribute: EditableAttribute): void;
+
   public abstract getAttribute(
     attribute: EditableAttribute,
   ): string | number | undefined;

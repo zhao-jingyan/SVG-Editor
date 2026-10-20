@@ -48,7 +48,7 @@ export class ShapeIndex {
     }
   }
 
-  public reparentShape(shape: Shape, parent: GroupShape): void {
+  public reparentShape(shape: Shape, parent: GroupShape | undefined): void {
     this.parentsById.set(shape.getId(), parent);
   }
 

@@ -42,6 +42,22 @@ export abstract class StyledShape extends Shape {
     }
   }
 
+  public override unsetAttribute(attribute: EditableAttribute): void {
+    switch (attribute) {
+      case "fill":
+        this.fill = undefined;
+        return;
+      case "stroke":
+        this.stroke = undefined;
+        return;
+      case "stroke-width":
+        this.strokeWidth = undefined;
+        return;
+      default:
+        this.throwUnknownAttribute(attribute);
+    }
+  }
+
   public override getAttribute(
     attribute: EditableAttribute,
   ): string | number | undefined {

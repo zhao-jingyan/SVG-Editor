@@ -1,6 +1,9 @@
 import type { EditableAttribute } from "../../protocol/EditableAttribute";
+import { ShapeAttributeSnapshot } from "../../protocol/commands/ShapeAttributeSnapshot";
+import { ShapePlacement } from "../../protocol/commands/ShapePlacement";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { DocumentError } from "../../protocol/errors/DocumentError";
+import { GroupShape } from "../../protocol/shapes/GroupShape";
 import type { Shape } from "../../protocol/shapes/Shape";
 import { ShapeHierarchy } from "./ShapeHierarchy";
 import { ShapeIndex } from "./ShapeIndex";
@@ -52,6 +55,50 @@ export class Document {
     return this.shapeHierarchy.getChildren(parentId);
   }
 
+  public getIndexInParent(shapeId: string): number {
+    return this.shapeHierarchy.getIndexInParent(shapeId);
+  }
+
+  public capturePlacement(shapeId: string): ShapePlacement {
+    return this.shapeHierarchy.capturePlacement(shapeId);
+  }
+
+  public restorePlacements(placements: readonly ShapePlacement[]): void {
+    this.shapeHierarchy.restorePlacements(placements);
+  }
+
+  public restoreGroup(placement: ShapePlacement): void {
+    this.shapeHierarchy.restoreGroup(placement);
+  }
+
+  public captureAttribute(
+    shapeId: string,
+    attribute: EditableAttribute,
+  ): ShapeAttributeSnapshot {
+    const values = new Map<string, string | number | undefined>();
+    const shape = this.getShape(shapeId);
+    this.captureShapeAttribute(shape, attribute, values);
+    return new ShapeAttributeSnapshot(shapeId, shape.getType(), attribute, values);
+  }
+
+  public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {
+    const attribute = snapshot.getAttribute();
+
+    for (const shapeId of snapshot.getShapeIds()) {
+      this.getShape(shapeId);
+    }
+
+    for (const shapeId of snapshot.getShapeIds()) {
+      const value = snapshot.getValue(shapeId);
+
+      if (value === undefined) {
+        this.getShape(shapeId).unsetAttribute(attribute);
+      } else {
+        this.getShape(shapeId).setAttribute(attribute, value);
+      }
+    }
+  }
+
   public addShape(shape: Shape, parentId?: string): void {
     this.shapeHierarchy.addShape(shape, parentId);
   }
@@ -101,5 +148,21 @@ export class Document {
     }
 
     return value;
+  }
+
+  private captureShapeAttribute(
+    shape: Shape,
+    attribute: EditableAttribute,
+    values: Map<string, string | number | undefined>,
+  ): void {
+    if (shape instanceof GroupShape) {
+      for (const child of shape.getChildren()) {
+        this.captureShapeAttribute(child, attribute, values);
+      }
+
+      return;
+    }
+
+    values.set(shape.getId(), shape.getAttribute(attribute));
   }
 }

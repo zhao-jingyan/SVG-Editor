@@ -272,6 +272,32 @@ describe("Shape 多态模型", () => {
     expect(() => empty.setAttribute("fill", "red")).not.toThrow();
   });
 
+  it("清除公共样式时递归处理容器并拒绝几何属性", () => {
+    const rect = new RectShape("r1", 0, 0, 10, 10, "red");
+    const circle = new CircleShape("c1", 0, 0, 5, "blue");
+    const group = new GroupShape("g1", [rect, circle]);
+    rect.setAttribute("stroke", "black");
+    rect.setAttribute("stroke-width", 2);
+
+    group.unsetAttribute("fill");
+    expect(rect.getAttribute("fill")).toBeUndefined();
+    expect(circle.getAttribute("fill")).toBeUndefined();
+
+    rect.unsetAttribute("stroke");
+    rect.unsetAttribute("stroke-width");
+    expect(rect.getAttribute("stroke")).toBeUndefined();
+    expect(rect.getAttribute("stroke-width")).toBeUndefined();
+
+    expectShapeError(
+      () => group.unsetAttribute("width"),
+      CommandErrorCode.UnknownAttribute,
+    );
+    expectShapeError(
+      () => rect.unsetAttribute("x"),
+      CommandErrorCode.UnknownAttribute,
+    );
+  });
+
   it("ShapeFactory 报告未知类型和非法参数", () => {
     expectShapeError(
       () => factory.create("hexagon", "h1", []),

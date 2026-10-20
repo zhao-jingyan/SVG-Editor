@@ -105,6 +105,19 @@ export class GroupShape extends Shape {
     }
   }
 
+  public override unsetAttribute(attribute: EditableAttribute): void {
+    if (attribute !== "fill" && attribute !== "stroke" && attribute !== "stroke-width") {
+      throw new ShapeError(
+        CommandErrorCode.UnknownAttribute,
+        `unknown attribute: ${attribute}`,
+      );
+    }
+
+    for (const child of this.children) {
+      child.unsetAttribute(attribute);
+    }
+  }
+
   public override getAttribute(
     _attribute: EditableAttribute,
   ): string | number | undefined {
