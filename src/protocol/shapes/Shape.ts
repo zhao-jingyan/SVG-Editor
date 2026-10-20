@@ -2,6 +2,7 @@ import type { EditableAttribute } from "../EditableAttribute";
 import { CommandErrorCode } from "../errors/CommandErrorCode";
 import { ShapeError } from "../errors/ShapeError";
 import type { ShapeType } from "./ShapeType";
+import type { ShapeVisitor } from "./ShapeVisitor";
 
 export abstract class Shape {
   private readonly id: string;
@@ -22,6 +23,8 @@ export abstract class Shape {
   }
 
   public abstract getType(): ShapeType;
+
+  public abstract accept<T>(visitor: ShapeVisitor<T>): T;
 
   public abstract move(dx: number, dy: number): void;
 

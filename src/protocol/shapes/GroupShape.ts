@@ -3,6 +3,7 @@ import { CommandErrorCode } from "../errors/CommandErrorCode";
 import { ShapeError } from "../errors/ShapeError";
 import { Shape } from "./Shape";
 import { ShapeType } from "./ShapeType";
+import type { ShapeVisitor } from "./ShapeVisitor";
 
 export class GroupShape extends Shape {
   private readonly children: Shape[];
@@ -18,6 +19,10 @@ export class GroupShape extends Shape {
 
   public override getType(): ShapeType {
     return ShapeType.Group;
+  }
+
+  public override accept<T>(visitor: ShapeVisitor<T>): T {
+    return visitor.visitGroup(this);
   }
 
   public addChild(child: Shape): void {

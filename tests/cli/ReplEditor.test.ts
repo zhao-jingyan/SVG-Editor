@@ -42,11 +42,13 @@ describe("Repl 真实编辑链路", () => {
       output,
       new CommandLineParser(new ShapeFactory()),
       new CommandExecutor(context),
+      "svg-editor 0.1 — type 'help' for commands",
     );
 
     await repl.run();
 
     expect(output.lines).toEqual([
+      "svg-editor 0.1 — type 'help' for commands",
       "canvas 800x600 created",
       "rect#r1 created",
       "rect#r1 moved by (5,5)",

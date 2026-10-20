@@ -3,7 +3,7 @@
 ## 职责
 
 - `EditorContext` 位于 `src/core/EditorContext.ts`，实现 `CommandContext`，是 CLI 命令与 Core 领域对象之间的应用层接收者。
-- Context 私有持有可选 `Document`、`CommandHistory` 和历史锁；文档不存在时只允许 `init`、`exit` 和占位命令。
+- Context 私有持有可选 `Document`、`CommandHistory`、历史锁和显示协作对象；文档不存在时只允许 `init`、`exit`、`help` 和占位命令。
 - `CommandExecutor` 位于 `src/core/CommandExecutor.ts`，实现 `Executor`，委托 `EditorContext.execute` 并把 `ProtocolError` 转成 `CommandErrorResult`。
 - `main.ts` 只负责组装 `ConsoleInputReader`、`Repl`、`CommandLineParser`、`EditorContext` 和 `CommandExecutor`。
 
@@ -14,6 +14,14 @@
 - `EditorContext.execute` 在命令成功后记录 `UndoableCommand` 并解除历史锁；失败或异常不记录。
 - undo/redo 委托 `CommandHistory`；历史锁定时返回 `HistoryUnavailable`，消息为 `undo not allowed after io command`。
 - 未初始化文档时执行编辑、显示、撤销、重做或画布命令，返回 `NoDocument`，消息为 `no document. use 'init' or 'read' first`。
+- `tree` 和 `show` 先要求文档存在；`help` 不依赖文档，可随时查看命令总表。
+
+## 显示命令
+
+- `tree` 由 `TreeDisplay` 渲染，使用 `ShapeSummaryVisitor` 取得各图形摘要，再统一计算属性对齐和树形连接线；无参数显示根级 `svg (WxH)`，带 id 时只显示该节点子树。
+- `show` 使用 `ShapeDetailVisitor` 输出几何与样式明细；首行为 `type#id  parent=g#parent`，根级图形显示 `parent=svg`。
+- 显示结果是一条可包含换行的成功消息，不进入历史栈，也不改变历史锁。
+- `HelpText` 集中维护 `help` 文本，避免命令说明散落在 Context 或 CLI。
 
 ## 撤销协作
 
@@ -23,8 +31,8 @@
 
 ## 当前边界
 
-- `read`、`save`、`tree`、`show`、`help` 仍返回 `CommandNotImplemented`，消息为 `<command> is not implemented yet`。
-- SVG IO、显示格式化、自动补 id、插件类型和 IO 历史锁的完整语义留到后续计划。
+- `read`、`save` 仍返回 `CommandNotImplemented`，消息为 `<command> is not implemented yet`。
+- SVG IO、自动补 id、插件类型和 IO 历史锁的完整语义留到后续计划。
 - 成功反馈由 Context 和具体逆操作生成，例如 `rect#r1 moved by (5,5)`、`rect#r1 moved back by (-5,-5)` 和 `type#id restored into g#parent`。
 
 ## 设计模式角色
@@ -33,3 +41,4 @@
 - Facade：EditorContext 对 CLI 隐藏 Document、History、Shape 多态和错误转换的协作细节。
 - Caretaker：CommandHistory 保存命令对象引用；历史锁和文档生命周期由 EditorContext 管理。
 - Memento：命令使用局部位置和属性快照保存撤销状态，不保存整文档快照。
+- Visitor：显示协作对象通过 `Shape.accept` 按具体图形类型生成摘要和明细，Context 不维护图形类型分支。

@@ -65,4 +65,4 @@
 - EditorContext：作为应用层门面实现命令接收者接口，持有当前 Document 和历史栈，并把编辑与恢复操作委托给 Document。
 - Factory：`ShapeFactory` 负责从文本或 SVG 创建具体 Shape，Document 只接收已创建对象。
 - Memento：具体命令通过 `ShapePlacement` 和 `ShapeAttributeSnapshot` 保存局部状态、父节点、顺序和旧属性值；Document 不保存整文档快照。
-- Visitor：后续用于 `tree/show/save` 等按图形类型输出的外部算法；Document 只提供树查询，不实现 Visitor。
+- Visitor：`tree/show` 已通过 `Shape.accept` 使用外部显示 Visitor；后续 `save` 等按图形类型输出的算法继续复用该扩展点，Document 只提供树查询，不实现 Visitor。

@@ -13,6 +13,7 @@ const repl = new Repl(
   new ConsoleOutputWriter(),
   new CommandLineParser(new ShapeFactory()),
   new CommandExecutor(editorContext),
+  "svg-editor 0.1 — type 'help' for commands",
 );
 
 repl.run().finally(() => inputReader.close());

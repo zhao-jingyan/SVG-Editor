@@ -71,6 +71,18 @@ class FakeExecutor implements Executor {
 }
 
 describe("Repl", () => {
+  it("在开始循环前输出可选启动提示", async () => {
+    const input = new FakeInputReader([null]);
+    const output = new FakeOutputWriter();
+    const parser = new FakeCommandParser([]);
+    const executor = new FakeExecutor([]);
+
+    await new Repl(input, output, parser, executor, "svg-editor 0.1").run();
+
+    expect(output.lines).toEqual(["svg-editor 0.1"]);
+    expect(output.prompts).toEqual(["svg> "]);
+  });
+
   it("将解析后的 Command 传给 Executor 并输出成功消息", async () => {
     const input = new FakeInputReader(["create rect r1 0 0 10 10", null]);
     const output = new FakeOutputWriter();

@@ -12,12 +12,18 @@ import { CommandSuccessResult } from "../protocol/results/CommandSuccessResult";
 import { GroupShape } from "../protocol/shapes/GroupShape";
 import type { Shape } from "../protocol/shapes/Shape";
 import { UndoableCommand } from "../protocol/UndoableCommand";
+import { HelpText } from "./display/HelpText";
+import { ShapeDetailVisitor } from "./display/ShapeDetailVisitor";
+import { TreeDisplay } from "./display/TreeDisplay";
 import { Document } from "./document/Document";
 import { CommandHistory } from "./history/CommandHistory";
 
 export class EditorContext implements CommandContext {
   private document?: Document;
   private readonly history: CommandHistory = new CommandHistory();
+  private readonly helpText: HelpText = new HelpText();
+  private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
+  private readonly treeDisplay: TreeDisplay = new TreeDisplay();
   private historyLocked: boolean = false;
 
   public async execute(command: Command): Promise<CommandResult> {
@@ -199,16 +205,26 @@ export class EditorContext implements CommandContext {
     this.requireDocument().restoreAttribute(snapshot);
   }
 
-  public async tree(_shapeId?: string): Promise<CommandResult> {
-    return this.notImplemented("tree");
+  public async tree(shapeId?: string): Promise<CommandResult> {
+    return new CommandSuccessResult(
+      this.treeDisplay.render(this.requireDocument(), shapeId),
+    );
   }
 
-  public async show(_shapeId: string): Promise<CommandResult> {
-    return this.notImplemented("show");
+  public async show(shapeId: string): Promise<CommandResult> {
+    const document = this.requireDocument();
+    const shape = document.getShape(shapeId);
+    const parentId = document.getParentId(shapeId);
+    const parentLabel = parentId === undefined ? "svg" : `g#${parentId}`;
+    const lines = [
+      `${shape.getType()}#${shape.getId()}  parent=${parentLabel}`,
+      ...shape.accept(this.shapeDetailVisitor).map((line) => `  ${line}`),
+    ];
+    return new CommandSuccessResult(lines.join("\n"));
   }
 
   public async help(): Promise<CommandResult> {
-    return this.notImplemented("help");
+    return new CommandSuccessResult(this.helpText.render());
   }
 
   public async undo(): Promise<CommandResult> {

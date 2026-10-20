@@ -1,6 +1,7 @@
 import type { EditableAttribute } from "../EditableAttribute";
 import { StyledShape } from "./StyledShape";
 import { ShapeType } from "./ShapeType";
+import type { ShapeVisitor } from "./ShapeVisitor";
 
 export class EllipseShape extends StyledShape {
   private cx: number;
@@ -25,6 +26,10 @@ export class EllipseShape extends StyledShape {
 
   public override getType(): ShapeType {
     return ShapeType.Ellipse;
+  }
+
+  public override accept<T>(visitor: ShapeVisitor<T>): T {
+    return visitor.visitEllipse(this);
   }
 
   public override move(dx: number, dy: number): void {

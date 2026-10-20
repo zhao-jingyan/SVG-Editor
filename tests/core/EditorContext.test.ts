@@ -291,14 +291,11 @@ describe("EditorContext", () => {
     }
   });
 
-  it("未实现的文档与显示命令返回稳定错误", async () => {
+  it("read 与 save 仍未实现", async () => {
     const { executor } = createEditor();
     const commands: readonly [Command, string][] = [
       [new ReadCommand("demo.svg"), "read"],
       [new SaveCommand("demo.svg"), "save"],
-      [new TreeCommand(), "tree"],
-      [new ShowCommand("r1"), "show"],
-      [new HelpCommand(), "help"],
     ];
 
     for (const [command, name] of commands) {
@@ -308,6 +305,85 @@ describe("EditorContext", () => {
         `${name} is not implemented yet`,
       );
     }
+  });
+
+  it("显示命令要求文档，help 无文档也可用", async () => {
+    const { executor } = createEditor();
+
+    expectErrorMessage(
+      await executor.execute(new TreeCommand()),
+      CommandErrorCode.NoDocument,
+      "no document. use 'init' or 'read' first",
+    );
+    expectErrorMessage(
+      await executor.execute(new ShowCommand("r1")),
+      CommandErrorCode.NoDocument,
+      "no document. use 'init' or 'read' first",
+    );
+
+    const help = (await executor.execute(new HelpCommand())).toCommandResultDto();
+    expect(help.type).toBe("success");
+    expect(JSON.stringify(help)).toContain("Commands:");
+    expect(JSON.stringify(help)).toContain("tree [id]");
+  });
+
+  it("tree 与 show 输出文档结构和属性明细", async () => {
+    const { executor } = createEditor();
+    await initialize(executor, 800, 600);
+    await executor.execute(new CreateCommand(new RectShape("bg", 0, 0, 800, 600, "#fff")));
+    await executor.execute(new CreateCommand(new CircleShape("c1", 100, 100, 20, "red")));
+    await executor.execute(new CreateCommand(new RectShape("box", 200, 80, 60, 60)));
+    await executor.execute(new GroupCommand("markers", ["c1", "box"]));
+
+    const tree = (await executor.execute(new TreeCommand())).toCommandResultDto();
+    expect(tree).toEqual({
+      type: "success",
+      message: [
+        "svg (800x600)",
+        "├── rect#bg    x=0 y=0 w=800 h=600 fill=#fff",
+        "└── g#markers",
+        "    ├── circle#c1  cx=100 cy=100 r=20 fill=red",
+        "    └── rect#box   x=200 y=80 w=60 h=60",
+      ].join("\n"),
+    });
+
+    const subtree = (await executor.execute(new TreeCommand("markers"))).toCommandResultDto();
+    expect(subtree).toEqual({
+      type: "success",
+      message: [
+        "g#markers",
+        "├── circle#c1  cx=100 cy=100 r=20 fill=red",
+        "└── rect#box   x=200 y=80 w=60 h=60",
+      ].join("\n"),
+    });
+
+    expect((await executor.execute(new ShowCommand("c1"))).toCommandResultDto()).toEqual({
+      type: "success",
+      message: [
+        "circle#c1  parent=g#markers",
+        "  cx=100 cy=100 r=20",
+        "  fill=red",
+      ].join("\n"),
+    });
+    expect((await executor.execute(new ShowCommand("bg"))).toCommandResultDto()).toEqual({
+      type: "success",
+      message: [
+        "rect#bg  parent=svg",
+        "  x=0 y=0 w=800 h=600",
+        "  fill=#fff",
+      ].join("\n"),
+    });
+
+    expectErrorMessage(
+      await executor.execute(new TreeCommand("missing")),
+      CommandErrorCode.ShapeNotFound,
+      "no such shape: missing",
+    );
+    expectErrorMessage(
+      await executor.execute(new ShowCommand("missing")),
+      CommandErrorCode.ShapeNotFound,
+      "no such shape: missing",
+    );
   });
 
   it("CommandExecutor 只转换协议错误，未知异常继续上抛", async () => {

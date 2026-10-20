@@ -11,9 +11,14 @@ export class Repl {
     private readonly outputWriter: OutputWriter,
     private readonly commandParser: CommandParser,
     private readonly executor: Executor,
+    private readonly startupMessage?: string,
   ) {}
 
   public async run(): Promise<void> {
+    if (this.startupMessage !== undefined && this.startupMessage.length > 0) {
+      await this.outputWriter.writeLine(this.startupMessage);
+    }
+
     while (true) {
       await this.outputWriter.writePrompt(Repl.prompt);
       const input = await this.inputReader.readLine();
