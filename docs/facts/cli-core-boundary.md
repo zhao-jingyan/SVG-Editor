@@ -4,9 +4,9 @@
 
 - `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
-- `src/core` 存放应用入口端口 `Executor`、临时执行器和 Demo 接收者。当前没有真实 Editor、文档状态或历史栈。
+- `src/core` 存放应用入口端口 `Executor`、临时执行器、Demo 接收者和独立 `CommandHistory`。当前没有真实 Editor 或文档状态，历史栈也尚未接入执行链路。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
-- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor 测试，`tests/protocol` 存放命令类层次测试。
+- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor 与 History 测试，`tests/protocol` 存放命令类层次测试。
 
 ## 文件命名
 
@@ -34,7 +34,7 @@ export abstract class Command {
 
 ## 结果模型
 
-- `CommandResult` 是抽象基类，只定义 `toCommandResultDto()`；具体结果为 `CommandSuccessResult`、`CommandErrorResult` 和 `CommandExitResult`。
+- `CommandResult` 是抽象基类，定义 `isSuccess()` 和 `toCommandResultDto()`；具体结果为 `CommandSuccessResult`、`CommandErrorResult` 和 `CommandExitResult`。
 - `CommandErrorResult` 持有 `ProtocolError` 运行时对象，在转换为 `CommandResultDto` 时才生成 `CommandErrorDto`。
 - `CommandResultDto` 是协议层边界结果 DTO，保持 `success/error/exit` 三种结构和既有字段名。
 - CLI 解析结果同样采用类层次：`CommandParseResult` 抽象基类，具体为 `CommandParseSuccessResult`、`CommandParseEmptyResult` 和 `CommandParseErrorResult`。
@@ -75,6 +75,7 @@ src/core -/-> src/cli
 - `CommandLineParser` 依赖协议层的具体命令类，不依赖 Core。
 - `DemoExecutor` 只依赖协议层 `Command`、`CommandContext` 和 `CommandResult` 类层次。
 - `DemoCommandContext` 位于 Core，是 `CommandContext` 的临时实现。
+- `CommandHistory` 位于 Core，是独立实现的 Caretaker；当前未被 `DemoExecutor` 或 `DemoCommandContext` 使用。
 
 ## 当前执行链路
 
@@ -95,7 +96,7 @@ DemoExecutor -> command.execute(context) -> DemoCommandContext
 ## 后续设计事实
 
 - 真实 `EditorContext` 将实现 `CommandContext`，命令类本身保持与文档存储细节解耦。
-- 编辑命令将覆盖 `UndoableCommand.undo`，历史栈只保存 `UndoableCommand` 实例。
+- 编辑命令将覆盖 `UndoableCommand.undo`；`CommandHistory` 已实现，后续由真实 `EditorContext` 与执行器接入。
 - undo/redo 采用命令自身逆操作，不使用文档快照。
 - 真实 Document、SVG 读写、插件注册表和图形删除归属进入后续阶段。
 - 真实 Core 的 Document、IO、History 错误在实现时继承 `ProtocolError`，并继续通过 `CommandErrorDto` 返回。

@@ -10,6 +10,10 @@ export class CommandErrorResult extends CommandResult {
     this.error = error;
   }
 
+  public isSuccess(): boolean {
+    return false;
+  }
+
   public toCommandResultDto(): CommandResultDto {
     return { type: "error", error: this.error.toCommandErrorDto() };
   }

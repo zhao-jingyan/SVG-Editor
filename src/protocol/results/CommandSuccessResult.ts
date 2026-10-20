@@ -9,6 +9,10 @@ export class CommandSuccessResult extends CommandResult {
     this.message = message;
   }
 
+  public isSuccess(): boolean {
+    return true;
+  }
+
   public toCommandResultDto(): CommandResultDto {
     return { type: "success", message: this.message };
   }

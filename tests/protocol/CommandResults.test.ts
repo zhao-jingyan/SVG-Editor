@@ -20,6 +20,10 @@ describe("CommandResult 类层次", () => {
       expect(result).toBeInstanceOf(CommandResult);
     }
 
+    expect(results[0].isSuccess()).toBe(true);
+    expect(results[1].isSuccess()).toBe(false);
+    expect(results[2].isSuccess()).toBe(false);
+
     expect(results[0].toCommandResultDto()).toEqual({
       type: "success",
       message: "created",
