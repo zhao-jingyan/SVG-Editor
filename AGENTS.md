@@ -10,8 +10,8 @@
 ## 架构与依赖
 
 - `src/cli`：只负责输入输出、终端适配和文本到命令对象的解析，不承载业务规则。
-- `src/protocol`：存放 CLI 与 Core 共享的命令 API、领域接口和必要的边界 DTO。
-- `src/core`：存放执行器、文档状态、图形模型和业务编排。
+- `src/protocol`：存放 CLI 与 Core 共享的命令 API、图形领域模型和必要的边界 DTO。
+- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol` 中的图形领域模型。
 - `src/main.ts`：只作为组合根，负责组装 CLI、Core 和依赖实例。
 - 固定依赖方向：`cli -> protocol`、`core -> protocol`、`main -> cli + core`。
 - `protocol` 不得依赖 `cli`、`core`、Node 或 DOM。
@@ -48,8 +48,8 @@
 
 ## 公共接口与命名
 
-- 未来领域形状以 `Shape` 抽象类为根，具体类包括 `RectShape`、`CircleShape`、`EllipseShape`、`LineShape`、`TextShape`、`GroupShape`。
-- 容器形状通过 `ContainerShape` 或 `GroupShape` 维护子节点，并递归实现统一操作。
+- 领域形状以 `Shape` 抽象类为根，具体类包括 `RectShape`、`CircleShape`、`EllipseShape`、`LineShape`、`TextShape`、`GroupShape`。
+- 容器形状通过 `GroupShape` 维护子节点，并递归实现统一操作。
 - `Command` 抽象类、`UndoableCommand` 和具体命令类继续作为命令模型；禁止退回命令联合类型。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 
@@ -57,9 +57,6 @@
 
 以下内容是当前代码的已知技术债，不是新代码可以继续模仿的范例：
 
-- `ShapeSpec` 及其 `*ShapeSpec` 当前是只读接口联合类型，待改为 `Shape` 抽象类 + 具体形状类。
-- `CommandLineParser` 当前按类型 `switch` 后直接构造对象字面量，待改为调用 `ShapeFactory` 并创建具体类。
-- `ShapeSpec` 目前穿透到 `CommandContext`，待改为边界 DTO 在进入 Core 前映射为 `Shape` 领域对象。
 - `CommandType`、`EditableAttribute` 等字符串联合类型作为边界值集合可暂时保留；若进入领域身份判断，再改为枚举或值对象。
 - `CommandResult` 属于边界结果 DTO，不纳入贫血模型整改范围。
 

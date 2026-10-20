@@ -2,7 +2,7 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、图形参数 DTO、执行结果和错误码。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API 和图形领域模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、执行结果和错误码。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
 - `src/core` 存放应用入口端口 `Executor`、临时执行器和 Demo 接收者。当前没有真实 Editor、文档状态或历史栈。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
@@ -11,7 +11,7 @@
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和联合类型单独成文件；具体命令放在 `protocol/commands`，图形参数放在 `protocol/shapes`。
+- 每个主要类、接口和枚举单独成文件；具体命令放在 `protocol/commands`，图形类与工厂放在 `protocol/shapes`。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
@@ -31,6 +31,14 @@ export abstract class Command {
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandContext`，不再由 Executor 根据 `type` 分派。
 - `CommandLineParser` 直接实例化具体命令类；命令名 `switch` 是 Lab 允许的命令分发点。
 - `CommandContext` 是命令接收者接口，统一返回 `Promise<CommandResult>`。
+
+## 图形模型
+
+- `Shape` 是抽象根类，具体类为 `RectShape`、`CircleShape`、`EllipseShape`、`LineShape`、`TextShape`、`GroupShape`。
+- `GroupShape` 使用 Composite 语义，`move`、`scale` 和公共样式 `set` 递归作用于子节点。
+- `ShapeFactory` 是唯一的“图形类型名 → 具体类”分派点；Parser 不直接构造领域对象。
+- `CreateCommand` 与 `CommandContext.createShape` 直接携带 `Shape`，不再使用 `ShapeSpec` 或图形 DTO。
+- 图形模型的设计模式角色、替代方案和当前边界见 `docs/facts/domain-shapes.md`。
 
 ## 依赖方向
 
@@ -69,4 +77,4 @@ DemoExecutor -> command.execute(context) -> DemoCommandContext
 - 真实 `EditorContext` 将实现 `CommandContext`，命令类本身保持与文档存储细节解耦。
 - 编辑命令将覆盖 `UndoableCommand.undo`，历史栈只保存 `UndoableCommand` 实例。
 - undo/redo 采用命令自身逆操作，不使用文档快照。
-- 图形对象多态化、Composite 容器与 SVG 读写进入后续阶段。
+- 真实 Document、SVG 读写、插件注册表和图形删除归属进入后续阶段。
