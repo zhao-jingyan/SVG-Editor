@@ -4,9 +4,9 @@
 
 - `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
-- `src/core` 存放应用入口端口 `Executor`、临时执行器、Demo 接收者、独立 `CommandHistory` 和 `document` 子系统。`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象。当前没有真实 Editor 或 SVG IO，历史栈也尚未接入执行链路。
+- `src/core` 存放应用入口端口 `Executor`、真实 `CommandExecutor`、`EditorContext`、`CommandHistory` 和 `document` 子系统。`EditorContext` 实现命令接收者并持有当前文档与历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象。SVG IO 与显示格式化尚未实现。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
-- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor 与 History 测试，`tests/core/document` 存放 Document 和 ShapeIndex 测试，`tests/protocol` 存放命令类层次测试。
+- `tests/cli` 存放 CLI、解析器和真实编辑链路测试，`tests/core` 存放 EditorContext、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/protocol` 存放命令类层次与图形测试。
 
 ## 文件命名
 
@@ -26,11 +26,11 @@ export abstract class Command {
 }
 ```
 
-- `UndoableCommand` 继承 `Command`，提供 `undo(context)`；当前全部具体逆操作返回 `command-not-implemented`。
+- `UndoableCommand` 继承 `Command`，提供 `undo(context)`；九类图形编辑命令均已覆盖逆操作，基类默认实现仍作为未覆盖子类的安全兜底。
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandContext`，不再由 Executor 根据 `type` 分派。
 - `CommandLineParser` 直接实例化具体命令类；命令名 `switch` 是 Lab 允许的命令分发点。
-- `CommandContext` 是命令接收者接口，统一返回 `Promise<CommandResult>`。
+- `CommandContext` 是命令接收者接口，编辑方法统一返回 `Promise<CommandResult>`；另提供位置、子树和属性快照的同步捕获/恢复方法，供命令保存局部撤销状态。
 
 ## 结果模型
 
@@ -49,7 +49,7 @@ export abstract class Command {
 - `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。结果对象可以持有 `ProtocolError`，但跨边界只暴露 `CommandErrorDto`，保证错误结果可序列化。
 - `CommandLineParser` 内部失败抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
 - `Repl` 只输出 `error: <message>`，不暴露错误码；未知异常不属于协议错误时继续向上抛出。
-- 拒绝方案：让结果 DTO 直接持有 `Error` 实例会破坏边界可序列化性；为每个错误码建立独立类会产生大量只有消息差异的类型。`UndoableCommand.undo` 当前通过 `CommandErrorResult(CommandExecutionError)` 返回 `command-not-implemented`。
+- 拒绝方案：让结果 DTO 直接持有 `Error` 实例会破坏边界可序列化性；为每个错误码建立独立类会产生大量只有消息差异的类型。`CommandExecutor` 在真实执行边界捕获 `ProtocolError` 并转换为 `CommandErrorResult`，未知异常继续上抛。
 
 ## 图形模型
 
@@ -73,10 +73,10 @@ src/core -/-> src/cli
 
 - `Repl` 依赖 `CommandParser` 接口和 `Executor` 接口。
 - `CommandLineParser` 依赖协议层的具体命令类，不依赖 Core。
-- `DemoExecutor` 只依赖协议层 `Command`、`CommandContext` 和 `CommandResult` 类层次。
-- `DemoCommandContext` 位于 Core，是 `CommandContext` 的临时实现。
-- `CommandHistory` 位于 Core，是独立实现的 Caretaker；当前未被 `DemoExecutor` 或 `DemoCommandContext` 使用。
-- `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。当前未被 Demo 执行链路使用。
+- `CommandExecutor` 位于 Core，实现 `Executor`，委托 `EditorContext.execute`，只依赖协议层 `Command`、`ProtocolError` 和结果类层次。
+- `EditorContext` 位于 Core，实现 `CommandContext`，持有可选 `Document`、`CommandHistory` 和历史锁；成功执行编辑命令后记录历史并解除锁定。
+- `CommandHistory` 由 `EditorContext` 持有，是真正的 Caretaker；undo/redo 命令通过 Context 委托历史栈。
+- `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。
 
 ## 当前执行链路
 
@@ -84,7 +84,10 @@ src/core -/-> src/cli
 ConsoleInputReader -> Repl -> CommandLineParser -> 具体 Command
                                                         |
                                                         v
-DemoExecutor -> command.execute(context) -> DemoCommandContext
+CommandExecutor -> EditorContext.execute -> command.execute(EditorContext)
+                                                        |
+                                                        v
+                                      Document / CommandHistory / Shape 多态行为
 ```
 
 - 空行和首个非空字符为 `#` 的注释行不创建命令。
@@ -93,11 +96,13 @@ DemoExecutor -> command.execute(context) -> DemoCommandContext
 - 解析和命令执行结果在边界上转换为 `CommandParseResultDto` / `CommandResultDto`；运行时结果对象和错误对象不会直接进入输出层。
 - `ExitCommand.execute` 不调用 Context，直接返回退出结果。
 - `ConsoleInputReader` 使用常驻事件监听和内部队列，能够处理管道一次写入的多行输入。
+- 编辑命令成功后进入历史栈；`init` 清空历史并锁定 undo/redo，`canvas` 修改尺寸只锁定历史，下一次成功编辑重新解禁。
+- 未初始化文档时执行编辑、显示、撤销或画布命令返回 `no document. use 'init' or 'read' first`。
 
 ## 后续设计事实
 
-- 真实 `EditorContext` 将实现 `CommandContext`，命令类本身保持与文档存储细节解耦。
-- 编辑命令将覆盖 `UndoableCommand.undo`；`CommandHistory` 已实现，后续由真实 `EditorContext` 与执行器接入。
-- undo/redo 采用命令自身逆操作，不使用文档快照。
-- `Document` 已实现画布和公开编辑入口，`ShapeHierarchy` 与 `ShapeIndex` 已拆出图形归属、结构编辑和索引不变量；EditorContext、SVG 读写和插件注册表进入后续阶段。
+- `EditorContext` 已接入 CLI 编辑链路，命令类本身保持与文档存储细节解耦。
+- undo/redo 采用命令自身逆操作和局部状态，不使用整文档快照。
+- `read/save/tree/show/help` 当前返回 `command-not-implemented`；SVG IO、显示格式化、插件注册表和 IO 后历史锁的完整语义进入后续阶段。
+- `Document`、`ShapeHierarchy` 与 `ShapeIndex` 已支持精确位置恢复和属性快照恢复，为命令撤销提供基础能力。
 - 真实 Core 的 Document、IO、History 错误在实现时继承 `ProtocolError`，并继续通过 `CommandErrorDto` 返回。

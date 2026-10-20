@@ -6,7 +6,7 @@
 - Document 持有画布宽高和私有 `ShapeHierarchy`；查询与结构编辑统一委托给层级对象。
 - `ShapeHierarchy` 持有根级有序图形并实现增删、容器嵌套、group/ungroup、归属迁移和同级重排。
 - `ShapeIndex` 维护全局 `id -> Shape` 索引、`id -> parent GroupShape` 映射、子树注册/注销和祖先判断。
-- Document 不直接维护索引或编辑规则，也不持有文件路径、历史栈、SVG DOM、命令结果或 IO 状态；这些属于后续 EditorContext 或 IO 边界。
+- Document 不直接维护索引或编辑规则，也不持有文件路径、历史栈、SVG DOM、命令结果或 IO 状态；这些属于 `EditorContext` 或 IO 边界。
 
 ## 存储模型
 
@@ -26,6 +26,15 @@
 - `ungroupShapes` 只处理非根级容器，子节点插入容器原索引位置。
 - `addToContainer` 只改变归属，不创建图形。
 - `reorderShape` 只调整同级顺序，不改变父子关系。
+
+## 撤销恢复能力
+
+- `capturePlacement` 把图形引用、父节点 id 和同级索引封装为 `ShapePlacement`；`restorePlacements` 负责把一组 placement 恢复到原位置。
+- 未注册图形按指定索引插入并注册整棵子树；已注册图形先摘下，再按索引重插并更新父节点映射。
+- 多个 placement 先按父节点分组，再按索引升序恢复，避免同一父级内先恢复较大索引导致顺序错位。
+- `restoreGroup` 用于 ungroup 的逆操作：确认容器直接子节点仍在原父级后，摘下并注销子子树，再把容器插回原索引并重新注册整棵子树。
+- `captureAttribute` 只捕获目标子树中的叶子节点，`restoreAttribute` 按叶子恢复旧值；旧值为 `undefined` 时调用 `unsetAttribute`，避免容器样式 undo 覆盖子节点各自的历史值。
+- 恢复操作在修改结构前校验父级、索引、重复 id 和祖先关系；失败时保持现有结构不变。
 
 ## 设计模式角色
 
@@ -53,7 +62,7 @@
 ## 后续模式边界
 
 - Command：具体命令封装请求，Document 只是接收者背后的领域模型；Document 不保存历史栈。
-- EditorContext：未来作为应用层门面统一对 CLI/Core 暴露命令接收者接口，并委托 Document。
+- EditorContext：作为应用层门面实现命令接收者接口，持有当前 Document 和历史栈，并把编辑与恢复操作委托给 Document。
 - Factory：`ShapeFactory` 负责从文本或 SVG 创建具体 Shape，Document 只接收已创建对象。
-- Memento：后续由具体命令保存局部状态、父节点和顺序；Document 不保存整文档快照。
+- Memento：具体命令通过 `ShapePlacement` 和 `ShapeAttributeSnapshot` 保存局部状态、父节点、顺序和旧属性值；Document 不保存整文档快照。
 - Visitor：后续用于 `tree/show/save` 等按图形类型输出的外部算法；Document 只提供树查询，不实现 Visitor。
