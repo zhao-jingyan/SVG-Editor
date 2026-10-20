@@ -38,7 +38,7 @@ Shape（抽象类：id、类型和统一行为）
 
 ## 当前边界
 
-- `Document` 已实现全局 id 唯一性、父子归属、顺序、容器操作和删除子树；尚未接入 EditorContext、命令执行或 SVG IO。
+- `Document` 位于 `src/core/document`，通过 `ShapeHierarchy` 和 `ShapeIndex` 实现全局 id 唯一性、父子归属、顺序、容器操作和删除子树；尚未接入 EditorContext、命令执行或 SVG IO。
 - 空组设置公共样式是合法空操作；未来 Document 若采用组样式继承，需要重新评估该语义。
 - `box` 插件、ShapeProvider 注册表和 SVG 序列化属于后续阶段。
 - 图形错误不直接进入结果 DTO；所有边界错误均由 `ProtocolError.toCommandErrorDto()` 转换。
