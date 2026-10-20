@@ -40,9 +40,9 @@ Shape（抽象类：id、类型和统一行为）
 
 ## Visitor 模式
 
-- 参与者：`Shape` 是 Element，`ShapeVisitor<T>` 是 Visitor，`RectShape` 等具体类实现 `accept` 并调用对应 `visit*`，Core 的 `ShapeSummaryVisitor` 与 `ShapeDetailVisitor` 是 Concrete Visitor。
-- 解决的问题：tree/show 需要按具体图形类型输出不同几何属性，但显示格式不应进入领域对象，也不应在 Context 中扩散 `instanceof` 分支。
-- 协作方式：显示算法把 Visitor 传给 `Shape.accept`，图形只负责选择自身访问方法；树结构和文档查询仍由 Document 提供。
+- 参与者：`Shape` 是 Element，`ShapeVisitor<T>` 是 Visitor，`RectShape` 等具体类实现 `accept` 并调用对应 `visit*`，Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor` 与 `SvgShapeWriter` 是 Concrete Visitor。
+- 解决的问题：tree/show/save 需要按具体图形类型输出不同几何属性，但显示与文件格式不应进入领域对象，也不应在 Context 中扩散 `instanceof` 分支。
+- 协作方式：显示和序列化算法把 Visitor 传给 `Shape.accept`，图形只负责选择自身访问方法；树结构和文档查询仍由 Document 提供。
 - 替代方案：在显示层按 `ShapeType` 或 `instanceof` 分支会新增第三个集中分派点，因此不采用。
 
 ## 当前边界
@@ -50,5 +50,5 @@ Shape（抽象类：id、类型和统一行为）
 - `Document` 位于 `src/core/document`，通过 `ShapeHierarchy` 和 `ShapeIndex` 实现全局 id 唯一性、父子归属、顺序、容器操作、删除子树和精确位置恢复；已通过 `EditorContext` 接入命令执行，SVG IO 尚未实现。
 - 属性撤销使用 `ShapeAttributeSnapshot` 捕获叶子旧值，不依赖整文档快照；容器公共样式恢复由各叶子分别执行。
 - 空组设置公共样式是合法空操作；未来 Document 若采用组样式继承，需要重新评估该语义。
-- `box` 插件、ShapeProvider 注册表和 SVG 序列化属于后续阶段；SVG 读写也应复用 Visitor 或专用序列化对象，而不是在 Shape 中加入文件逻辑。
+- `box` 插件与 ShapeProvider 注册表属于后续阶段；SVG 解析复用 `ShapeFactory`，写出复用 `SvgShapeWriter` Visitor，文件逻辑不进入 Shape 领域对象。
 - 图形错误不直接进入结果 DTO；所有边界错误均由 `ProtocolError.toCommandErrorDto()` 转换。

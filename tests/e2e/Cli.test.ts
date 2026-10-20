@@ -1,4 +1,12 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
 const repositoryRoot = process.cwd();
@@ -139,5 +147,50 @@ describe("CLI 进程级端到端", () => {
     expect(lines).toContain("└── g#markers");
     expect(lines).toContain("circle#c1  parent=g#markers");
     expect(lines).toContain("  cx=100 cy=100 r=20");
+  });
+
+  it("读取、编辑、保存 SVG 文件并锁定撤销", () => {
+    const directory = mkdtempSync(join(tmpdir(), "svg-editor-e2e-"));
+    const inputPath = join(directory, "input.svg");
+    const outputPath = join(directory, "output.svg");
+
+    try {
+      writeFileSync(inputPath, [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">',
+        '  <rect x="0" y="0" width="400" height="300" fill="#fff"/>',
+        '  <g id="scene"><circle id="c1" cx="10" cy="20" r="5"/></g>',
+        '</svg>',
+      ].join("\n"), "utf8");
+
+      const run = runCli([
+        `read ${inputPath}`,
+        "canvas",
+        "move c1 5 5",
+        `save ${outputPath}`,
+        "undo",
+        "create rect r2 1 2 3 4",
+        "undo",
+        "exit",
+      ].join("\n"));
+      const lines = run.stdout.split("\n");
+
+      expect(run.status).toBe(0);
+      expect(run.stderr).toBe("");
+      expect(lines[0]).toBe(startupMessage);
+      expect(lines).toContain("warning: assigned id rect1 to unnamed <rect>");
+      expect(lines).toContain(`read ${inputPath} (3 elements)`);
+      expect(lines).toContain("canvas 400x300");
+      expect(lines).toContain("circle#c1 moved by (5,5)");
+      expect(lines).toContain(`saved to ${outputPath} (3 elements)`);
+      expect(lines).toContain("error: undo not allowed after io command");
+      expect(lines).toContain("rect#r2 created");
+      expect(lines).toContain("rect#r2 deleted");
+
+      const saved = readFileSync(outputPath, "utf8");
+      expect(saved).toContain('<rect id="rect1" x="0" y="0" width="400" height="300" fill="#fff"/>');
+      expect(saved).toContain('<circle id="c1" cx="15" cy="25" r="5"/>');
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });

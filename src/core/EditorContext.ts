@@ -6,7 +6,6 @@ import type { ShapePlacement } from "../protocol/commands/ShapePlacement";
 import { CommandErrorCode } from "../protocol/errors/CommandErrorCode";
 import { CommandExecutionError } from "../protocol/errors/CommandExecutionError";
 import { DocumentError } from "../protocol/errors/DocumentError";
-import { CommandErrorResult } from "../protocol/results/CommandErrorResult";
 import type { CommandResult } from "../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../protocol/results/CommandSuccessResult";
 import { GroupShape } from "../protocol/shapes/GroupShape";
@@ -17,14 +16,25 @@ import { ShapeDetailVisitor } from "./display/ShapeDetailVisitor";
 import { TreeDisplay } from "./display/TreeDisplay";
 import { Document } from "./document/Document";
 import { CommandHistory } from "./history/CommandHistory";
+import { FileSvgStorage } from "./io/FileSvgStorage";
+import { SvgDocumentParser } from "./io/SvgDocumentParser";
+import { SvgDocumentWriter } from "./io/SvgDocumentWriter";
+import type { SvgStorage } from "./io/SvgStorage";
 
 export class EditorContext implements CommandContext {
   private document?: Document;
+  private currentPath?: string;
   private readonly history: CommandHistory = new CommandHistory();
   private readonly helpText: HelpText = new HelpText();
   private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
   private readonly treeDisplay: TreeDisplay = new TreeDisplay();
+  private readonly svgDocumentParser: SvgDocumentParser = new SvgDocumentParser();
+  private readonly svgDocumentWriter: SvgDocumentWriter = new SvgDocumentWriter();
   private historyLocked: boolean = false;
+
+  public constructor(
+    private readonly svgStorage: SvgStorage = new FileSvgStorage(),
+  ) {}
 
   public async execute(command: Command): Promise<CommandResult> {
     const result = await command.execute(this);
@@ -40,6 +50,7 @@ export class EditorContext implements CommandContext {
   public async init(width?: number, height?: number): Promise<CommandResult> {
     const document = new Document(width ?? 800, height ?? 600);
     this.document = document;
+    this.currentPath = undefined;
     this.history.clear();
     this.historyLocked = true;
     return new CommandSuccessResult(
@@ -47,12 +58,56 @@ export class EditorContext implements CommandContext {
     );
   }
 
-  public async read(_path: string): Promise<CommandResult> {
-    return this.notImplemented("read");
+  public async read(path: string): Promise<CommandResult> {
+    let content: string;
+
+    try {
+      content = await this.svgStorage.read(path);
+    } catch {
+      throw new CommandExecutionError(
+        CommandErrorCode.IoRead,
+        `cannot read file: ${path}`,
+      );
+    }
+
+    const parsed = this.svgDocumentParser.parse(content);
+    this.document = parsed.getDocument();
+    this.currentPath = path;
+    this.history.clear();
+    this.historyLocked = true;
+    return new CommandSuccessResult([
+      ...parsed.getWarnings(),
+      `read ${path} (${parsed.getElementCount()} elements)`,
+    ].join("\n"));
   }
 
-  public async save(_path?: string): Promise<CommandResult> {
-    return this.notImplemented("save");
+  public async save(path?: string): Promise<CommandResult> {
+    const document = this.requireDocument();
+    const targetPath = path ?? this.currentPath;
+
+    if (targetPath === undefined) {
+      throw new DocumentError(
+        CommandErrorCode.InvalidArgument,
+        "save requires a file path",
+      );
+    }
+
+    const content = this.svgDocumentWriter.render(document);
+
+    try {
+      await this.svgStorage.write(targetPath, content);
+    } catch {
+      throw new CommandExecutionError(
+        CommandErrorCode.IoWrite,
+        `cannot write file: ${targetPath}`,
+      );
+    }
+
+    this.currentPath = targetPath;
+    this.historyLocked = true;
+    return new CommandSuccessResult(
+      `saved to ${targetPath} (${this.svgDocumentWriter.countElements(document)} elements)`,
+    );
   }
 
   public async canvas(width?: number, height?: number): Promise<CommandResult> {
@@ -257,15 +312,6 @@ export class EditorContext implements CommandContext {
         "undo not allowed after io command",
       );
     }
-  }
-
-  private notImplemented(commandName: string): CommandResult {
-    return new CommandErrorResult(
-      new CommandExecutionError(
-        CommandErrorCode.CommandNotImplemented,
-        `${commandName} is not implemented yet`,
-      ),
-    );
   }
 
   private formatValue(value: string | number): string {

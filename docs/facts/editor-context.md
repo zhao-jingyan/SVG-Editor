@@ -3,13 +3,15 @@
 ## 职责
 
 - `EditorContext` 位于 `src/core/EditorContext.ts`，实现 `CommandContext`，是 CLI 命令与 Core 领域对象之间的应用层接收者。
-- Context 私有持有可选 `Document`、`CommandHistory`、历史锁和显示协作对象；文档不存在时只允许 `init`、`exit`、`help` 和占位命令。
+- Context 私有持有可选 `Document`、当前文件路径、`CommandHistory`、历史锁、显示协作对象和可注入的 `SvgStorage`；文档不存在时只允许 `init`、`exit`、`help` 和 IO 命令。
 - `CommandExecutor` 位于 `src/core/CommandExecutor.ts`，实现 `Executor`，委托 `EditorContext.execute` 并把 `ProtocolError` 转成 `CommandErrorResult`。
 - `main.ts` 只负责组装 `ConsoleInputReader`、`Repl`、`CommandLineParser`、`EditorContext` 和 `CommandExecutor`。
 
 ## 生命周期与历史
 
 - `init` 创建新 Document，默认尺寸为 `800x600`；成功替换文档后清空历史并锁定 undo/redo。
+- `read` 读取并解析 SVG，成功后替换文档、记录当前路径、清空历史并锁定 undo/redo；解析失败不会替换现有文档。
+- `save` 使用显式路径或当前路径写出 SVG；成功写出后锁定 undo/redo，但保留既有历史，下一次成功编辑会重新解锁。
 - `canvas` 无参数查询尺寸；带参数时先校验并 resize，然后锁定历史，不主动清空历史。
 - `EditorContext.execute` 在命令成功后记录 `UndoableCommand` 并解除历史锁；失败或异常不记录。
 - undo/redo 委托 `CommandHistory`；历史锁定时返回 `HistoryUnavailable`，消息为 `undo not allowed after io command`。
@@ -23,6 +25,14 @@
 - 显示结果是一条可包含换行的成功消息，不进入历史栈，也不改变历史锁。
 - `HelpText` 集中维护 `help` 文本，避免命令说明散落在 Context 或 CLI。
 
+## SVG IO
+
+- Context 通过 `SvgStorage` 读取和写出文本，生产适配器为 `FileSvgStorage`；测试可注入内存实现，不需要真实文件系统。
+- `read` 成功消息为 `read <path> (<n> elements)`；缺 id 警告逐行放在成功消息之前，格式为 `warning: assigned id <id> to unnamed <<tag>>`。
+- `save` 成功消息为 `saved to <path> (<n> elements)`；无显式路径且没有当前文件时返回 `InvalidArgument`，消息为 `save requires a file path`。
+- 文件读取失败返回 `IoRead`，消息为 `cannot read file: <path>`；写出失败返回 `IoWrite`，消息为 `cannot write file: <path>`。
+- 元素计数包含全部图形（含嵌套 group），不包含 `<svg>` 根元素。
+
 ## 撤销协作
 
 - 具体命令在 execute 前保存局部状态：`ShapePlacement` 保存图形、父节点和索引，`ShapeAttributeSnapshot` 保存属性名和子树叶子旧值。
@@ -31,8 +41,7 @@
 
 ## 当前边界
 
-- `read`、`save` 仍返回 `CommandNotImplemented`，消息为 `<command> is not implemented yet`。
-- SVG IO、自动补 id、插件类型和 IO 历史锁的完整语义留到后续计划。
+- SVG 子集读写、自动补 id 和 IO 历史锁已接入；插件类型、复杂 SVG 特性和画布外裁剪留到后续阶段。
 - 成功反馈由 Context 和具体逆操作生成，例如 `rect#r1 moved by (5,5)`、`rect#r1 moved back by (-5,-5)` 和 `type#id restored into g#parent`。
 
 ## 设计模式角色

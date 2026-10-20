@@ -27,6 +27,7 @@ import { CircleShape } from "../../src/protocol/shapes/CircleShape";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 import { RectShape } from "../../src/protocol/shapes/RectShape";
 import { TextShape } from "../../src/protocol/shapes/TextShape";
+import { InMemorySvgStorage } from "../support/InMemorySvgStorage";
 
 function expectErrorMessage(
   result: CommandResult,
@@ -40,11 +41,11 @@ function expectErrorMessage(
   });
 }
 
-function createEditor(): {
+function createEditor(storage?: InMemorySvgStorage): {
   context: EditorContext;
   executor: CommandExecutor;
 } {
-  const context = new EditorContext();
+  const context = new EditorContext(storage);
   return { context, executor: new CommandExecutor(context) };
 }
 
@@ -291,20 +292,124 @@ describe("EditorContext", () => {
     }
   });
 
-  it("read 与 save 仍未实现", async () => {
-    const { executor } = createEditor();
-    const commands: readonly [Command, string][] = [
-      [new ReadCommand("demo.svg"), "read"],
-      [new SaveCommand("demo.svg"), "save"],
-    ];
+  it("read 替换文档、输出警告、清空历史并锁定撤销", async () => {
+    const storage = new InMemorySvgStorage();
+    storage.files.set("demo.svg", `<svg width="400" height="300">
+  <rect x="0" y="0" width="400" height="300" fill="#fff"/>
+  <g id="g1"><circle id="c1" cx="10" cy="20" r="5"/></g>
+</svg>`);
+    const { executor } = createEditor(storage);
 
-    for (const [command, name] of commands) {
-      expectErrorMessage(
-        await executor.execute(command),
-        CommandErrorCode.CommandNotImplemented,
-        `${name} is not implemented yet`,
-      );
-    }
+    expect((await executor.execute(new ReadCommand("demo.svg"))).toCommandResultDto()).toEqual({
+      type: "success",
+      message: [
+        "warning: assigned id rect1 to unnamed <rect>",
+        "read demo.svg (3 elements)",
+      ].join("\n"),
+    });
+    expect((await executor.execute(new CanvasCommand())).toCommandResultDto()).toEqual({
+      type: "success",
+      message: "canvas 400x300",
+    });
+    expectErrorMessage(
+      await executor.execute(new UndoCommand()),
+      CommandErrorCode.HistoryUnavailable,
+      "undo not allowed after io command",
+    );
+
+    await executor.execute(new CreateCommand(new TextShape("t1", 0, 0, "new")));
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "text#t1 deleted" });
+  });
+
+  it("read 失败返回 IoRead 并保留原文档", async () => {
+    const storage = new InMemorySvgStorage();
+    storage.readError = new Error("missing file");
+    const { context, executor } = createEditor(storage);
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+
+    expectErrorMessage(
+      await executor.execute(new ReadCommand("missing.svg")),
+      CommandErrorCode.IoRead,
+      "cannot read file: missing.svg",
+    );
+    expect(context.capturePlacement("r1").getParentId()).toBeUndefined();
+  });
+
+  it("read 解析失败不替换文档，也不清空历史", async () => {
+    const storage = new InMemorySvgStorage();
+    storage.files.set("broken.svg", "<svg");
+    const { context, executor } = createEditor(storage);
+    await initialize(executor);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+
+    expectErrorMessage(
+      await executor.execute(new ReadCommand("broken.svg")),
+      CommandErrorCode.InvalidArgument,
+      "invalid SVG: invalid XML",
+    );
+    expect(context.capturePlacement("r1").getParentId()).toBeUndefined();
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "rect#r1 deleted" });
+  });
+
+  it("save 使用显式路径、统计元素并锁定历史", async () => {
+    const storage = new InMemorySvgStorage();
+    const { executor } = createEditor(storage);
+    await initialize(executor, 320, 240);
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10, "red")));
+    await executor.execute(new CreateCommand(new CircleShape("c1", 5, 5, 2)));
+
+    expect((await executor.execute(new SaveCommand("out.svg"))).toCommandResultDto()).toEqual({
+      type: "success",
+      message: "saved to out.svg (2 elements)",
+    });
+    expect(storage.files.get("out.svg")).toContain(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"',
+    );
+    expect(storage.files.get("out.svg")).toContain(
+      '<rect id="r1" x="0" y="0" width="10" height="10" fill="red"/>',
+    );
+    expectErrorMessage(
+      await executor.execute(new UndoCommand()),
+      CommandErrorCode.HistoryUnavailable,
+      "undo not allowed after io command",
+    );
+  });
+
+  it("save 无参数复用 read 路径，并覆盖缺路径与写失败分支", async () => {
+    const storage = new InMemorySvgStorage();
+    storage.files.set("demo.svg", '<svg width="10" height="10"/>');
+    const { executor } = createEditor(storage);
+
+    await initialize(executor);
+    expectErrorMessage(
+      await executor.execute(new SaveCommand()),
+      CommandErrorCode.InvalidArgument,
+      "save requires a file path",
+    );
+
+    await executor.execute(new ReadCommand("demo.svg"));
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+    expect((await executor.execute(new SaveCommand())).toCommandResultDto()).toEqual({
+      type: "success",
+      message: "saved to demo.svg (1 elements)",
+    });
+    expect(storage.files.get("demo.svg")).toContain('<rect id="r1"');
+
+    storage.writeError = new Error("readonly");
+    await executor.execute(new CreateCommand(new CircleShape("c1", 1, 1, 1)));
+    expectErrorMessage(
+      await executor.execute(new SaveCommand("blocked.svg")),
+      CommandErrorCode.IoWrite,
+      "cannot write file: blocked.svg",
+    );
+    expect(
+      (await executor.execute(new UndoCommand())).toCommandResultDto(),
+    ).toEqual({ type: "success", message: "circle#c1 deleted" });
   });
 
   it("显示命令要求文档，help 无文档也可用", async () => {
