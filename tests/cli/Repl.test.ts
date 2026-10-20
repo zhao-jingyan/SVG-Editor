@@ -19,7 +19,7 @@ import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResul
 import { CommandExitResult } from "../../src/protocol/results/CommandExitResult";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
-import type { Executor } from "../../src/core/Executor";
+import type { Executor } from "../../src/protocol/Executor";
 
 class FakeInputReader implements InputReader {
   public constructor(private readonly inputs: Array<string | null>) {}

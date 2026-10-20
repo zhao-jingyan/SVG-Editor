@@ -3,7 +3,7 @@
 ## 职责
 
 - `EditorContext` 位于 `src/core/EditorContext.ts`，实现 `CommandContext`，是 CLI 命令与 Core 领域对象之间的应用层接收者。
-- Context 私有持有可选 `Document`、当前文件路径、`CommandHistory`、历史锁、显示协作对象和可注入的 `SvgStorage`；文档不存在时只允许 `init`、`exit`、`help` 和 IO 命令。
+- Context 私有持有可选 `Document`、当前文件路径、`CommandHistory`、历史锁、显示协作对象和可注入的 `SvgStorage`；文档不存在时只允许 `init`、`read`、`exit` 和 `help`；`save`、`canvas` 等其余命令仍要求文档存在。
 - `CommandExecutor` 位于 `src/core/CommandExecutor.ts`，实现 `Executor`，委托 `EditorContext.execute` 并把 `ProtocolError` 转成 `CommandErrorResult`。
 - `main.ts` 只负责组装 `ConsoleInputReader`、`Repl`、`CommandLineParser`、`EditorContext` 和 `CommandExecutor`。
 
@@ -42,7 +42,7 @@
 ## 当前边界
 
 - SVG 子集读写、自动补 id 和 IO 历史锁已接入；插件类型、复杂 SVG 特性和画布外裁剪留到后续阶段。
-- 成功反馈由 Context 和具体逆操作生成，例如 `rect#r1 moved by (5,5)`、`rect#r1 moved back by (-5,-5)` 和 `type#id restored into g#parent`。
+- 成功反馈由 Context 和具体逆操作生成，例如 `rect#r1 moved to (5,5)`、`rect#r1 moved back to (0,0)`、`g#g1 moved by (5,5)` 和 `type#id restored into g#parent`。
 
 ## 设计模式角色
 

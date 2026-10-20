@@ -12,7 +12,11 @@ import { ShapeFactory } from "../../src/protocol/shapes/ShapeFactory";
 import { ShapeType } from "../../src/protocol/shapes/ShapeType";
 import { TextShape } from "../../src/protocol/shapes/TextShape";
 
-function expectShapeError(action: () => void, code: CommandErrorCode): void {
+function expectShapeError(
+  action: () => void,
+  code: CommandErrorCode,
+  message?: string,
+): void {
   let caught: unknown;
 
   try {
@@ -26,6 +30,10 @@ function expectShapeError(action: () => void, code: CommandErrorCode): void {
 
   if (caught instanceof ShapeError) {
     expect(caught.getCode()).toBe(code);
+
+    if (message !== undefined) {
+      expect(caught.message).toBe(message);
+    }
   }
 }
 
@@ -122,6 +130,15 @@ describe("Shape 多态模型", () => {
     expect(line.getAttribute("y2")).toBe(10);
     expect(text.getAttribute("x")).toBe(50);
     expect(text.getAttribute("text")).toBe("标题");
+  });
+
+  it("叶子形状暴露当前位置，容器没有单一位置", () => {
+    expect(new RectShape("r1", 10, 20, 1, 1).getPosition()?.getX()).toBe(10);
+    expect(new CircleShape("c1", 30, 40, 2).getPosition()?.getY()).toBe(40);
+    expect(new EllipseShape("e1", 1, 2, 3, 4).getPosition()?.getX()).toBe(1);
+    expect(new LineShape("l1", 5, 6, 7, 8).getPosition()?.getY()).toBe(6);
+    expect(new TextShape("t1", 9, 10, "text").getPosition()?.getX()).toBe(9);
+    expect(new GroupShape("g1").getPosition()).toBeUndefined();
   });
 
   it("非法缩放不修改任何几何状态", () => {
@@ -302,6 +319,7 @@ describe("Shape 多态模型", () => {
     expectShapeError(
       () => factory.create("hexagon", "h1", []),
       CommandErrorCode.UnknownShapeType,
+      "unknown shape type: hexagon (is the plugin loaded?)",
     );
     expectShapeError(
       () => factory.create("rect", "r1", ["x", "0", "10", "10"]),

@@ -26,7 +26,7 @@ export class ShapeFactory {
       default:
         throw new ShapeError(
           CommandErrorCode.UnknownShapeType,
-          `unknown shape type: ${typeName}`,
+          `unknown shape type: ${typeName} (is the plugin loaded?)`,
         );
     }
   }

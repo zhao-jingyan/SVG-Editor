@@ -2,6 +2,7 @@ import type { EditableAttribute } from "../EditableAttribute";
 import { CommandErrorCode } from "../errors/CommandErrorCode";
 import { ShapeError } from "../errors/ShapeError";
 import { Shape } from "./Shape";
+import type { ShapePosition } from "./ShapePosition";
 import { ShapeType } from "./ShapeType";
 import type { ShapeVisitor } from "./ShapeVisitor";
 
@@ -19,6 +20,10 @@ export class GroupShape extends Shape {
 
   public override getType(): ShapeType {
     return ShapeType.Group;
+  }
+
+  public override getPosition(): undefined {
+    return undefined;
   }
 
   public override accept<T>(visitor: ShapeVisitor<T>): T {

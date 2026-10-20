@@ -59,9 +59,9 @@ describe("CLI 进程级端到端", () => {
       startupMessage,
       "canvas 800x600 created",
       "rect#r1 created",
-      "rect#r1 moved by (5,5)",
-      "rect#r1 moved back by (-5,-5)",
-      "rect#r1 moved by (5,5)",
+      "rect#r1 moved to (5,5)",
+      "rect#r1 moved back to (0,0)",
+      "rect#r1 moved to (5,5)",
     ]);
   });
 
@@ -180,7 +180,7 @@ describe("CLI 进程级端到端", () => {
       expect(lines).toContain("warning: assigned id rect1 to unnamed <rect>");
       expect(lines).toContain(`read ${inputPath} (3 elements)`);
       expect(lines).toContain("canvas 400x300");
-      expect(lines).toContain("circle#c1 moved by (5,5)");
+      expect(lines).toContain("circle#c1 moved to (15,25)");
       expect(lines).toContain(`saved to ${outputPath} (3 elements)`);
       expect(lines).toContain("error: undo not allowed after io command");
       expect(lines).toContain("rect#r2 created");

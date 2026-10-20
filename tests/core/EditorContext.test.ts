@@ -94,17 +94,17 @@ describe("EditorContext", () => {
 
     expect(
       (await executor.execute(new MoveCommand("r1", 5, 5))).toCommandResultDto(),
-    ).toEqual({ type: "success", message: "rect#r1 moved by (5,5)" });
+    ).toEqual({ type: "success", message: "rect#r1 moved to (5,5)" });
     expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
 
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
-    ).toEqual({ type: "success", message: "rect#r1 moved back by (-5,-5)" });
+    ).toEqual({ type: "success", message: "rect#r1 moved back to (0,0)" });
     expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(0);
 
     expect(
       (await executor.execute(new RedoCommand())).toCommandResultDto(),
-    ).toEqual({ type: "success", message: "rect#r1 moved by (5,5)" });
+    ).toEqual({ type: "success", message: "rect#r1 moved to (5,5)" });
     expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
   });
 

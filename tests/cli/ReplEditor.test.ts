@@ -51,9 +51,9 @@ describe("Repl 真实编辑链路", () => {
       "svg-editor 0.1 — type 'help' for commands",
       "canvas 800x600 created",
       "rect#r1 created",
-      "rect#r1 moved by (5,5)",
-      "rect#r1 moved back by (-5,-5)",
-      "rect#r1 moved by (5,5)",
+      "rect#r1 moved to (5,5)",
+      "rect#r1 moved back to (0,0)",
+      "rect#r1 moved to (5,5)",
     ]);
     expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
   });

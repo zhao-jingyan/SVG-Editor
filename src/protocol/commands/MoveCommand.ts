@@ -34,6 +34,14 @@ export class MoveCommand extends UndoableCommand {
       return result;
     }
 
+    const position = context.capturePlacement(this.shapeId).getShape().getPosition();
+
+    if (position !== undefined) {
+      return new CommandSuccessResult(
+        `${shapeType}#${this.shapeId} moved back to (${position.getX()},${position.getY()})`,
+      );
+    }
+
     return new CommandSuccessResult(
       `${shapeType}#${this.shapeId} moved back by (${-this.dx},${-this.dy})`,
     );

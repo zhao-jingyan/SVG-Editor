@@ -1,6 +1,7 @@
 import type { EditableAttribute } from "../EditableAttribute";
 import { StyledShape } from "./StyledShape";
 import { ShapeType } from "./ShapeType";
+import { ShapePosition } from "./ShapePosition";
 import type { ShapeVisitor } from "./ShapeVisitor";
 
 export class RectShape extends StyledShape {
@@ -26,6 +27,10 @@ export class RectShape extends StyledShape {
 
   public override getType(): ShapeType {
     return ShapeType.Rect;
+  }
+
+  public override getPosition(): ShapePosition {
+    return new ShapePosition(this.x, this.y);
   }
 
   public override accept<T>(visitor: ShapeVisitor<T>): T {

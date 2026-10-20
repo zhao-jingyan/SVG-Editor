@@ -161,6 +161,14 @@ export class EditorContext implements CommandContext {
     const document = this.requireDocument();
     const shape = document.getShape(shapeId);
     document.moveShape(shapeId, dx, dy);
+    const position = shape.getPosition();
+
+    if (position !== undefined) {
+      return new CommandSuccessResult(
+        `${shape.getType()}#${shape.getId()} moved to (${position.getX()},${position.getY()})`,
+      );
+    }
+
     return new CommandSuccessResult(
       `${shape.getType()}#${shape.getId()} moved by (${dx},${dy})`,
     );

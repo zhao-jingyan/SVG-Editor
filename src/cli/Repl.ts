@@ -1,7 +1,7 @@
 import type { InputReader } from "./InputReader";
 import type { OutputWriter } from "./OutputWriter";
 import type { CommandParser } from "./CommandParser";
-import type { Executor } from "../core/Executor";
+import type { Executor } from "../protocol/Executor";
 
 export class Repl {
   private static readonly prompt = "svg> ";
