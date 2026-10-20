@@ -6,6 +6,10 @@ import type { OutputWriter } from "../../src/cli/OutputWriter";
 import { Repl } from "../../src/cli/Repl";
 import type { Command } from "../../src/protocol/Command";
 import type { CommandResult } from "../../src/protocol/CommandResult";
+import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
+import { ExitCommand } from "../../src/protocol/commands/ExitCommand";
+import { HelpCommand } from "../../src/protocol/commands/HelpCommand";
+import { MoveCommand } from "../../src/protocol/commands/MoveCommand";
 import type { Executor } from "../../src/core/Executor";
 
 class FakeInputReader implements InputReader {
@@ -61,10 +65,14 @@ describe("Repl", () => {
   it("将解析后的 Command 传给 Executor 并输出成功消息", async () => {
     const input = new FakeInputReader(["create rect r1 0 0 10 10", null]);
     const output = new FakeOutputWriter();
-    const command: Command = {
-      type: "create",
-      shape: { type: "rect", id: "r1", x: 0, y: 0, width: 10, height: 10 },
-    };
+    const command = new CreateCommand({
+      type: "rect",
+      id: "r1",
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10,
+    });
     const parser = new FakeCommandParser([{ type: "command", command }]);
     const executor = new FakeExecutor([
       { type: "success", message: "rect#r1 created" },
@@ -73,7 +81,8 @@ describe("Repl", () => {
     await new Repl(input, output, parser, executor).run();
 
     expect(parser.inputs).toEqual(["create rect r1 0 0 10 10"]);
-    expect(executor.commands).toEqual([command]);
+    expect(executor.commands).toHaveLength(1);
+    expect(executor.commands[0]).toBe(command);
     expect(output.lines).toEqual(["rect#r1 created"]);
     expect(output.prompts).toEqual(["svg> ", "svg> "]);
   });
@@ -102,7 +111,7 @@ describe("Repl", () => {
         type: "error",
         error: { code: "invalid-command", message: "unknown command: bad" },
       },
-      { type: "command", command: { type: "help" } },
+      { type: "command", command: new HelpCommand() },
     ]);
     const executor = new FakeExecutor([{ type: "success", message: "help text" }]);
 
@@ -115,11 +124,8 @@ describe("Repl", () => {
     const input = new FakeInputReader(["move r1 1 1", "help", null]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      {
-        type: "command",
-        command: { type: "move", shapeId: "r1", dx: 1, dy: 1 },
-      },
-      { type: "command", command: { type: "help" } },
+      { type: "command", command: new MoveCommand("r1", 1, 1) },
+      { type: "command", command: new HelpCommand() },
     ]);
     const executor = new FakeExecutor([
       {
@@ -138,13 +144,14 @@ describe("Repl", () => {
     const input = new FakeInputReader(["exit", "unread"]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      { type: "command", command: { type: "exit" } },
+      { type: "command", command: new ExitCommand() },
     ]);
     const executor = new FakeExecutor([{ type: "exit" }]);
 
     await new Repl(input, output, parser, executor).run();
 
-    expect(executor.commands).toEqual([{ type: "exit" }]);
+    expect(executor.commands).toHaveLength(1);
+    expect(executor.commands[0]).toBeInstanceOf(ExitCommand);
     expect(output.lines).toEqual([]);
     expect(output.prompts).toEqual(["svg> "]);
   });
@@ -153,8 +160,8 @@ describe("Repl", () => {
     const input = new FakeInputReader(["first", "second", null]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      { type: "command", command: { type: "help" } },
-      { type: "command", command: { type: "help" } },
+      { type: "command", command: new HelpCommand() },
+      { type: "command", command: new HelpCommand() },
     ]);
     const executor = new FakeExecutor([
       new Error("temporary failure"),

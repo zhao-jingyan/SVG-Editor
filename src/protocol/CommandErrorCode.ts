@@ -12,4 +12,5 @@ export type CommandErrorCode =
   | "invalid-scale"
   | "io-read"
   | "io-write"
-  | "history-unavailable";
+  | "history-unavailable"
+  | "command-not-implemented";

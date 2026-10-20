@@ -1,4 +1,3 @@
-import type { Command } from "../protocol/Command";
 import type { CommandError } from "../protocol/CommandError";
 import type { CommandErrorCode } from "../protocol/CommandErrorCode";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
@@ -11,6 +10,25 @@ import type {
   ShapeSpec,
   TextShapeSpec,
 } from "../protocol/ShapeSpec";
+import { AddToCommand } from "../protocol/commands/AddToCommand";
+import { CanvasCommand } from "../protocol/commands/CanvasCommand";
+import { CreateCommand } from "../protocol/commands/CreateCommand";
+import { DeleteCommand } from "../protocol/commands/DeleteCommand";
+import { ExitCommand } from "../protocol/commands/ExitCommand";
+import { GroupCommand } from "../protocol/commands/GroupCommand";
+import { HelpCommand } from "../protocol/commands/HelpCommand";
+import { InitCommand } from "../protocol/commands/InitCommand";
+import { MoveCommand } from "../protocol/commands/MoveCommand";
+import { ReadCommand } from "../protocol/commands/ReadCommand";
+import { RedoCommand } from "../protocol/commands/RedoCommand";
+import { ReorderCommand } from "../protocol/commands/ReorderCommand";
+import { SaveCommand } from "../protocol/commands/SaveCommand";
+import { ScaleCommand } from "../protocol/commands/ScaleCommand";
+import { SetCommand } from "../protocol/commands/SetCommand";
+import { ShowCommand } from "../protocol/commands/ShowCommand";
+import { TreeCommand } from "../protocol/commands/TreeCommand";
+import { UndoCommand } from "../protocol/commands/UndoCommand";
+import { UngroupCommand } from "../protocol/commands/UngroupCommand";
 import type { CommandParser } from "./CommandParser";
 import type { CommandParseResult } from "./CommandParseResult";
 
@@ -114,7 +132,7 @@ export class CommandLineParser implements CommandParser {
 
   private static parseInit(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: { type: "init" } };
+      return { type: "command", command: new InitCommand() };
     }
 
     if (tokens.length !== 3) {
@@ -129,7 +147,7 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "init", width: dimensions[0], height: dimensions[1] },
+      command: new InitCommand(dimensions[0], dimensions[1]),
     };
   }
 
@@ -144,12 +162,12 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(path);
     }
 
-    return { type: "command", command: { type: "read", path } };
+    return { type: "command", command: new ReadCommand(path) };
   }
 
   private static parseSave(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: { type: "save" } };
+      return { type: "command", command: new SaveCommand() };
     }
 
     if (tokens.length !== 2) {
@@ -162,12 +180,12 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(path);
     }
 
-    return { type: "command", command: { type: "save", path } };
+    return { type: "command", command: new SaveCommand(path) };
   }
 
   private static parseCanvas(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: { type: "canvas" } };
+      return { type: "command", command: new CanvasCommand() };
     }
 
     if (tokens.length !== 3) {
@@ -182,7 +200,7 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "canvas", width: dimensions[0], height: dimensions[1] },
+      command: new CanvasCommand(dimensions[0], dimensions[1]),
     };
   }
 
@@ -427,14 +445,7 @@ export class CommandLineParser implements CommandParser {
   }
 
   private static createResult(shape: ShapeSpec, parentId?: string): CommandParseResult {
-    return {
-      type: "command",
-      command: {
-        type: "create",
-        shape,
-        ...(parentId === undefined ? {} : { parentId }),
-      },
-    };
+    return { type: "command", command: new CreateCommand(shape, parentId) };
   }
 
   private static parseDelete(tokens: string[]): CommandParseResult {
@@ -448,7 +459,7 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(shapeId);
     }
 
-    return { type: "command", command: { type: "delete", shapeId } };
+    return { type: "command", command: new DeleteCommand(shapeId) };
   }
 
   private static parseMove(tokens: string[]): CommandParseResult {
@@ -470,7 +481,7 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "move", shapeId, dx: numbers[0], dy: numbers[1] },
+      command: new MoveCommand(shapeId, numbers[0], numbers[1]),
     };
   }
 
@@ -491,7 +502,7 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(factor);
     }
 
-    return { type: "command", command: { type: "scale", shapeId, factor } };
+    return { type: "command", command: new ScaleCommand(shapeId, factor) };
   }
 
   private static parseSet(tokens: string[]): CommandParseResult {
@@ -527,7 +538,7 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "set", shapeId, attribute, value },
+      command: new SetCommand(shapeId, attribute, value),
     };
   }
 
@@ -556,7 +567,7 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "group", containerId, memberIds },
+      command: new GroupCommand(containerId, memberIds),
     };
   }
 
@@ -571,7 +582,7 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(containerId);
     }
 
-    return { type: "command", command: { type: "ungroup", containerId } };
+    return { type: "command", command: new UngroupCommand(containerId) };
   }
 
   private static parseAddTo(tokens: string[]): CommandParseResult {
@@ -593,7 +604,7 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "addto", containerId, shapeId },
+      command: new AddToCommand(containerId, shapeId),
     };
   }
 
@@ -613,13 +624,13 @@ export class CommandLineParser implements CommandParser {
 
     return {
       type: "command",
-      command: { type: "reorder", shapeId, position },
+      command: new ReorderCommand(shapeId, position),
     };
   }
 
   private static parseTree(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: { type: "tree" } };
+      return { type: "command", command: new TreeCommand() };
     }
 
     if (tokens.length !== 2) {
@@ -632,7 +643,7 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(shapeId);
     }
 
-    return { type: "command", command: { type: "tree", shapeId } };
+    return { type: "command", command: new TreeCommand(shapeId) };
   }
 
   private static parseShow(tokens: string[]): CommandParseResult {
@@ -646,7 +657,7 @@ export class CommandLineParser implements CommandParser {
       return CommandLineParser.errorResult(shapeId);
     }
 
-    return { type: "command", command: { type: "show", shapeId } };
+    return { type: "command", command: new ShowCommand(shapeId) };
   }
 
   private static parseNoArgumentCommand(tokens: string[]): CommandParseResult {
@@ -656,13 +667,13 @@ export class CommandLineParser implements CommandParser {
 
     switch (tokens[0]) {
       case "help":
-        return { type: "command", command: { type: "help" } };
+        return { type: "command", command: new HelpCommand() };
       case "undo":
-        return { type: "command", command: { type: "undo" } };
+        return { type: "command", command: new UndoCommand() };
       case "redo":
-        return { type: "command", command: { type: "redo" } };
+        return { type: "command", command: new RedoCommand() };
       case "exit":
-        return { type: "command", command: { type: "exit" } };
+        return { type: "command", command: new ExitCommand() };
       default:
         return CommandLineParser.failure("invalid-command", `unknown command: ${tokens[0]}`);
     }

@@ -1,4 +1,15 @@
-export interface DeleteCommand {
-  readonly type: "delete";
-  readonly shapeId: string;
+import type { CommandContext } from "../CommandContext";
+import type { CommandResult } from "../CommandResult";
+import { UndoableCommand } from "../UndoableCommand";
+
+export class DeleteCommand extends UndoableCommand {
+  public readonly type = "delete";
+
+  public constructor(private readonly shapeId: string) {
+    super();
+  }
+
+  public execute(context: CommandContext): Promise<CommandResult> {
+    return context.deleteShape(this.shapeId);
+  }
 }

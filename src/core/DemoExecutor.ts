@@ -1,13 +1,12 @@
 import type { Command } from "../protocol/Command";
+import type { CommandContext } from "../protocol/CommandContext";
 import type { CommandResult } from "../protocol/CommandResult";
 import type { Executor } from "./Executor";
 
 export class DemoExecutor implements Executor {
-  public async execute(command: Command): Promise<CommandResult> {
-    if (command.type === "exit") {
-      return { type: "exit" };
-    }
+  public constructor(private readonly context: CommandContext) {}
 
-    return { type: "success", message: `received command: ${command.type}` };
+  public execute(command: Command): Promise<CommandResult> {
+    return command.execute(this.context);
   }
 }

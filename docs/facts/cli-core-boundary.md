@@ -2,38 +2,35 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的纯协议类型：命令 DTO、图形 DTO、执行结果和错误码。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
-- `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为协议命令的 `CommandLineParser`。
-- `src/core` 存放应用入口端口 `Executor` 及其临时实现。本轮没有真实 Editor、命令分发器或历史栈。
-- `src/main.ts` 是组合根和启动入口，只负责组装 CLI 适配器、解析器与 `Executor`，不实现业务逻辑。
-- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor 实现测试。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、图形参数 DTO、执行结果和错误码。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
+- `src/core` 存放应用入口端口 `Executor`、临时执行器和 Demo 接收者。当前没有真实 Editor、文档状态或历史栈。
+- `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
+- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor 测试，`tests/protocol` 存放命令类层次测试。
 
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和联合类型单独成文件；协议命令与图形 DTO 分别放在 `protocol/commands`、`protocol/shapes`。
+- 每个主要类、接口和联合类型单独成文件；具体命令放在 `protocol/commands`，图形参数放在 `protocol/shapes`。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
-## 通信边界
+## Command 模式
 
-CLI 与 Core 不再传递原始字符串，而是传递可序列化的强类型 `Command`：
+`Command` 是可执行抽象类，而不是纯数据联合类型：
 
 ```typescript
-export interface Executor {
-  execute(command: Command): Promise<CommandResult>;
+export abstract class Command {
+  public abstract readonly type: CommandType;
+  public abstract execute(context: CommandContext): Promise<CommandResult>;
 }
-
-export type CommandResult =
-  | { readonly type: "success"; readonly message: string }
-  | { readonly type: "error"; readonly error: CommandError }
-  | { readonly type: "exit" };
 ```
 
-- `Command` 是覆盖完整命令词表的可辨识联合，命令通过 `type` 字段区分。
-- `CommandResult` 只提供成功消息、结构化错误和退出分支；逐命令结构化结果后续再扩展。
-- CLI 文本语法由 `src/cli/CommandLineParser` 负责转换为协议命令，协议层不包含解析逻辑。
-- 未来 GUI 可以直接构造 `Command` 并调用同一个 `Executor`，无需经过 CLI 文本语法。
+- `UndoableCommand` 继承 `Command`，提供 `undo(context)`；当前全部具体逆操作返回 `command-not-implemented`。
+- 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
+- 具体命令封装私有参数，`execute` 通过多态委托给 `CommandContext`，不再由 Executor 根据 `type` 分派。
+- `CommandLineParser` 直接实例化具体命令类；命令名 `switch` 是 Lab 允许的命令分发点。
+- `CommandContext` 是命令接收者接口，统一返回 `Promise<CommandResult>`。
 
 ## 依赖方向
 
@@ -47,24 +44,29 @@ src/protocol -/-> src/core
 src/core -/-> src/cli
 ```
 
-- `Repl` 依赖 `CommandParser` 接口和 `Executor` 接口，不依赖具体解析器或 Demo 实现。
-- `CommandLineParser` 只依赖协议类型，不依赖 Core。
-- `src/core` 不得依赖 `src/cli`，因此未来 GUI 可以绕过 CLI 复用同一应用入口。
-- 依赖真实终端的代码只能位于 CLI 适配器；测试使用假输入、输出、解析器和 Executor。
+- `Repl` 依赖 `CommandParser` 接口和 `Executor` 接口。
+- `CommandLineParser` 依赖协议层的具体命令类，不依赖 Core。
+- `DemoExecutor` 只依赖协议层 `Command`、`CommandContext` 和 `CommandResult`。
+- `DemoCommandContext` 位于 Core，是 `CommandContext` 的临时实现。
 
-## 当前行为事实
+## 当前执行链路
 
-- REPL 每轮显示 `svg> `，读取一行文本后交给 `CommandParser.parse`。
-- 空行和首个非空字符为 `#` 的注释行不调用 Executor。
+```text
+ConsoleInputReader -> Repl -> CommandLineParser -> 具体 Command
+                                                        |
+                                                        v
+DemoExecutor -> command.execute(context) -> DemoCommandContext
+```
+
+- 空行和首个非空字符为 `#` 的注释行不创建命令。
 - 解析错误输出 `error: <message>` 后继续循环。
 - `success` 输出其 `message`，`error` 输出 `error: <message>`，`exit` 结束循环。
-- Executor 抛异常时，CLI 输出统一错误信息并继续循环。
-- `DemoExecutor` 仅验证边界：`exit` 返回退出，其他命令返回 `received command: <type>`。
+- `ExitCommand.execute` 不调用 Context，直接返回退出结果。
 - `ConsoleInputReader` 使用常驻事件监听和内部队列，能够处理管道一次写入的多行输入。
 
 ## 后续设计事实
 
-- 经典 Command 模式采用“协议 DTO + Core 命令对象”两层结构。
-- 后续 Core 的 `EditorCommand` 暴露 `execute(context)` 与 `undo(context)`，历史栈保存已执行命令对象。
+- 真实 `EditorContext` 将实现 `CommandContext`，命令类本身保持与文档存储细节解耦。
+- 编辑命令将覆盖 `UndoableCommand.undo`，历史栈只保存 `UndoableCommand` 实例。
 - undo/redo 采用命令自身逆操作，不使用文档快照。
-- 真实命令分发、文档状态和 SVG 读写进入后续阶段，不回流到 `src/cli`。
+- 图形对象多态化、Composite 容器与 SVG 读写进入后续阶段。
