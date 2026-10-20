@@ -227,6 +227,26 @@ describe("Shape 多态模型", () => {
     );
   });
 
+  it("GroupShape 在指定索引插入子节点并拒绝非法索引", () => {
+    const rect = new RectShape("r1", 0, 0, 10, 10);
+    const circle = new CircleShape("c1", 0, 0, 5);
+    const inserted = new RectShape("r2", 1, 1, 2, 2);
+    const group = new GroupShape("g1", [rect, circle]);
+
+    group.insertChild(inserted, 1);
+    expect(group.getChildren()).toEqual([rect, inserted, circle]);
+
+    expectShapeError(
+      () => group.insertChild(new RectShape("r3", 0, 0, 1, 1), -1),
+      CommandErrorCode.InvalidArgument,
+    );
+    expectShapeError(
+      () => group.insertChild(new RectShape("r4", 0, 0, 1, 1), 4),
+      CommandErrorCode.InvalidArgument,
+    );
+    expect(group.getChildren()).toEqual([rect, inserted, circle]);
+  });
+
   it("GroupShape 只接受公共样式并保持失败前状态", () => {
     const rect = new RectShape("r1", 0, 0, 10, 10);
     const group = new GroupShape("g1", [rect]);

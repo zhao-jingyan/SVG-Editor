@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { CommandExecutionError } from "../../src/protocol/errors/CommandExecutionError";
 import { CommandParseError } from "../../src/protocol/errors/CommandParseError";
+import { DocumentError } from "../../src/protocol/errors/DocumentError";
 import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
 import { ShapeError } from "../../src/protocol/errors/ShapeError";
 
@@ -17,6 +18,7 @@ describe("ProtocolError 类层次", () => {
         "undo is not implemented",
       ),
       new ShapeError(CommandErrorCode.InvalidScale, "scale factor must be positive"),
+      new DocumentError(CommandErrorCode.ShapeNotFound, "no such shape: r1"),
     ];
 
     for (const error of errors) {

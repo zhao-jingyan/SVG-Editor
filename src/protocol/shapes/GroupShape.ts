@@ -21,6 +21,10 @@ export class GroupShape extends Shape {
   }
 
   public addChild(child: Shape): void {
+    this.insertChild(child, this.children.length);
+  }
+
+  public insertChild(child: Shape, index: number): void {
     if (child === this) {
       throw new ShapeError(
         CommandErrorCode.InvalidArgument,
@@ -38,7 +42,14 @@ export class GroupShape extends Shape {
       );
     }
 
-    this.children.push(child);
+    if (!Number.isInteger(index) || index < 0 || index > this.children.length) {
+      throw new ShapeError(
+        CommandErrorCode.InvalidArgument,
+        `invalid child index: ${index}`,
+      );
+    }
+
+    this.children.splice(index, 0, child);
   }
 
   public removeChild(shapeId: string): Shape | undefined {

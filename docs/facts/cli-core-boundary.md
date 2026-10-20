@@ -4,9 +4,9 @@
 
 - `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
-- `src/core` 存放应用入口端口 `Executor`、临时执行器、Demo 接收者和独立 `CommandHistory`。当前没有真实 Editor 或文档状态，历史栈也尚未接入执行链路。
+- `src/core` 存放应用入口端口 `Executor`、临时执行器、Demo 接收者、独立 `CommandHistory` 和 `Document` 聚合根。当前没有真实 Editor 或 SVG IO，历史栈也尚未接入执行链路。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
-- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor 与 History 测试，`tests/protocol` 存放命令类层次测试。
+- `tests/cli` 存放 CLI 与解析器行为测试，`tests/core` 存放 Executor、History 与 Document 测试，`tests/protocol` 存放命令类层次测试。
 
 ## 文件命名
 
@@ -44,7 +44,7 @@ export abstract class Command {
 ## 错误模型
 
 - `ProtocolError` 是继承 `Error` 的抽象基类，封装私有 `CommandErrorCode`，提供 `getCode()` 和 `toCommandErrorDto()`；构造器负责建立错误码与消息不变量。
-- 具体错误按来源分为 `CommandParseError`、`CommandExecutionError` 和 `ShapeError`，三者均位于 `src/protocol/errors` 并继承 `ProtocolError`。
+- 具体错误按来源分为 `CommandParseError`、`CommandExecutionError`、`ShapeError` 和 `DocumentError`，均位于 `src/protocol/errors` 并继承 `ProtocolError`。
 - `CommandErrorCode` 是封闭枚举，字符串值与既有 CLI 错误码完全一致；枚举成员使用 PascalCase 命名。
 - `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。结果对象可以持有 `ProtocolError`，但跨边界只暴露 `CommandErrorDto`，保证错误结果可序列化。
 - `CommandLineParser` 内部失败抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
@@ -76,6 +76,7 @@ src/core -/-> src/cli
 - `DemoExecutor` 只依赖协议层 `Command`、`CommandContext` 和 `CommandResult` 类层次。
 - `DemoCommandContext` 位于 Core，是 `CommandContext` 的临时实现。
 - `CommandHistory` 位于 Core，是独立实现的 Caretaker；当前未被 `DemoExecutor` 或 `DemoCommandContext` 使用。
+- `Document` 位于 Core，是图形文档的聚合根；当前未被 Demo 执行链路使用。
 
 ## 当前执行链路
 
@@ -98,5 +99,5 @@ DemoExecutor -> command.execute(context) -> DemoCommandContext
 - 真实 `EditorContext` 将实现 `CommandContext`，命令类本身保持与文档存储细节解耦。
 - 编辑命令将覆盖 `UndoableCommand.undo`；`CommandHistory` 已实现，后续由真实 `EditorContext` 与执行器接入。
 - undo/redo 采用命令自身逆操作，不使用文档快照。
-- 真实 Document、SVG 读写、插件注册表和图形删除归属进入后续阶段。
+- `Document` 已实现图形归属与完整结构编辑；EditorContext、SVG 读写和插件注册表进入后续阶段。
 - 真实 Core 的 Document、IO、History 错误在实现时继承 `ProtocolError`，并继续通过 `CommandErrorDto` 返回。
