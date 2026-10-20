@@ -1,6 +1,7 @@
 import type { CommandContext } from "../protocol/CommandContext";
-import type { CommandResult } from "../protocol/CommandResult";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
+import { CommandSuccessResult } from "../protocol/results/CommandSuccessResult";
+import type { CommandResult } from "../protocol/results/CommandResult";
 import type { Shape } from "../protocol/shapes/Shape";
 
 export class DemoCommandContext implements CommandContext {
@@ -94,6 +95,6 @@ export class DemoCommandContext implements CommandContext {
   }
 
   private success(command: string): CommandResult {
-    return { type: "success", message: `received command: ${command}` };
+    return new CommandSuccessResult(`received command: ${command}`);
   }
 }

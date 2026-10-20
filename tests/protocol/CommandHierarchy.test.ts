@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Command } from "../../src/protocol/Command";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
+import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
 import { AddToCommand } from "../../src/protocol/commands/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/CanvasCommand";
 import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
@@ -66,8 +67,10 @@ describe("Command 类层次", () => {
 
   it("未实现的具体逆操作返回 command-not-implemented", async () => {
     const context = new RecordingCommandContext();
+    const result = await new MoveCommand("r1", 10, 20).undo(context);
 
-    await expect(new MoveCommand("r1", 10, 20).undo(context)).resolves.toEqual({
+    expect(result).toBeInstanceOf(CommandErrorResult);
+    expect(result.toCommandResultDto()).toEqual({
       type: "error",
       error: {
         code: CommandErrorCode.CommandNotImplemented,

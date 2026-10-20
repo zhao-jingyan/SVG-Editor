@@ -1,5 +1,5 @@
 import type { CommandContext } from "../CommandContext";
-import type { CommandResult } from "../CommandResult";
+import type { CommandResult } from "../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class UngroupCommand extends UndoableCommand {

@@ -58,7 +58,7 @@
 以下内容是当前代码的已知技术债，不是新代码可以继续模仿的范例：
 
 - `CommandType`、`EditableAttribute` 等字符串联合类型作为边界值集合可暂时保留；若进入领域身份判断，再改为枚举或值对象。
-- `CommandResult` 属于边界结果 DTO，不纳入贫血模型整改范围。
+- `CommandResult` 与 `CommandParseResult` 已改为运行时结果类层次；边界通过 `CommandResultDto` / `CommandParseResultDto` 转换，不再作为贫血模型例外。
 
 ## 实现验收清单
 

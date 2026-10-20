@@ -1,6 +1,7 @@
 import type { CommandContext } from "../../src/protocol/CommandContext";
-import type { CommandResult } from "../../src/protocol/CommandResult";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
+import type { CommandResult } from "../../src/protocol/results/CommandResult";
+import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
 import type { Shape } from "../../src/protocol/shapes/Shape";
 
 export interface ContextCall {
@@ -12,7 +13,7 @@ export class RecordingCommandContext implements CommandContext {
   public readonly calls: ContextCall[] = [];
 
   public constructor(
-    private readonly result: CommandResult = { type: "success", message: "ok" },
+    private readonly result: CommandResult = new CommandSuccessResult("ok"),
   ) {}
 
   public init(width?: number, height?: number): Promise<CommandResult> {

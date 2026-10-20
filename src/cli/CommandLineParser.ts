@@ -24,7 +24,10 @@ import { TreeCommand } from "../protocol/commands/TreeCommand";
 import { UndoCommand } from "../protocol/commands/UndoCommand";
 import { UngroupCommand } from "../protocol/commands/UngroupCommand";
 import type { CommandParser } from "./CommandParser";
-import type { CommandParseResult } from "./CommandParseResult";
+import { CommandParseEmptyResult } from "./results/CommandParseEmptyResult";
+import { CommandParseErrorResult } from "./results/CommandParseErrorResult";
+import type { CommandParseResult } from "./results/CommandParseResult";
+import { CommandParseSuccessResult } from "./results/CommandParseSuccessResult";
 
 export class CommandLineParser implements CommandParser {
   private static readonly editableAttributes = new Set<EditableAttribute>([
@@ -71,13 +74,13 @@ export class CommandLineParser implements CommandParser {
       const trimmed = line.trim();
 
       if (trimmed.length === 0 || trimmed.startsWith("#")) {
-        return { type: "empty" };
+        return new CommandParseEmptyResult();
       }
 
       return this.parseTokens(CommandLineParser.tokenize(trimmed));
     } catch (error: unknown) {
       if (error instanceof ProtocolError) {
-        return { type: "error", error: error.toCommandErrorDto() };
+        return new CommandParseErrorResult(error);
       }
 
       throw error;
@@ -133,7 +136,7 @@ export class CommandLineParser implements CommandParser {
 
   private static parseInit(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: new InitCommand() };
+      return new CommandParseSuccessResult(new InitCommand());
     }
 
     if (tokens.length !== 3) {
@@ -142,10 +145,9 @@ export class CommandLineParser implements CommandParser {
 
     const dimensions = CommandLineParser.parseNumbers(tokens, 1, 2);
 
-    return {
-      type: "command",
-      command: new InitCommand(dimensions[0], dimensions[1]),
-    };
+    return new CommandParseSuccessResult(
+      new InitCommand(dimensions[0], dimensions[1]),
+    );
   }
 
   private static parseRead(tokens: string[]): CommandParseResult {
@@ -153,30 +155,28 @@ export class CommandLineParser implements CommandParser {
       CommandLineParser.invalidArguments("read <file.svg>");
     }
 
-    return {
-      type: "command",
-      command: new ReadCommand(CommandLineParser.nonEmptyToken(tokens[1], "file path")),
-    };
+    return new CommandParseSuccessResult(
+      new ReadCommand(CommandLineParser.nonEmptyToken(tokens[1], "file path")),
+    );
   }
 
   private static parseSave(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: new SaveCommand() };
+      return new CommandParseSuccessResult(new SaveCommand());
     }
 
     if (tokens.length !== 2) {
       CommandLineParser.invalidArguments("save [file.svg]");
     }
 
-    return {
-      type: "command",
-      command: new SaveCommand(CommandLineParser.nonEmptyToken(tokens[1], "file path")),
-    };
+    return new CommandParseSuccessResult(
+      new SaveCommand(CommandLineParser.nonEmptyToken(tokens[1], "file path")),
+    );
   }
 
   private static parseCanvas(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: new CanvasCommand() };
+      return new CommandParseSuccessResult(new CanvasCommand());
     }
 
     if (tokens.length !== 3) {
@@ -185,10 +185,9 @@ export class CommandLineParser implements CommandParser {
 
     const dimensions = CommandLineParser.parseNumbers(tokens, 1, 2);
 
-    return {
-      type: "command",
-      command: new CanvasCommand(dimensions[0], dimensions[1]),
-    };
+    return new CommandParseSuccessResult(
+      new CanvasCommand(dimensions[0], dimensions[1]),
+    );
   }
 
   private parseCreate(tokens: string[]): CommandParseResult {
@@ -230,7 +229,7 @@ export class CommandLineParser implements CommandParser {
   }
 
   private createResult(shape: Shape, parentId?: string): CommandParseResult {
-    return { type: "command", command: new CreateCommand(shape, parentId) };
+    return new CommandParseSuccessResult(new CreateCommand(shape, parentId));
   }
 
   private static parseDelete(tokens: string[]): CommandParseResult {
@@ -238,10 +237,9 @@ export class CommandLineParser implements CommandParser {
       CommandLineParser.invalidArguments("delete <id>");
     }
 
-    return {
-      type: "command",
-      command: new DeleteCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
-    };
+    return new CommandParseSuccessResult(
+      new DeleteCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
+    );
   }
 
   private static parseMove(tokens: string[]): CommandParseResult {
@@ -252,10 +250,9 @@ export class CommandLineParser implements CommandParser {
     const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
     const numbers = CommandLineParser.parseNumbers(tokens, 2, 2);
 
-    return {
-      type: "command",
-      command: new MoveCommand(shapeId, numbers[0], numbers[1]),
-    };
+    return new CommandParseSuccessResult(
+      new MoveCommand(shapeId, numbers[0], numbers[1]),
+    );
   }
 
   private static parseScale(tokens: string[]): CommandParseResult {
@@ -266,7 +263,7 @@ export class CommandLineParser implements CommandParser {
     const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
     const factor = CommandLineParser.parseNumber(tokens[2]);
 
-    return { type: "command", command: new ScaleCommand(shapeId, factor) };
+    return new CommandParseSuccessResult(new ScaleCommand(shapeId, factor));
   }
 
   private static parseSet(tokens: string[]): CommandParseResult {
@@ -290,10 +287,9 @@ export class CommandLineParser implements CommandParser {
       value = CommandLineParser.parseNumber(tokens[3]);
     }
 
-    return {
-      type: "command",
-      command: new SetCommand(shapeId, attribute, value),
-    };
+    return new CommandParseSuccessResult(
+      new SetCommand(shapeId, attribute, value),
+    );
   }
 
   private static parseGroup(tokens: string[]): CommandParseResult {
@@ -308,10 +304,9 @@ export class CommandLineParser implements CommandParser {
       memberIds.push(CommandLineParser.nonEmptyToken(token, "member id"));
     }
 
-    return {
-      type: "command",
-      command: new GroupCommand(containerId, memberIds),
-    };
+    return new CommandParseSuccessResult(
+      new GroupCommand(containerId, memberIds),
+    );
   }
 
   private static parseUngroup(tokens: string[]): CommandParseResult {
@@ -319,12 +314,9 @@ export class CommandLineParser implements CommandParser {
       CommandLineParser.invalidArguments("ungroup <gid>");
     }
 
-    return {
-      type: "command",
-      command: new UngroupCommand(
-        CommandLineParser.nonEmptyToken(tokens[1], "container id"),
-      ),
-    };
+    return new CommandParseSuccessResult(
+      new UngroupCommand(CommandLineParser.nonEmptyToken(tokens[1], "container id")),
+    );
   }
 
   private static parseAddTo(tokens: string[]): CommandParseResult {
@@ -335,10 +327,9 @@ export class CommandLineParser implements CommandParser {
     const containerId = CommandLineParser.nonEmptyToken(tokens[1], "container id");
     const shapeId = CommandLineParser.nonEmptyToken(tokens[2], "shape id");
 
-    return {
-      type: "command",
-      command: new AddToCommand(containerId, shapeId),
-    };
+    return new CommandParseSuccessResult(
+      new AddToCommand(containerId, shapeId),
+    );
   }
 
   private static parseReorder(
@@ -349,28 +340,26 @@ export class CommandLineParser implements CommandParser {
       CommandLineParser.invalidArguments(`${tokens[0]} <id>`);
     }
 
-    return {
-      type: "command",
-      command: new ReorderCommand(
+    return new CommandParseSuccessResult(
+      new ReorderCommand(
         CommandLineParser.nonEmptyToken(tokens[1], "shape id"),
         position,
       ),
-    };
+    );
   }
 
   private static parseTree(tokens: string[]): CommandParseResult {
     if (tokens.length === 1) {
-      return { type: "command", command: new TreeCommand() };
+      return new CommandParseSuccessResult(new TreeCommand());
     }
 
     if (tokens.length !== 2) {
       CommandLineParser.invalidArguments("tree [id]");
     }
 
-    return {
-      type: "command",
-      command: new TreeCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
-    };
+    return new CommandParseSuccessResult(
+      new TreeCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
+    );
   }
 
   private static parseShow(tokens: string[]): CommandParseResult {
@@ -378,10 +367,9 @@ export class CommandLineParser implements CommandParser {
       CommandLineParser.invalidArguments("show <id>");
     }
 
-    return {
-      type: "command",
-      command: new ShowCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
-    };
+    return new CommandParseSuccessResult(
+      new ShowCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
+    );
   }
 
   private static parseNoArgumentCommand(tokens: string[]): CommandParseResult {
@@ -391,13 +379,13 @@ export class CommandLineParser implements CommandParser {
 
     switch (tokens[0]) {
       case "help":
-        return { type: "command", command: new HelpCommand() };
+        return new CommandParseSuccessResult(new HelpCommand());
       case "undo":
-        return { type: "command", command: new UndoCommand() };
+        return new CommandParseSuccessResult(new UndoCommand());
       case "redo":
-        return { type: "command", command: new RedoCommand() };
+        return new CommandParseSuccessResult(new RedoCommand());
       case "exit":
-        return { type: "command", command: new ExitCommand() };
+        return new CommandParseSuccessResult(new ExitCommand());
       default:
         throw new CommandParseError(
           CommandErrorCode.InvalidCommand,

@@ -1,5 +1,5 @@
 import type { CommandContext } from "../CommandContext";
-import type { CommandResult } from "../CommandResult";
+import type { CommandResult } from "../results/CommandResult";
 import type { EditableAttribute } from "../EditableAttribute";
 import { UndoableCommand } from "../UndoableCommand";
 

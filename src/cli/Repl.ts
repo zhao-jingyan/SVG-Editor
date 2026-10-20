@@ -22,7 +22,7 @@ export class Repl {
         return;
       }
 
-      const parseResult = this.commandParser.parse(input);
+      const parseResult = this.commandParser.parse(input).toCommandParseResultDto();
 
       if (parseResult.type === "empty") {
         continue;
@@ -34,7 +34,9 @@ export class Repl {
       }
 
       try {
-        const result = await this.executor.execute(parseResult.command);
+        const result = (
+          await this.executor.execute(parseResult.command)
+        ).toCommandResultDto();
 
         if (result.type === "exit") {
           return;

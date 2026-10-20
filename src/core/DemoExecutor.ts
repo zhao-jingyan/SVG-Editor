@@ -1,6 +1,6 @@
 import type { Command } from "../protocol/Command";
 import type { CommandContext } from "../protocol/CommandContext";
-import type { CommandResult } from "../protocol/CommandResult";
+import type { CommandResult } from "../protocol/results/CommandResult";
 import type { Executor } from "./Executor";
 
 export class DemoExecutor implements Executor {

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { CommandLineParser } from "../../src/cli/CommandLineParser";
+import { CommandParseEmptyResult } from "../../src/cli/results/CommandParseEmptyResult";
+import { CommandParseErrorResult } from "../../src/cli/results/CommandParseErrorResult";
+import type { CommandParseResultDto } from "../../src/cli/results/CommandParseResultDto";
 import type { Command } from "../../src/protocol/Command";
-import type { CommandResult } from "../../src/protocol/CommandResult";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { AddToCommand } from "../../src/protocol/commands/AddToCommand";
@@ -31,6 +33,8 @@ import { RectShape } from "../../src/protocol/shapes/RectShape";
 import { Shape } from "../../src/protocol/shapes/Shape";
 import { ShapeFactory } from "../../src/protocol/shapes/ShapeFactory";
 import { TextShape } from "../../src/protocol/shapes/TextShape";
+import { CommandExitResult } from "../../src/protocol/results/CommandExitResult";
+import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import {
   RecordingCommandContext,
   type ContextCall,
@@ -42,13 +46,17 @@ type ShapeConstructor = new (...args: any[]) => Shape;
 const parser = new CommandLineParser(new ShapeFactory());
 
 function parseCommand(input: string): Command {
-  const result = parser.parse(input);
+  const result = parseDto(input);
 
   if (result.type !== "command") {
     throw new Error(`expected command, received ${result.type}`);
   }
 
   return result.command;
+}
+
+function parseDto(input: string): CommandParseResultDto {
+  return parser.parse(input).toCommandParseResultDto();
 }
 
 async function execute(
@@ -178,23 +186,23 @@ describe("CommandLineParser", () => {
   });
 
   it("报告图形工厂的参数错误", () => {
-    expect(parser.parse("create hexagon h1 0 0")).toMatchObject({
+    expect(parseDto("create hexagon h1 0 0")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.UnknownShapeType },
     });
-    expect(parser.parse("create rect r1 nope 0 10 10")).toMatchObject({
+    expect(parseDto("create rect r1 nope 0 10 10")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidNumber },
     });
-    expect(parser.parse("create circle c1 0 0")).toMatchObject({
+    expect(parseDto("create circle c1 0 0")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
-    expect(parser.parse("create g g1 extra")).toMatchObject({
+    expect(parseDto("create g g1 extra")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
-    expect(parser.parse("create rect r1 0 0 10 10 in")).toMatchObject({
+    expect(parseDto("create rect r1 0 0 10 10 in")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
@@ -240,69 +248,74 @@ describe("CommandLineParser", () => {
     const { command, calls, result } = await execute("exit");
     expect(command).toBeInstanceOf(ExitCommand);
     expect(calls).toEqual([]);
-    expect(result).toEqual({ type: "exit" });
+    expect(result).toBeInstanceOf(CommandExitResult);
+    expect(result.toCommandResultDto()).toEqual({ type: "exit" });
   });
 
   it("将空行和注释行视为空输入", () => {
-    expect(parser.parse("")).toEqual({ type: "empty" });
-    expect(parser.parse("   ")).toEqual({ type: "empty" });
-    expect(parser.parse("  # create rect r1 0 0 10 10")).toEqual({ type: "empty" });
+    expect(parser.parse("")).toBeInstanceOf(CommandParseEmptyResult);
+    expect(parseDto("")).toEqual({ type: "empty" });
+    expect(parseDto("   ")).toEqual({ type: "empty" });
+    expect(parseDto("  # create rect r1 0 0 10 10")).toEqual({ type: "empty" });
   });
 
   it("报告未知命令和元数错误", () => {
-    expect(parser.parse("unknown")).toMatchObject({
+    expect(parseDto("unknown")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidCommand },
     });
-    expect(parser.parse("init 800")).toMatchObject({
+    expect(parseDto("init 800")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
-    expect(parser.parse("group g1 r1")).toMatchObject({
+    expect(parseDto("group g1 r1")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
   });
 
   it("报告数字和图形类型错误", () => {
-    expect(parser.parse("move r1 abc 10")).toMatchObject({
+    expect(parseDto("move r1 abc 10")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidNumber },
     });
-    expect(parser.parse("create hexagon h1 0 0")).toMatchObject({
+    expect(parseDto("create hexagon h1 0 0")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.UnknownShapeType },
     });
-    expect(parser.parse("create rect r1 0 0 10")).toMatchObject({
+    expect(parseDto("create rect r1 0 0 10")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
   });
 
   it("报告属性、引号和尾缀错误", () => {
-    expect(parser.parse("set r1 opacity 0.5")).toMatchObject({
+    expect(parseDto("set r1 opacity 0.5")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.UnknownAttribute },
     });
-    expect(parser.parse('create text t1 0 0 "unterminated')).toMatchObject({
+    expect(parseDto('create text t1 0 0 "unterminated')).toMatchObject({
       type: "error",
       error: {
         code: CommandErrorCode.InvalidArgument,
         message: "unterminated quoted string",
       },
     });
-    expect(parser.parse("create rect r1 0 0 10 10 red blue")).toMatchObject({
+    expect(parseDto("create rect r1 0 0 10 10 red blue")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
-    expect(parser.parse("create g g1 in")).toMatchObject({
+    expect(parseDto("create g g1 in")).toMatchObject({
       type: "error",
       error: { code: CommandErrorCode.InvalidArgument },
     });
   });
 
   it("解析错误结果是可序列化 DTO，而不是异常实例", () => {
-    const result = parser.parse("unknown");
+    const parseResult = parser.parse("unknown");
+    const result = parseResult.toCommandParseResultDto();
+
+    expect(parseResult).toBeInstanceOf(CommandParseErrorResult);
 
     expect(result).toEqual({
       type: "error",

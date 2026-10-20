@@ -1,16 +1,24 @@
 import { describe, expect, it } from "vitest";
 import type { CommandParser } from "../../src/cli/CommandParser";
-import type { CommandParseResult } from "../../src/cli/CommandParseResult";
 import type { InputReader } from "../../src/cli/InputReader";
 import type { OutputWriter } from "../../src/cli/OutputWriter";
 import { Repl } from "../../src/cli/Repl";
+import { CommandParseEmptyResult } from "../../src/cli/results/CommandParseEmptyResult";
+import { CommandParseErrorResult } from "../../src/cli/results/CommandParseErrorResult";
+import type { CommandParseResult } from "../../src/cli/results/CommandParseResult";
+import { CommandParseSuccessResult } from "../../src/cli/results/CommandParseSuccessResult";
 import type { Command } from "../../src/protocol/Command";
-import type { CommandResult } from "../../src/protocol/CommandResult";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
+import { CommandExecutionError } from "../../src/protocol/errors/CommandExecutionError";
+import { CommandParseError } from "../../src/protocol/errors/CommandParseError";
 import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
 import { ExitCommand } from "../../src/protocol/commands/ExitCommand";
 import { HelpCommand } from "../../src/protocol/commands/HelpCommand";
 import { MoveCommand } from "../../src/protocol/commands/MoveCommand";
+import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
+import { CommandExitResult } from "../../src/protocol/results/CommandExitResult";
+import type { CommandResult } from "../../src/protocol/results/CommandResult";
+import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
 import type { Executor } from "../../src/core/Executor";
 
 class FakeInputReader implements InputReader {
@@ -41,7 +49,7 @@ class FakeCommandParser implements CommandParser {
 
   public parse(line: string): CommandParseResult {
     this.inputs.push(line);
-    return this.results.shift() ?? { type: "empty" };
+    return this.results.shift() ?? new CommandParseEmptyResult();
   }
 }
 
@@ -58,7 +66,7 @@ class FakeExecutor implements Executor {
       throw result;
     }
 
-    return result ?? { type: "exit" };
+    return result ?? new CommandExitResult();
   }
 }
 
@@ -74,9 +82,9 @@ describe("Repl", () => {
       width: 10,
       height: 10,
     });
-    const parser = new FakeCommandParser([{ type: "command", command }]);
+    const parser = new FakeCommandParser([new CommandParseSuccessResult(command)]);
     const executor = new FakeExecutor([
-      { type: "success", message: "rect#r1 created" },
+      new CommandSuccessResult("rect#r1 created"),
     ]);
 
     await new Repl(input, output, parser, executor).run();
@@ -92,8 +100,8 @@ describe("Repl", () => {
     const input = new FakeInputReader(["", "# comment", null]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      { type: "empty" },
-      { type: "empty" },
+      new CommandParseEmptyResult(),
+      new CommandParseEmptyResult(),
     ]);
     const executor = new FakeExecutor([]);
 
@@ -108,16 +116,15 @@ describe("Repl", () => {
     const input = new FakeInputReader(["bad", "help", null]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      {
-        type: "error",
-        error: {
-          code: CommandErrorCode.InvalidCommand,
-          message: "unknown command: bad",
-        },
-      },
-      { type: "command", command: new HelpCommand() },
+      new CommandParseErrorResult(
+        new CommandParseError(
+          CommandErrorCode.InvalidCommand,
+          "unknown command: bad",
+        ),
+      ),
+      new CommandParseSuccessResult(new HelpCommand()),
     ]);
-    const executor = new FakeExecutor([{ type: "success", message: "help text" }]);
+    const executor = new FakeExecutor([new CommandSuccessResult("help text")]);
 
     await new Repl(input, output, parser, executor).run();
 
@@ -128,18 +135,17 @@ describe("Repl", () => {
     const input = new FakeInputReader(["move r1 1 1", "help", null]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      { type: "command", command: new MoveCommand("r1", 1, 1) },
-      { type: "command", command: new HelpCommand() },
+      new CommandParseSuccessResult(new MoveCommand("r1", 1, 1)),
+      new CommandParseSuccessResult(new HelpCommand()),
     ]);
     const executor = new FakeExecutor([
-      {
-        type: "error",
-        error: {
-          code: CommandErrorCode.ShapeNotFound,
-          message: "no such shape: r1",
-        },
-      },
-      { type: "success", message: "help text" },
+      new CommandErrorResult(
+        new CommandExecutionError(
+          CommandErrorCode.ShapeNotFound,
+          "no such shape: r1",
+        ),
+      ),
+      new CommandSuccessResult("help text"),
     ]);
 
     await new Repl(input, output, parser, executor).run();
@@ -151,9 +157,9 @@ describe("Repl", () => {
     const input = new FakeInputReader(["exit", "unread"]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      { type: "command", command: new ExitCommand() },
+      new CommandParseSuccessResult(new ExitCommand()),
     ]);
-    const executor = new FakeExecutor([{ type: "exit" }]);
+    const executor = new FakeExecutor([new CommandExitResult()]);
 
     await new Repl(input, output, parser, executor).run();
 
@@ -167,12 +173,12 @@ describe("Repl", () => {
     const input = new FakeInputReader(["first", "second", null]);
     const output = new FakeOutputWriter();
     const parser = new FakeCommandParser([
-      { type: "command", command: new HelpCommand() },
-      { type: "command", command: new HelpCommand() },
+      new CommandParseSuccessResult(new HelpCommand()),
+      new CommandParseSuccessResult(new HelpCommand()),
     ]);
     const executor = new FakeExecutor([
       new Error("temporary failure"),
-      { type: "success", message: "recovered" },
+      new CommandSuccessResult("recovered"),
     ]);
 
     await new Repl(input, output, parser, executor).run();
