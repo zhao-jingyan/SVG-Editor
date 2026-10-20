@@ -1,0 +1,15 @@
+export type CommandErrorCode =
+  | "invalid-command"
+  | "invalid-argument"
+  | "invalid-number"
+  | "unknown-shape-type"
+  | "unknown-attribute"
+  | "no-document"
+  | "duplicate-id"
+  | "shape-not-found"
+  | "container-not-found"
+  | "not-container"
+  | "invalid-scale"
+  | "io-read"
+  | "io-write"
+  | "history-unavailable";

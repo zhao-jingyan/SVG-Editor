@@ -1,5 +1,6 @@
 import type { InputReader } from "./InputReader";
 import type { OutputWriter } from "./OutputWriter";
+import type { CommandParser } from "./CommandParser";
 import type { Executor } from "../core/Executor";
 
 export class Repl {
@@ -8,6 +9,7 @@ export class Repl {
   public constructor(
     private readonly inputReader: InputReader,
     private readonly outputWriter: OutputWriter,
+    private readonly commandParser: CommandParser,
     private readonly executor: Executor,
   ) {}
 
@@ -20,14 +22,29 @@ export class Repl {
         return;
       }
 
+      const parseResult = this.commandParser.parse(input);
+
+      if (parseResult.type === "empty") {
+        continue;
+      }
+
+      if (parseResult.type === "error") {
+        await this.outputWriter.writeLine(`error: ${parseResult.error.message}`);
+        continue;
+      }
+
       try {
-        const result = await this.executor.execute(input);
+        const result = await this.executor.execute(parseResult.command);
 
         if (result.type === "exit") {
           return;
         }
 
-        await this.outputWriter.writeLine(result.text);
+        if (result.type === "success") {
+          await this.outputWriter.writeLine(result.message);
+        } else {
+          await this.outputWriter.writeLine(`error: ${result.error.message}`);
+        }
       } catch (error: unknown) {
         await this.outputWriter.writeLine(Repl.errorMessage(error));
       }
