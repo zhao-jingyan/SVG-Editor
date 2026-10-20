@@ -1,6 +1,7 @@
 import type { EditableAttribute } from "../EditableAttribute";
+import { CommandErrorCode } from "../errors/CommandErrorCode";
+import { ShapeError } from "../errors/ShapeError";
 import { Shape } from "./Shape";
-import { ShapeError } from "./ShapeError";
 import { ShapeType } from "./ShapeType";
 
 export class GroupShape extends Shape {
@@ -21,14 +22,20 @@ export class GroupShape extends Shape {
 
   public addChild(child: Shape): void {
     if (child === this) {
-      throw new ShapeError("invalid-argument", "cannot add a container to itself");
+      throw new ShapeError(
+        CommandErrorCode.InvalidArgument,
+        "cannot add a container to itself",
+      );
     }
 
     if (
       child.getId() === this.getId() ||
       this.children.some((existing) => existing.getId() === child.getId())
     ) {
-      throw new ShapeError("duplicate-id", `id already exists: ${child.getId()}`);
+      throw new ShapeError(
+        CommandErrorCode.DuplicateId,
+        `id already exists: ${child.getId()}`,
+      );
     }
 
     this.children.push(child);
@@ -70,7 +77,10 @@ export class GroupShape extends Shape {
     value: string | number,
   ): void {
     if (attribute !== "fill" && attribute !== "stroke" && attribute !== "stroke-width") {
-      throw new ShapeError("unknown-attribute", `unknown attribute: ${attribute}`);
+      throw new ShapeError(
+        CommandErrorCode.UnknownAttribute,
+        `unknown attribute: ${attribute}`,
+      );
     }
 
     if (attribute === "stroke-width") {

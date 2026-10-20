@@ -1,5 +1,6 @@
 import type { EditableAttribute } from "../EditableAttribute";
-import { ShapeError } from "./ShapeError";
+import { CommandErrorCode } from "../errors/CommandErrorCode";
+import { ShapeError } from "../errors/ShapeError";
 import { Shape } from "./Shape";
 
 export abstract class StyledShape extends Shape {
@@ -66,6 +67,9 @@ export abstract class StyledShape extends Shape {
   ): string | number | undefined;
 
   protected throwUnknownAttribute(attribute: EditableAttribute): never {
-    throw new ShapeError("unknown-attribute", `unknown attribute: ${attribute}`);
+    throw new ShapeError(
+      CommandErrorCode.UnknownAttribute,
+      `unknown attribute: ${attribute}`,
+    );
   }
 }

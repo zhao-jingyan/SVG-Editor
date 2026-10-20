@@ -1,5 +1,6 @@
 import type { EditableAttribute } from "../EditableAttribute";
-import { ShapeError } from "./ShapeError";
+import { CommandErrorCode } from "../errors/CommandErrorCode";
+import { ShapeError } from "../errors/ShapeError";
 import type { ShapeType } from "./ShapeType";
 
 export abstract class Shape {
@@ -7,7 +8,10 @@ export abstract class Shape {
 
   protected constructor(id: string) {
     if (id.trim().length === 0) {
-      throw new ShapeError("invalid-argument", "shape id must not be empty");
+      throw new ShapeError(
+        CommandErrorCode.InvalidArgument,
+        "shape id must not be empty",
+      );
     }
 
     this.id = id;
@@ -34,7 +38,10 @@ export abstract class Shape {
 
   protected requireFiniteNumber(value: number, label: string): number {
     if (!Number.isFinite(value)) {
-      throw new ShapeError("invalid-number", `invalid number: ${label}`);
+      throw new ShapeError(
+        CommandErrorCode.InvalidNumber,
+        `invalid number: ${label}`,
+      );
     }
 
     return value;
@@ -42,7 +49,10 @@ export abstract class Shape {
 
   protected requirePositiveScaleFactor(factor: number): number {
     if (!Number.isFinite(factor) || factor <= 0) {
-      throw new ShapeError("invalid-scale", "scale factor must be positive");
+      throw new ShapeError(
+        CommandErrorCode.InvalidScale,
+        "scale factor must be positive",
+      );
     }
 
     return factor;
@@ -54,7 +64,7 @@ export abstract class Shape {
   ): number {
     if (typeof value !== "number" || !Number.isFinite(value)) {
       throw new ShapeError(
-        "invalid-argument",
+        CommandErrorCode.InvalidArgument,
         `attribute ${attribute} requires a finite number`,
       );
     }
@@ -68,7 +78,7 @@ export abstract class Shape {
   ): string {
     if (typeof value !== "string") {
       throw new ShapeError(
-        "invalid-argument",
+        CommandErrorCode.InvalidArgument,
         `attribute ${attribute} requires a string`,
       );
     }

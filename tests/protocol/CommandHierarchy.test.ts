@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Command } from "../../src/protocol/Command";
+import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { AddToCommand } from "../../src/protocol/commands/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/CanvasCommand";
 import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
@@ -69,7 +70,7 @@ describe("Command 类层次", () => {
     await expect(new MoveCommand("r1", 10, 20).undo(context)).resolves.toEqual({
       type: "error",
       error: {
-        code: "command-not-implemented",
+        code: CommandErrorCode.CommandNotImplemented,
         message: "undo is not implemented for command: move",
       },
     });

@@ -3,6 +3,7 @@ import { CommandLineParser } from "../../src/cli/CommandLineParser";
 import type { Command } from "../../src/protocol/Command";
 import type { CommandResult } from "../../src/protocol/CommandResult";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
+import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { AddToCommand } from "../../src/protocol/commands/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/CanvasCommand";
 import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
@@ -179,23 +180,23 @@ describe("CommandLineParser", () => {
   it("报告图形工厂的参数错误", () => {
     expect(parser.parse("create hexagon h1 0 0")).toMatchObject({
       type: "error",
-      error: { code: "unknown-shape-type" },
+      error: { code: CommandErrorCode.UnknownShapeType },
     });
     expect(parser.parse("create rect r1 nope 0 10 10")).toMatchObject({
       type: "error",
-      error: { code: "invalid-number" },
+      error: { code: CommandErrorCode.InvalidNumber },
     });
     expect(parser.parse("create circle c1 0 0")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
     expect(parser.parse("create g g1 extra")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
     expect(parser.parse("create rect r1 0 0 10 10 in")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
   });
 
@@ -251,49 +252,69 @@ describe("CommandLineParser", () => {
   it("报告未知命令和元数错误", () => {
     expect(parser.parse("unknown")).toMatchObject({
       type: "error",
-      error: { code: "invalid-command" },
+      error: { code: CommandErrorCode.InvalidCommand },
     });
     expect(parser.parse("init 800")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
     expect(parser.parse("group g1 r1")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
   });
 
   it("报告数字和图形类型错误", () => {
     expect(parser.parse("move r1 abc 10")).toMatchObject({
       type: "error",
-      error: { code: "invalid-number" },
+      error: { code: CommandErrorCode.InvalidNumber },
     });
     expect(parser.parse("create hexagon h1 0 0")).toMatchObject({
       type: "error",
-      error: { code: "unknown-shape-type" },
+      error: { code: CommandErrorCode.UnknownShapeType },
     });
     expect(parser.parse("create rect r1 0 0 10")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
   });
 
   it("报告属性、引号和尾缀错误", () => {
     expect(parser.parse("set r1 opacity 0.5")).toMatchObject({
       type: "error",
-      error: { code: "unknown-attribute" },
+      error: { code: CommandErrorCode.UnknownAttribute },
     });
     expect(parser.parse('create text t1 0 0 "unterminated')).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument", message: "unterminated quoted string" },
+      error: {
+        code: CommandErrorCode.InvalidArgument,
+        message: "unterminated quoted string",
+      },
     });
     expect(parser.parse("create rect r1 0 0 10 10 red blue")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
     expect(parser.parse("create g g1 in")).toMatchObject({
       type: "error",
-      error: { code: "invalid-argument" },
+      error: { code: CommandErrorCode.InvalidArgument },
     });
+  });
+
+  it("解析错误结果是可序列化 DTO，而不是异常实例", () => {
+    const result = parser.parse("unknown");
+
+    expect(result).toEqual({
+      type: "error",
+      error: {
+        code: CommandErrorCode.InvalidCommand,
+        message: "unknown command: unknown",
+      },
+    });
+
+    if (result.type === "error") {
+      expect(result.error).not.toBeInstanceOf(Error);
+      expect(JSON.parse(JSON.stringify(result.error))).toEqual(result.error);
+    }
   });
 });

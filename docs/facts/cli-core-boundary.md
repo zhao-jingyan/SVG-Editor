@@ -2,7 +2,7 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API 和图形领域模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、执行结果和错误码。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型和错误模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、`CommandResult` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
 - `src/core` 存放应用入口端口 `Executor`、临时执行器和 Demo 接收者。当前没有真实 Editor、文档状态或历史栈。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
@@ -11,7 +11,7 @@
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和枚举单独成文件；具体命令放在 `protocol/commands`，图形类与工厂放在 `protocol/shapes`。
+- 每个主要类、接口和枚举单独成文件；具体命令放在 `protocol/commands`，图形类与工厂放在 `protocol/shapes`，共享错误类型放在 `protocol/errors`。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
@@ -31,6 +31,16 @@ export abstract class Command {
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandContext`，不再由 Executor 根据 `type` 分派。
 - `CommandLineParser` 直接实例化具体命令类；命令名 `switch` 是 Lab 允许的命令分发点。
 - `CommandContext` 是命令接收者接口，统一返回 `Promise<CommandResult>`。
+
+## 错误模型
+
+- `ProtocolError` 是继承 `Error` 的抽象基类，封装私有 `CommandErrorCode`，提供 `getCode()` 和 `toCommandErrorDto()`；构造器负责建立错误码与消息不变量。
+- 具体错误按来源分为 `CommandParseError`、`CommandExecutionError` 和 `ShapeError`，三者均位于 `src/protocol/errors` 并继承 `ProtocolError`。
+- `CommandErrorCode` 是封闭枚举，字符串值与既有 CLI 错误码完全一致；枚举成员使用 PascalCase 命名。
+- `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。`CommandResult` 与 `CommandParseResult` 只保存该 DTO，不保存 `Error` 实例，保证结果可序列化。
+- `CommandLineParser` 内部失败抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`parse()` 顶层捕获 `ProtocolError` 并统一转换为 DTO。
+- `Repl` 只输出 `error: <message>`，不暴露错误码；未知异常不属于协议错误时继续向上抛出。
+- 拒绝方案：让 `CommandResult.error` 直接持有 `Error` 实例会破坏边界可序列化性；为每个错误码建立独立类会产生大量只有消息差异的类型。`UndoableCommand.undo` 当前通过 `CommandExecutionError` 返回 `command-not-implemented`。
 
 ## 图形模型
 
@@ -69,6 +79,7 @@ DemoExecutor -> command.execute(context) -> DemoCommandContext
 - 空行和首个非空字符为 `#` 的注释行不创建命令。
 - 解析错误输出 `error: <message>` 后继续循环。
 - `success` 输出其 `message`，`error` 输出 `error: <message>`，`exit` 结束循环。
+- 解析和命令执行错误在边界上均为 `CommandErrorDto`；运行时错误对象不会越过 `CommandLineParser.parse()` 或命令执行结果边界。
 - `ExitCommand.execute` 不调用 Context，直接返回退出结果。
 - `ConsoleInputReader` 使用常驻事件监听和内部队列，能够处理管道一次写入的多行输入。
 
@@ -78,3 +89,4 @@ DemoExecutor -> command.execute(context) -> DemoCommandContext
 - 编辑命令将覆盖 `UndoableCommand.undo`，历史栈只保存 `UndoableCommand` 实例。
 - undo/redo 采用命令自身逆操作，不使用文档快照。
 - 真实 Document、SVG 读写、插件注册表和图形删除归属进入后续阶段。
+- 真实 Core 的 Document、IO、History 错误在实现时继承 `ProtocolError`，并继续通过 `CommandErrorDto` 返回。

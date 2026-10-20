@@ -1,10 +1,11 @@
+import { CommandErrorCode } from "../errors/CommandErrorCode";
+import { ShapeError } from "../errors/ShapeError";
 import { CircleShape } from "./CircleShape";
 import { EllipseShape } from "./EllipseShape";
 import { GroupShape } from "./GroupShape";
 import { LineShape } from "./LineShape";
 import { RectShape } from "./RectShape";
 import type { Shape } from "./Shape";
-import { ShapeError } from "./ShapeError";
 import { TextShape } from "./TextShape";
 
 export class ShapeFactory {
@@ -23,7 +24,10 @@ export class ShapeFactory {
       case "g":
         return this.createGroup(id, args);
       default:
-        throw new ShapeError("unknown-shape-type", `unknown shape type: ${typeName}`);
+        throw new ShapeError(
+          CommandErrorCode.UnknownShapeType,
+          `unknown shape type: ${typeName}`,
+        );
     }
   }
 
@@ -121,7 +125,10 @@ export class ShapeFactory {
     usage: string,
   ): void {
     if (args.length < minimum || args.length > maximum) {
-      throw new ShapeError("invalid-argument", `invalid arguments; usage: ${usage}`);
+      throw new ShapeError(
+        CommandErrorCode.InvalidArgument,
+        `invalid arguments; usage: ${usage}`,
+      );
     }
   }
 
@@ -137,13 +144,16 @@ export class ShapeFactory {
 
   private parseNumber(token: string): number {
     if (token.trim().length === 0) {
-      throw new ShapeError("invalid-number", "empty numeric value");
+      throw new ShapeError(CommandErrorCode.InvalidNumber, "empty numeric value");
     }
 
     const value = Number(token);
 
     if (!Number.isFinite(value)) {
-      throw new ShapeError("invalid-number", `invalid number: ${token}`);
+      throw new ShapeError(
+        CommandErrorCode.InvalidNumber,
+        `invalid number: ${token}`,
+      );
     }
 
     return value;
@@ -156,13 +166,16 @@ export class ShapeFactory {
 
     if (style === "in") {
       throw new ShapeError(
-        "invalid-argument",
+        CommandErrorCode.InvalidArgument,
         "expected 'in <containerId>' at the end of the command",
       );
     }
 
     if (style.trim().length === 0) {
-      throw new ShapeError("invalid-argument", "style value must not be empty");
+      throw new ShapeError(
+        CommandErrorCode.InvalidArgument,
+        "style value must not be empty",
+      );
     }
 
     return style;

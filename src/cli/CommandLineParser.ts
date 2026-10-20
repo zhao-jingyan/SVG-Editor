@@ -1,8 +1,8 @@
-import type { CommandError } from "../protocol/CommandError";
-import type { CommandErrorCode } from "../protocol/CommandErrorCode";
+import { CommandErrorCode } from "../protocol/errors/CommandErrorCode";
+import { CommandParseError } from "../protocol/errors/CommandParseError";
+import { ProtocolError } from "../protocol/errors/ProtocolError";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
 import type { Shape } from "../protocol/shapes/Shape";
-import { ShapeError } from "../protocol/shapes/ShapeError";
 import type { ShapeFactory } from "../protocol/shapes/ShapeFactory";
 import { AddToCommand } from "../protocol/commands/AddToCommand";
 import { CanvasCommand } from "../protocol/commands/CanvasCommand";
@@ -67,19 +67,21 @@ export class CommandLineParser implements CommandParser {
   public constructor(private readonly shapeFactory: ShapeFactory) {}
 
   public parse(line: string): CommandParseResult {
-    const trimmed = line.trim();
+    try {
+      const trimmed = line.trim();
 
-    if (trimmed.length === 0 || trimmed.startsWith("#")) {
-      return { type: "empty" };
+      if (trimmed.length === 0 || trimmed.startsWith("#")) {
+        return { type: "empty" };
+      }
+
+      return this.parseTokens(CommandLineParser.tokenize(trimmed));
+    } catch (error: unknown) {
+      if (error instanceof ProtocolError) {
+        return { type: "error", error: error.toCommandErrorDto() };
+      }
+
+      throw error;
     }
-
-    const tokens = CommandLineParser.tokenize(trimmed);
-
-    if (CommandLineParser.isCommandError(tokens)) {
-      return CommandLineParser.errorResult(tokens);
-    }
-
-    return this.parseTokens(tokens);
   }
 
   private parseTokens(tokens: string[]): CommandParseResult {
@@ -122,7 +124,10 @@ export class CommandLineParser implements CommandParser {
       case "exit":
         return CommandLineParser.parseNoArgumentCommand(tokens);
       default:
-        return CommandLineParser.failure("invalid-command", `unknown command: ${tokens[0]}`);
+        throw new CommandParseError(
+          CommandErrorCode.InvalidCommand,
+          `unknown command: ${tokens[0]}`,
+        );
     }
   }
 
@@ -132,14 +137,10 @@ export class CommandLineParser implements CommandParser {
     }
 
     if (tokens.length !== 3) {
-      return CommandLineParser.invalidArguments("init [width height]");
+      CommandLineParser.invalidArguments("init [width height]");
     }
 
     const dimensions = CommandLineParser.parseNumbers(tokens, 1, 2);
-
-    if (CommandLineParser.isCommandError(dimensions)) {
-      return CommandLineParser.errorResult(dimensions);
-    }
 
     return {
       type: "command",
@@ -149,16 +150,13 @@ export class CommandLineParser implements CommandParser {
 
   private static parseRead(tokens: string[]): CommandParseResult {
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments("read <file.svg>");
+      CommandLineParser.invalidArguments("read <file.svg>");
     }
 
-    const path = CommandLineParser.nonEmptyToken(tokens[1], "file path");
-
-    if (CommandLineParser.isCommandError(path)) {
-      return CommandLineParser.errorResult(path);
-    }
-
-    return { type: "command", command: new ReadCommand(path) };
+    return {
+      type: "command",
+      command: new ReadCommand(CommandLineParser.nonEmptyToken(tokens[1], "file path")),
+    };
   }
 
   private static parseSave(tokens: string[]): CommandParseResult {
@@ -167,16 +165,13 @@ export class CommandLineParser implements CommandParser {
     }
 
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments("save [file.svg]");
+      CommandLineParser.invalidArguments("save [file.svg]");
     }
 
-    const path = CommandLineParser.nonEmptyToken(tokens[1], "file path");
-
-    if (CommandLineParser.isCommandError(path)) {
-      return CommandLineParser.errorResult(path);
-    }
-
-    return { type: "command", command: new SaveCommand(path) };
+    return {
+      type: "command",
+      command: new SaveCommand(CommandLineParser.nonEmptyToken(tokens[1], "file path")),
+    };
   }
 
   private static parseCanvas(tokens: string[]): CommandParseResult {
@@ -185,14 +180,10 @@ export class CommandLineParser implements CommandParser {
     }
 
     if (tokens.length !== 3) {
-      return CommandLineParser.invalidArguments("canvas [width height]");
+      CommandLineParser.invalidArguments("canvas [width height]");
     }
 
     const dimensions = CommandLineParser.parseNumbers(tokens, 1, 2);
-
-    if (CommandLineParser.isCommandError(dimensions)) {
-      return CommandLineParser.errorResult(dimensions);
-    }
 
     return {
       type: "command",
@@ -202,42 +193,25 @@ export class CommandLineParser implements CommandParser {
 
   private parseCreate(tokens: string[]): CommandParseResult {
     if (tokens.length < 3) {
-      return CommandLineParser.invalidArguments(
+      CommandLineParser.invalidArguments(
         "create <type> <id> [params...] [in <containerId>]",
       );
     }
 
     const shapeId = CommandLineParser.nonEmptyToken(tokens[2], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
     const parsedArguments = this.parseCreateArguments(tokens);
+    const shape = this.shapeFactory.create(
+      tokens[1],
+      shapeId,
+      parsedArguments.arguments,
+    );
 
-    if (CommandLineParser.isCommandError(parsedArguments)) {
-      return CommandLineParser.errorResult(parsedArguments);
-    }
-
-    try {
-      const shape = this.shapeFactory.create(
-        tokens[1],
-        shapeId,
-        parsedArguments.arguments,
-      );
-      return this.createResult(shape, parsedArguments.parentId);
-    } catch (error: unknown) {
-      if (error instanceof ShapeError) {
-        return CommandLineParser.failure(error.getCode(), error.message);
-      }
-
-      throw error;
-    }
+    return this.createResult(shape, parsedArguments.parentId);
   }
 
   private parseCreateArguments(
     tokens: string[],
-  ): { arguments: readonly string[]; parentId?: string } | CommandError {
+  ): { arguments: readonly string[]; parentId?: string } {
     const parentKeywordIndex = tokens.length - 2;
 
     if (tokens[parentKeywordIndex] !== "in") {
@@ -248,10 +222,6 @@ export class CommandLineParser implements CommandParser {
       tokens[parentKeywordIndex + 1],
       "container id",
     );
-
-    if (CommandLineParser.isCommandError(parentId)) {
-      return parentId;
-    }
 
     return {
       arguments: tokens.slice(3, parentKeywordIndex),
@@ -265,34 +235,22 @@ export class CommandLineParser implements CommandParser {
 
   private static parseDelete(tokens: string[]): CommandParseResult {
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments("delete <id>");
+      CommandLineParser.invalidArguments("delete <id>");
     }
 
-    const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
-    return { type: "command", command: new DeleteCommand(shapeId) };
+    return {
+      type: "command",
+      command: new DeleteCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
+    };
   }
 
   private static parseMove(tokens: string[]): CommandParseResult {
     if (tokens.length !== 4) {
-      return CommandLineParser.invalidArguments("move <id> <dx> <dy>");
+      CommandLineParser.invalidArguments("move <id> <dx> <dy>");
     }
 
     const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
     const numbers = CommandLineParser.parseNumbers(tokens, 2, 2);
-
-    if (CommandLineParser.isCommandError(numbers)) {
-      return CommandLineParser.errorResult(numbers);
-    }
 
     return {
       type: "command",
@@ -302,38 +260,25 @@ export class CommandLineParser implements CommandParser {
 
   private static parseScale(tokens: string[]): CommandParseResult {
     if (tokens.length !== 3) {
-      return CommandLineParser.invalidArguments("scale <id> <factor>");
+      CommandLineParser.invalidArguments("scale <id> <factor>");
     }
 
     const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
     const factor = CommandLineParser.parseNumber(tokens[2]);
-
-    if (CommandLineParser.isCommandError(factor)) {
-      return CommandLineParser.errorResult(factor);
-    }
 
     return { type: "command", command: new ScaleCommand(shapeId, factor) };
   }
 
   private static parseSet(tokens: string[]): CommandParseResult {
     if (tokens.length !== 4) {
-      return CommandLineParser.invalidArguments("set <id> <attribute> <value>");
+      CommandLineParser.invalidArguments("set <id> <attribute> <value>");
     }
 
     const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
 
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
     if (!CommandLineParser.editableAttributes.has(tokens[2] as EditableAttribute)) {
-      return CommandLineParser.failure(
-        "unknown-attribute",
+      throw new CommandParseError(
+        CommandErrorCode.UnknownAttribute,
         `unknown attribute: ${tokens[2]}`,
       );
     }
@@ -342,13 +287,7 @@ export class CommandLineParser implements CommandParser {
     let value: string | number = tokens[3];
 
     if (CommandLineParser.numericAttributes.has(attribute)) {
-      const parsedValue = CommandLineParser.parseNumber(tokens[3]);
-
-      if (CommandLineParser.isCommandError(parsedValue)) {
-        return CommandLineParser.errorResult(parsedValue);
-      }
-
-      value = parsedValue;
+      value = CommandLineParser.parseNumber(tokens[3]);
     }
 
     return {
@@ -359,25 +298,14 @@ export class CommandLineParser implements CommandParser {
 
   private static parseGroup(tokens: string[]): CommandParseResult {
     if (tokens.length < 4) {
-      return CommandLineParser.invalidArguments("group <newGid> <id1> <id2>...");
+      CommandLineParser.invalidArguments("group <newGid> <id1> <id2>...");
     }
 
     const containerId = CommandLineParser.nonEmptyToken(tokens[1], "container id");
-
-    if (CommandLineParser.isCommandError(containerId)) {
-      return CommandLineParser.errorResult(containerId);
-    }
-
     const memberIds: string[] = [];
 
     for (const token of tokens.slice(2)) {
-      const memberId = CommandLineParser.nonEmptyToken(token, "member id");
-
-      if (CommandLineParser.isCommandError(memberId)) {
-        return CommandLineParser.errorResult(memberId);
-      }
-
-      memberIds.push(memberId);
+      memberIds.push(CommandLineParser.nonEmptyToken(token, "member id"));
     }
 
     return {
@@ -388,34 +316,24 @@ export class CommandLineParser implements CommandParser {
 
   private static parseUngroup(tokens: string[]): CommandParseResult {
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments("ungroup <gid>");
+      CommandLineParser.invalidArguments("ungroup <gid>");
     }
 
-    const containerId = CommandLineParser.nonEmptyToken(tokens[1], "container id");
-
-    if (CommandLineParser.isCommandError(containerId)) {
-      return CommandLineParser.errorResult(containerId);
-    }
-
-    return { type: "command", command: new UngroupCommand(containerId) };
+    return {
+      type: "command",
+      command: new UngroupCommand(
+        CommandLineParser.nonEmptyToken(tokens[1], "container id"),
+      ),
+    };
   }
 
   private static parseAddTo(tokens: string[]): CommandParseResult {
     if (tokens.length !== 3) {
-      return CommandLineParser.invalidArguments("addto <gid> <id>");
+      CommandLineParser.invalidArguments("addto <gid> <id>");
     }
 
     const containerId = CommandLineParser.nonEmptyToken(tokens[1], "container id");
-
-    if (CommandLineParser.isCommandError(containerId)) {
-      return CommandLineParser.errorResult(containerId);
-    }
-
     const shapeId = CommandLineParser.nonEmptyToken(tokens[2], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
 
     return {
       type: "command",
@@ -428,18 +346,15 @@ export class CommandLineParser implements CommandParser {
     position: "front" | "back",
   ): CommandParseResult {
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments(`${tokens[0]} <id>`);
-    }
-
-    const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
+      CommandLineParser.invalidArguments(`${tokens[0]} <id>`);
     }
 
     return {
       type: "command",
-      command: new ReorderCommand(shapeId, position),
+      command: new ReorderCommand(
+        CommandLineParser.nonEmptyToken(tokens[1], "shape id"),
+        position,
+      ),
     };
   }
 
@@ -449,35 +364,29 @@ export class CommandLineParser implements CommandParser {
     }
 
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments("tree [id]");
+      CommandLineParser.invalidArguments("tree [id]");
     }
 
-    const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
-    return { type: "command", command: new TreeCommand(shapeId) };
+    return {
+      type: "command",
+      command: new TreeCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
+    };
   }
 
   private static parseShow(tokens: string[]): CommandParseResult {
     if (tokens.length !== 2) {
-      return CommandLineParser.invalidArguments("show <id>");
+      CommandLineParser.invalidArguments("show <id>");
     }
 
-    const shapeId = CommandLineParser.nonEmptyToken(tokens[1], "shape id");
-
-    if (CommandLineParser.isCommandError(shapeId)) {
-      return CommandLineParser.errorResult(shapeId);
-    }
-
-    return { type: "command", command: new ShowCommand(shapeId) };
+    return {
+      type: "command",
+      command: new ShowCommand(CommandLineParser.nonEmptyToken(tokens[1], "shape id")),
+    };
   }
 
   private static parseNoArgumentCommand(tokens: string[]): CommandParseResult {
     if (tokens.length !== 1) {
-      return CommandLineParser.invalidArguments(tokens[0]);
+      CommandLineParser.invalidArguments(tokens[0]);
     }
 
     switch (tokens[0]) {
@@ -490,7 +399,10 @@ export class CommandLineParser implements CommandParser {
       case "exit":
         return { type: "command", command: new ExitCommand() };
       default:
-        return CommandLineParser.failure("invalid-command", `unknown command: ${tokens[0]}`);
+        throw new CommandParseError(
+          CommandErrorCode.InvalidCommand,
+          `unknown command: ${tokens[0]}`,
+        );
     }
   }
 
@@ -498,73 +410,64 @@ export class CommandLineParser implements CommandParser {
     tokens: string[],
     startIndex: number,
     count: number,
-  ): number[] | CommandError {
+  ): number[] {
     const values: number[] = [];
 
     for (let index = 0; index < count; index += 1) {
       const token = tokens[startIndex + index];
 
       if (token === undefined) {
-        return {
-          code: "invalid-argument",
-          message: `missing numeric argument at position ${startIndex + index + 1}`,
-        };
+        throw new CommandParseError(
+          CommandErrorCode.InvalidArgument,
+          `missing numeric argument at position ${startIndex + index + 1}`,
+        );
       }
 
-      const value = CommandLineParser.parseNumber(token);
-
-      if (CommandLineParser.isCommandError(value)) {
-        return value;
-      }
-
-      values.push(value);
+      values.push(CommandLineParser.parseNumber(token));
     }
 
     return values;
   }
 
-  private static parseNumber(token: string): number | CommandError {
+  private static parseNumber(token: string): number {
     if (token.trim().length === 0) {
-      return { code: "invalid-number", message: "empty numeric value" };
+      throw new CommandParseError(
+        CommandErrorCode.InvalidNumber,
+        "empty numeric value",
+      );
     }
 
     const value = Number(token);
 
     if (!Number.isFinite(value)) {
-      return { code: "invalid-number", message: `invalid number: ${token}` };
+      throw new CommandParseError(
+        CommandErrorCode.InvalidNumber,
+        `invalid number: ${token}`,
+      );
     }
 
     return value;
   }
 
-  private static nonEmptyToken(token: string | undefined, label: string): string | CommandError {
+  private static nonEmptyToken(token: string | undefined, label: string): string {
     if (token === undefined || token.trim().length === 0) {
-      return { code: "invalid-argument", message: `missing ${label}` };
+      throw new CommandParseError(
+        CommandErrorCode.InvalidArgument,
+        `missing ${label}`,
+      );
     }
 
     return token;
   }
 
-  private static invalidArguments(usage: string): CommandParseResult {
-    return CommandLineParser.failure(
-      "invalid-argument",
+  private static invalidArguments(usage: string): never {
+    throw new CommandParseError(
+      CommandErrorCode.InvalidArgument,
       `invalid arguments; usage: ${usage}`,
     );
   }
 
-  private static failure(code: CommandErrorCode, message: string): CommandParseResult {
-    return { type: "error", error: { code, message } };
-  }
-
-  private static errorResult(error: CommandError): CommandParseResult {
-    return { type: "error", error };
-  }
-
-  private static isCommandError(value: unknown): value is CommandError {
-    return typeof value === "object" && value !== null && "code" in value;
-  }
-
-  private static tokenize(input: string): string[] | CommandError {
+  private static tokenize(input: string): string[] {
     const tokens: string[] = [];
     let current = "";
     let inQuotes = false;
@@ -591,7 +494,10 @@ export class CommandLineParser implements CommandParser {
     }
 
     if (inQuotes) {
-      return { code: "invalid-argument", message: "unterminated quoted string" };
+      throw new CommandParseError(
+        CommandErrorCode.InvalidArgument,
+        "unterminated quoted string",
+      );
     }
 
     if (tokenStarted) {

@@ -1,6 +1,6 @@
 import type { CommandErrorCode } from "./CommandErrorCode";
 
-export interface CommandError {
+export interface CommandErrorDto {
   readonly code: CommandErrorCode;
   readonly message: string;
 }

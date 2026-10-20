@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { CommandErrorCode } from "../../src/protocol/CommandErrorCode";
+import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
+import { ShapeError } from "../../src/protocol/errors/ShapeError";
 import { CircleShape } from "../../src/protocol/shapes/CircleShape";
 import { EllipseShape } from "../../src/protocol/shapes/EllipseShape";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 import { LineShape } from "../../src/protocol/shapes/LineShape";
 import { RectShape } from "../../src/protocol/shapes/RectShape";
 import { Shape } from "../../src/protocol/shapes/Shape";
-import { ShapeError } from "../../src/protocol/shapes/ShapeError";
 import { ShapeFactory } from "../../src/protocol/shapes/ShapeFactory";
 import { ShapeType } from "../../src/protocol/shapes/ShapeType";
 import { TextShape } from "../../src/protocol/shapes/TextShape";
@@ -21,6 +22,7 @@ function expectShapeError(action: () => void, code: CommandErrorCode): void {
   }
 
   expect(caught).toBeInstanceOf(ShapeError);
+  expect(caught).toBeInstanceOf(ProtocolError);
 
   if (caught instanceof ShapeError) {
     expect(caught.getCode()).toBe(code);
@@ -66,14 +68,17 @@ describe("Shape 多态模型", () => {
   });
 
   it("构造器拒绝空 id 和非有限数字", () => {
-    expectShapeError(() => new RectShape("", 0, 0, 10, 10), "invalid-argument");
+    expectShapeError(
+      () => new RectShape("", 0, 0, 10, 10),
+      CommandErrorCode.InvalidArgument,
+    );
     expectShapeError(
       () => new CircleShape("c1", Number.NaN, 0, 10),
-      "invalid-number",
+      CommandErrorCode.InvalidNumber,
     );
     expectShapeError(
       () => new TextShape("t1", 0, Number.POSITIVE_INFINITY, "text"),
-      "invalid-number",
+      CommandErrorCode.InvalidNumber,
     );
   });
 
@@ -122,9 +127,9 @@ describe("Shape 多态模型", () => {
   it("非法缩放不修改任何几何状态", () => {
     const rect = new RectShape("r1", 10, 20, 100, 50);
 
-    expectShapeError(() => rect.scale(0), "invalid-scale");
-    expectShapeError(() => rect.scale(-1), "invalid-scale");
-    expectShapeError(() => rect.scale(Number.NaN), "invalid-scale");
+    expectShapeError(() => rect.scale(0), CommandErrorCode.InvalidScale);
+    expectShapeError(() => rect.scale(-1), CommandErrorCode.InvalidScale);
+    expectShapeError(() => rect.scale(Number.NaN), CommandErrorCode.InvalidScale);
     expect(rect.getAttribute("x")).toBe(10);
     expect(rect.getAttribute("width")).toBe(100);
   });
@@ -156,10 +161,22 @@ describe("Shape 多态模型", () => {
     expect(line.getAttribute("stroke")).toBe("blue");
     expect(text.getAttribute("text")).toBe("新标题");
 
-    expectShapeError(() => circle.setAttribute("width", 10), "unknown-attribute");
-    expectShapeError(() => line.setAttribute("text", "line"), "unknown-attribute");
-    expectShapeError(() => text.setAttribute("r", 1), "unknown-attribute");
-    expectShapeError(() => rect.setAttribute("width", "wide"), "invalid-argument");
+    expectShapeError(
+      () => circle.setAttribute("width", 10),
+      CommandErrorCode.UnknownAttribute,
+    );
+    expectShapeError(
+      () => line.setAttribute("text", "line"),
+      CommandErrorCode.UnknownAttribute,
+    );
+    expectShapeError(
+      () => text.setAttribute("r", 1),
+      CommandErrorCode.UnknownAttribute,
+    );
+    expectShapeError(
+      () => rect.setAttribute("width", "wide"),
+      CommandErrorCode.InvalidArgument,
+    );
   });
 
   it("GroupShape 递归执行移动、缩放和样式传播", () => {
@@ -202,11 +219,11 @@ describe("Shape 多态模型", () => {
     expect(group.getChildren()).toEqual([circle]);
     expectShapeError(
       () => group.addChild(new RectShape("c1", 0, 0, 1, 1)),
-      "duplicate-id",
+      CommandErrorCode.DuplicateId,
     );
     expectShapeError(
       () => group.addChild(new RectShape("g1", 0, 0, 1, 1)),
-      "duplicate-id",
+      CommandErrorCode.DuplicateId,
     );
   });
 
@@ -214,12 +231,21 @@ describe("Shape 多态模型", () => {
     const rect = new RectShape("r1", 0, 0, 10, 10);
     const group = new GroupShape("g1", [rect]);
 
-    expectShapeError(() => group.setAttribute("width", 100), "unknown-attribute");
-    expectShapeError(() => group.setAttribute("text", "group"), "unknown-attribute");
-    expectShapeError(() => group.setAttribute("fill", 10), "invalid-argument");
+    expectShapeError(
+      () => group.setAttribute("width", 100),
+      CommandErrorCode.UnknownAttribute,
+    );
+    expectShapeError(
+      () => group.setAttribute("text", "group"),
+      CommandErrorCode.UnknownAttribute,
+    );
+    expectShapeError(
+      () => group.setAttribute("fill", 10),
+      CommandErrorCode.InvalidArgument,
+    );
     expect(rect.getAttribute("width")).toBe(10);
 
-    expectShapeError(() => group.scale(0), "invalid-scale");
+    expectShapeError(() => group.scale(0), CommandErrorCode.InvalidScale);
     expect(rect.getAttribute("width")).toBe(10);
 
     const empty = new GroupShape("empty");
@@ -227,15 +253,21 @@ describe("Shape 多态模型", () => {
   });
 
   it("ShapeFactory 报告未知类型和非法参数", () => {
-    expectShapeError(() => factory.create("hexagon", "h1", []), "unknown-shape-type");
+    expectShapeError(
+      () => factory.create("hexagon", "h1", []),
+      CommandErrorCode.UnknownShapeType,
+    );
     expectShapeError(
       () => factory.create("rect", "r1", ["x", "0", "10", "10"]),
-      "invalid-number",
+      CommandErrorCode.InvalidNumber,
     );
-    expectShapeError(() => factory.create("circle", "c1", ["0", "0"]), "invalid-argument");
+    expectShapeError(
+      () => factory.create("circle", "c1", ["0", "0"]),
+      CommandErrorCode.InvalidArgument,
+    );
     expectShapeError(
       () => factory.create("line", "l1", ["0", "0", "1", "1", ""]),
-      "invalid-argument",
+      CommandErrorCode.InvalidArgument,
     );
   });
 });

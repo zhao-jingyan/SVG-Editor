@@ -6,6 +6,7 @@ import type { OutputWriter } from "../../src/cli/OutputWriter";
 import { Repl } from "../../src/cli/Repl";
 import type { Command } from "../../src/protocol/Command";
 import type { CommandResult } from "../../src/protocol/CommandResult";
+import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { CreateCommand } from "../../src/protocol/commands/CreateCommand";
 import { ExitCommand } from "../../src/protocol/commands/ExitCommand";
 import { HelpCommand } from "../../src/protocol/commands/HelpCommand";
@@ -109,7 +110,10 @@ describe("Repl", () => {
     const parser = new FakeCommandParser([
       {
         type: "error",
-        error: { code: "invalid-command", message: "unknown command: bad" },
+        error: {
+          code: CommandErrorCode.InvalidCommand,
+          message: "unknown command: bad",
+        },
       },
       { type: "command", command: new HelpCommand() },
     ]);
@@ -130,7 +134,10 @@ describe("Repl", () => {
     const executor = new FakeExecutor([
       {
         type: "error",
-        error: { code: "shape-not-found", message: "no such shape: r1" },
+        error: {
+          code: CommandErrorCode.ShapeNotFound,
+          message: "no such shape: r1",
+        },
       },
       { type: "success", message: "help text" },
     ]);
