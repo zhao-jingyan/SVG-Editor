@@ -4,7 +4,7 @@
   "description": "SVG editor CLI boundary prototype",
   "main": "dist/main.js",
   "directories": {
-    "doc": "docs"
+    "doc": "doc"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
