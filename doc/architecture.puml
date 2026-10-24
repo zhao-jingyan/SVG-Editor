@@ -1,0 +1,30 @@
+@startuml
+skinparam shadowing false
+skinparam dpi 144
+skinparam nodesep 55
+skinparam ranksep 70
+skinparam defaultFontName "Arial"
+skinparam linetype ortho
+top to bottom direction
+
+title SVG Editor CLI 分层架构
+
+rectangle "main.ts\n组合根" as Main
+
+rectangle "CLI\nI/O 适配器 · Parser · Session" as Cli
+
+rectangle "Core\nCommandExecutor · Receiver · Document\nHistory · Display · SVG IO" as Core
+
+rectangle "Protocol：共享交换契约\nCommand · Shape · Result / Error\nExecutor / Receiver 端口" as Protocol
+
+Main --> Cli
+Main --> Core
+Cli --> Protocol
+Core --> Protocol
+
+note bottom of Protocol
+  Command 由 CLI Parser 产生，交给 Core Executor / Receiver 执行
+  Protocol 提供跨层交换对象，不是独立执行层
+end note
+
+@enduml

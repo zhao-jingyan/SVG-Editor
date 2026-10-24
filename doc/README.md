@@ -25,7 +25,7 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 | `src/cli/io` | `InputReader` / `OutputWriter` 端口及控制台适配器，仅处理标准输入输出 | 可以使用 Node `readline`；不依赖 Parser、Session 或 Core |
 | `src/cli/parser` | 文本切词、参数校验、命令定义注册、按命令族构造具体 Command，以及解析结果模型 | 仅依赖自身子模块和 `protocol` |
 | `src/cli/session` | REPL 生命周期和单次输入处理；把空输入、解析结果、执行结果和退出状态转换为交互反馈 | 依赖 `cli/io` 端口、`CommandParser` 接口和 `protocol` 的 `Executor` 端口 |
-| `src/protocol/commands` | `Command` / `UndoableCommand` 基类、按语义族组织的具体命令以及局部撤销快照 | 可以依赖 Protocol 内的 receivers、shapes、results、errors |
+| `src/protocol/commands` | 定义 CLI Parser 产出、Core Executor / Receiver 消费的命令对象，以及撤销所需的局部快照；它不是独立执行层 | 可以依赖 Protocol 内的 receivers、shapes、results、errors |
 | `src/protocol/receivers` | 文档、图形、显示、历史四个命令接收能力接口及聚合 `CommandReceiver` | 仅依赖 Protocol 内的命令快照、图形、结果模型 |
 | `src/protocol/execution` | `Executor` 命令执行端口，隔离 CLI Session 与 Core 实现 | 仅依赖 Protocol 的命令与结果模型 |
 | `src/protocol/shapes` | 图形类层次、图形类型与属性值对象、`ShapeFactory` 和 Visitor 扩展点 | 仅依赖 Protocol 内的错误模型 |
@@ -71,125 +71,19 @@ src/
     └── io/                          # SVG Storage、Parser、Writer、辅助对象
 ```
 
-### 2.2 组件图
+### 2.2 分层包图
 
-```plantuml
-@startuml
-skinparam componentStyle rectangle
+![SVG Editor CLI 分层架构](./architecture.png)
 
-package "src/main.ts" {
-  [main 组合根] as Main
-}
+图中只保留包级依赖，模块内部对象已经在 2.1 的模块表中列出。`Protocol` 是 CLI 与 Core 共享的交换契约，不是第三个执行层：CLI 与 Core 都依赖它，它不反向依赖二者。为避免不必要的视觉噪声，组合根直接创建 `ShapeFactory` 的细节不单独画线。
 
-package "src/cli" {
-  package "io" {
-    [InputReader / OutputWriter] as IOPorts
-    [ConsoleInputReader / ConsoleOutputWriter] as ConsoleIO
-  }
-  package "parser" {
-    [CommandParser / CommandLineParser] as ParserEntry
-    package "syntax" {
-      [CommandLineTokenizer / CommandArguments] as ParserSyntax
-    }
-    package "commands" {
-      [CommandDefinitionRegistry] as Registry
-      [Document / Create / Shape / View parser] as FamilyParsers
-    }
-    package "results" {
-      [CommandParseResult 类层次] as ParseResults
-    }
-  }
-  package "session" {
-    [CommandLoop] as Loop
-    [CommandSession] as Session
-  }
-}
+图片由 [`architecture.puml`](./architecture.puml) 预渲染生成，Markdown 查看器不需要安装 PlantUML 插件；修改架构后应同步更新源文件并重新生成 PNG。
 
-package "src/protocol" {
-  [Command / UndoableCommand / 具体命令] as ProtocolCommands
-  [CommandReceiver + 四类能力接口] as ReceiverPorts
-  [Executor] as ExecutorPort
-  [Shape 类层次 / ShapeFactory / ShapeVisitor] as Shapes
-  [CommandResult 类层次 / DTO] as Results
-  [ProtocolError / 错误码 / DTO] as Errors
-}
+### 2.3 命令交换与执行链路
 
-package "src/core" {
-  [CommandExecutor] as ExecutorImpl
-  [EditorCommandReceiver] as ReceiverImpl
-  [EditorDocument / EditorShape / EditorView Receiver] as ReceiverCapabilities
-  [Document / ShapeHierarchy / ShapeIndex] as Document
-  [CommandHistory] as History
-  [ShapeSummaryVisitor / ShapeDetailVisitor / TreeDisplay] as Display
-  [SvgStorage / SvgDocumentParser / SvgDocumentWriter] as CoreIO
-}
+`Command` 不是静态模块块，而是从 CLI Parser 流向 Core Executor / Receiver 的交换对象。命令执行完成后，结果再沿调用链返回 CLI。
 
-package "外部适配" {
-  [Node fs/promises] as Fs
-  [Node readline / stdin / stdout] as Stdio
-  [fast-xml-parser] as XmlParser
-}
-
-Main --> ConsoleIO
-Main --> ParserEntry
-Main --> Loop
-Main --> Session
-Main --> ExecutorImpl
-Main --> ReceiverImpl
-Main --> History
-Main --> Shapes
-
-Loop --> Session
-Loop --> IOPorts
-Session --> IOPorts
-Session --> ParserEntry
-Session --> ExecutorPort
-
-ParserEntry --> ParserSyntax
-ParserEntry --> Registry
-ParserEntry --> ParseResults
-Registry --> FamilyParsers
-Registry --> ProtocolCommands
-FamilyParsers --> ProtocolCommands
-FamilyParsers --> Shapes
-ParserSyntax --> Errors
-ParseResults --> ProtocolCommands
-ParseResults --> Errors
-
-ExecutorImpl --> ExecutorPort
-ExecutorImpl --> ReceiverPorts
-ExecutorImpl --> ProtocolCommands
-ExecutorImpl --> History
-ExecutorImpl --> Results
-ExecutorImpl --> Errors
-
-ReceiverImpl --> ReceiverPorts
-ReceiverImpl --> ReceiverCapabilities
-ReceiverImpl --> History
-ReceiverCapabilities --> Document
-ReceiverCapabilities --> Display
-ReceiverCapabilities --> CoreIO
-ReceiverCapabilities --> Results
-Document --> Shapes
-Document --> Errors
-History --> ProtocolCommands
-History --> ReceiverPorts
-History --> Results
-Display --> Shapes
-CoreIO --> Document
-CoreIO --> Shapes
-CoreIO --> Errors
-
-ConsoleIO --> IOPorts
-ConsoleIO --> Stdio
-CoreIO --> Fs
-CoreIO --> XmlParser
-@enduml
-```
-
-箭头表示编译期依赖，没有画出同模块内的全部类型引用。`src/protocol` 位于中心，但不反向依赖 `cli`、`core` 或运行时适配层。CLI 的终端细节只存在于 `cli/io`；文件系统与 XML 解析细节只存在于 `core/io`。
-
-### 2.3 核心执行链路
+![命令交换与执行结果回流](./command-flow.png)
 
 ```text
 stdin
@@ -213,6 +107,9 @@ stdin
   -> stdout
 ```
 
+- `Command` 是 Protocol 定义的交换对象：CLI Parser 构造它，CLI Session 交给 Core Executor，Executor 再把同一个对象交给 Receiver 执行。
+- `Protocol` 同时定义这次交换所需的 Command、Shape、CommandResult、ProtocolError，以及 Executor / Receiver 端口；它本身不执行命令。
+- 结果沿相反方向返回：Receiver 返回 `CommandResult` 或 `ProtocolError`，Executor 统一转换错误并在需要时记录可撤销命令，Session 转换为边界 DTO 后输出。
 - `CommandLoop` 只负责启动提示、提示符、逐行读取和终止；它不解释解析结果或执行结果。
 - `CommandSession` 负责单次输入的交互策略：空输入不输出，解析错误输出 `error: ...`，成功结果输出消息，退出结果结束会话。
 - `CommandLineParser` 只负责切词、命令查找、参数对象创建和解析结果包装；命令名分派集中在 `CommandDefinitionRegistry`。
@@ -245,6 +142,8 @@ Shape
 └── GroupShape
 ```
 
+这里的 `Command` 是跨层流转的请求对象。CLI Parser 创建它，Core Executor 和 Receiver 消费它；图中的类层次表达对象能力，不代表又增加了一个独立的架构层。
+
 | 模式 | 参与者与代码位置 | 解决的问题 | 替代方案与取舍 |
 |---|---|---|---|
 | Command | `Command` / `UndoableCommand`、语义族具体命令、作为 Invoker 的 `CommandExecutor`、作为 Receiver 的 `CommandReceiver` | 把每条 CLI 命令封装为具有身份和行为的对象；执行与撤销都通过命令对象完成 | 命令联合类型 + Executor 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
@@ -273,7 +172,7 @@ src/core -/-> src/cli
 
 理由：
 
-- `protocol` 是 CLI 与 Core 的共同语言，包含 Command、Shape、Receiver 能力、Result/Error 和 `Executor` 端口。CLI 因此不需要依赖 Core 的具体执行器。
+- `protocol` 是 CLI 与 Core 共同交换对象的定义，包含 Command、Shape、Receiver 能力、Result/Error 和 `Executor` 端口。CLI 因此不需要依赖 Core 的具体执行器，Command 也不构成第三层。
 - `cli/parser` 只向 `protocol` 输出具体 Command 和错误；`cli/session` 只依赖 Parser 接口与 Executor 端口，不接触 Document 或文件系统。
 - `cli/io` 与 `core/io` 分别隔离终端和文件/XML 运行时细节：只有 `ConsoleInputReader` 使用 Node `readline`，只有 `FileSvgStorage` 使用 Node `fs/promises`，`SvgDocumentParser` 使用 `fast-xml-parser`。
 - `core/receiver` 通过 Protocol 的四个能力接口实现聚合 Receiver，再组合 Document、History、Display、SVG IO 等 Core 协作对象。Core 可以依赖 Protocol，但不能反向依赖 CLI。
@@ -297,9 +196,9 @@ src/core -/-> src/cli
 
 ### 6.1 开发策略：先建立行为基线，再重构架构
 
-在提交 `2216dc4 docs: 补充项目交付说明` 之前，开发协作只使用 plan mode：先由 AI 制定并执行计划，按照 TDD 小步推进，由 AI 自行完成测试与实现，最终得到一个行为正确的完整 CLI 实现。这一阶段的首要目标是建立可运行、可验证的业务基线，而不是提前追求理想的目录结构。
+在提交 `2216dc4 docs: 补充项目交付说明` 之前，开发协作只使用 plan mode：先由 AI 制定并执行计划，按照 TDD 小步推进，由 AI 自行完成测试与实现，最终得到一个行为正确的完整 CLI 实现。这一阶段的首要目标是建立可运行、可验证的业务基线，初步要求AI划分了功能模块并运用了设计模式，但不是一次性追求理想的目录结构。
 
-该提交之后，工作重点转向 refactor。重构主要关注目录架构、依赖方向和代码可读性，并持续利用已有测试做回归：先在行为保持不变的前提下调整职责边界与目录，再由测试确认命令行为、文档状态、撤销/重做、SVG 读写和 CLI 交互没有被破坏。对每次结构改动都尽量保持提交范围单一，使问题可以定位和回退。
+该提交之后，工作重点转向 refactor，人工Review代码。重构主要关注目录架构、依赖方向和代码可读性，并持续利用已有测试做回归：先在行为保持不变的前提下调整职责边界与目录，再由测试确认命令行为、文档状态、撤销/重做、SVG 读写和 CLI 交互没有被破坏。对每次结构改动都尽量保持提交范围单一，使问题可以定位和回退。
 
 这种“先形成行为基线，再用测试保护持续重构”的过程，是本项目保证代码质量的信心来源。它让我们可以在已经确认功能正确的基础上改善架构，而不是用架构调整替代对业务行为的验证。
 
@@ -326,6 +225,7 @@ src/core -/-> src/cli
 - 实际目录与本文档树一致：`main -> cli + core + protocol`，`cli -> protocol`，`core -> protocol`，`protocol` 不反向依赖。
 - 抽样检查未发现 `src/protocol` 导入 `src/cli`、`src/core`、Node 或 DOM，也未发现 `src/core` 导入 `src/cli`。
 - 命令名分派只存在于 `CommandDefinitionRegistry`，按类型名选择具体图形的分派只存在于 `ShapeFactory`；显示和 SVG 写出通过 Visitor 多态完成。
+- `Command` 的流转方向是 CLI Parser -> Core Executor -> Core Receiver；Protocol 只提供交换对象和端口契约，不参与执行。
 - `CommandExecutor` 是唯一成功命令记录点；`CommandHistory` 是撤销/重做栈和历史锁的唯一所有者；Document 不持有历史。
 - `EditorCommandReceiver` 只做接口聚合和能力委托，当前文档由 `EditorDocumentCommandReceiver` 持有，图形和显示能力通过该对象取得文档。
 - 组件图、执行链路、设计模式参与者和模块目录均按当前源码核对；`docs/facts/` 记录局部实现事实，`docs/plans/` 记录阶段计划。

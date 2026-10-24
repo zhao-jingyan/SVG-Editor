@@ -39,7 +39,7 @@
 |---|---|---|
 | 将控制循环与单次输入策略分离 | `CommandLoop` 只管理提示、读取和终止；`CommandSession` 管理空输入、错误反馈、执行和退出，避免主循环同时解释业务结果 | commit `f45724f`，[CommandLoop](session/CommandLoop.ts)、[CommandSession](session/CommandSession.ts) |
 | 未知 Executor 异常终止进程 | 业务失败已经通过结果对象表达；未建模异常通常代表程序缺陷，继续循环会掩盖根因 | commit `f45724f`，[main.ts](../main.ts) |
-| 将 Parser 拆成切词、参数、命令构造与集中注册 | 原始入口同时承担词法、全部参数规则和 19 个命令构造，修改任一命令都会扩大审查范围；命令名分派仍保持唯一 | commits `9b6ef88`、`9f23c7b`、`0a53307`、`0691a34`，[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts)、[CommandLineParser](parser/CommandLineParser.ts) |
+| 将 Parser 拆成切词、参数、命令构造与集中注册 | 原始入口同时承担词法、全部参数规则和 20 个命令构造，修改任一命令都会扩大审查范围；命令名分派仍保持唯一 | commits `9b6ef88`、`9f23c7b`、`0a53307`、`0691a34`，[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts)、[CommandLineParser](parser/CommandLineParser.ts) |
 
 ## 相关代码
 

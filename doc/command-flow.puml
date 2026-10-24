@@ -1,0 +1,31 @@
+@startuml
+skinparam shadowing false
+skinparam dpi 144
+skinparam defaultFontName "Arial"
+skinparam sequenceMessageAlign left
+
+title 命令交换与执行结果回流
+
+participant "CLI Parser" as Parser
+participant "CLI Session" as Session
+participant "Core CommandExecutor" as Executor
+participant "Core CommandReceiver" as Receiver
+participant "Document / History / SVG IO" as Domain
+participant "Terminal" as Terminal
+
+Parser -> Session : CommandParseResult（含 Command）
+Session -> Executor : Command
+Executor -> Receiver : command.execute(receiver)
+Receiver -> Domain : 执行、读取或写入
+Domain --> Receiver : 新状态、数据或 ProtocolError
+Receiver --> Executor : CommandResult 或 ProtocolError
+Executor -> Executor : 转换错误、记录可撤销命令
+Executor --> Session : CommandResult
+Session -> Terminal : 输出成功消息或 error 消息
+
+note over Parser, Receiver
+  Protocol 定义本次交换使用的
+  Command、Shape、CommandResult、ProtocolError 和端口契约
+end note
+
+@enduml
