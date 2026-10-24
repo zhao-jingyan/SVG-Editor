@@ -23,7 +23,7 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 | `src/cli/io` | 交互输入输出端口与终端适配器 | 仅自身端口 |
 | `src/cli/parser` | 文本到具体 Command 的解析、CLI 解析结果与边界 DTO | `src/protocol` |
 | `src/cli/session` | 交互循环、单次命令编排、反馈与继续/退出策略 | `src/cli/io`、`src/cli/parser`、`src/protocol` |
-| `src/protocol` | CLI 与 Core 共享的命令模型、图形领域模型、`CommandReceiver` / `Executor` 端口、结果与错误模型、SVG 图形工厂 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
+| `src/protocol` | CLI 与 Core 共享的命令模型、图形领域模型、`CommandReceiver` 能力聚合 / `Executor` 端口、结果与错误模型、SVG 图形工厂 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
 | `src/core` | 应用编排、文档聚合、历史栈、显示格式化、SVG 解析与文件适配 | `src/protocol`；仅 `core/io/FileSvgStorage` 使用 Node `fs/promises` |
 | `scripts/e2e.mjs` | 黑盒端到端回归脚本，启动真实编译产物并检查输出与文件结果 | Node 标准库 |
 | `tests` | 单元测试、协议测试、Core 协作测试与进程级 E2E 测试 | 按测试对象使用相应模块 |
@@ -146,7 +146,7 @@ stdin
 - CommandSession 负责单次输入的交互策略：跳过空输入、反馈解析错误、执行命令、输出结果和决定是否退出。
 - CommandLoop 只负责提示符、逐行读取、会话生命周期与终止，不解释 Parser 或 Executor 的结果。
 - CommandExecutor 负责调用命令、直接记录成功命令与 `ProtocolError -> CommandErrorResult` 转换。
-- EditorSession 负责文档生命周期、IO 与撤销入口；历史栈和历史锁由共享的 `CommandHistory` 管理。
+- EditorSession 是 Receiver 聚合点，把文档、图形、显示和历史能力委托给独立协作对象。
 - 具体命令通过 `CommandReceiver` 操作文档，并通过局部快照实现逆操作。
 - `CommandHistory` 只保存成功执行过的 `UndoableCommand`，不保存整文档快照。
 
@@ -154,7 +154,7 @@ stdin
 
 | 模式 | 参与者与代码位置 | 解决的问题 | 替代方案与取舍 |
 |---|---|---|---|
-| Command | `protocol/commands/Command.ts`、`protocol/commands/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandReceiver` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
+| Command | `protocol/commands/Command.ts`、`protocol/commands/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandReceiver` 聚合四类能力接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
 | Composite | `protocol/shapes/model/Shape.ts`、`protocol/shapes/concrete/GroupShape.ts` 与五种叶子图形 | 容器与叶子统一支持移动、缩放、公共样式设置和删除 | 在 EditorSession/命令层到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
 | Factory | `protocol/shapes/factory/ShapeFactory.ts` | 集中处理“图形类型名 -> 具体 Shape”，统一参数校验 | Parser 内重复 `switch(type)` 会产生第二个类型分派点，不采用 |
 | Visitor | `protocol/shapes/visitor/ShapeVisitor.ts`、各 Shape 的 `accept`；Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示与序列化层按类型分支会增加分派点，不采用 |

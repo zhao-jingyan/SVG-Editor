@@ -2,11 +2,11 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 根目录持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；Protocol 根持有 `CommandReceiver` 接收者接口、`Executor` 入口端口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 根目录持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；Protocol 根持有文档、图形、显示、历史四个能力接收者接口及聚合 `CommandReceiver`、`Executor` 入口端口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`tokenization`、`arguments`、`commands`、`definition`、`results` 分别承载切词、参数校验、命令构造、命令注册和解析结果。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
-- `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorSession`、`CommandHistory`、`document`、`display` 和 `io` 子系统。`EditorSession` 实现命令接收者并持有当前文档，与执行器共享历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
+- `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorSession`、`CommandHistory`、`receiver` 协作对象、`document`、`display` 和 `io` 子系统。`EditorSession` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandReceiver。
 - `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core` 存放 EditorSession、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
 
@@ -120,7 +120,7 @@ src/core -/-> src/cli
 - `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
 - `CommandExecutor` 位于 Core，实现 `Executor`，依赖 `CommandReceiver` 与 `CommandHistory`；调用命令成功时直接记录 `UndoableCommand`，并转换 `ProtocolError`。
-- `EditorSession` 位于 Core，实现 `CommandReceiver`，持有可选 `Document`，并与执行器共享 `CommandHistory`；它不提供历史记录转发方法。
+- `EditorSession` 位于 Core，实现聚合 `CommandReceiver`，把文档、图形和显示操作委托给 `DocumentCommands`、`ShapeCommands`、`ViewCommands`，并与执行器共享 `CommandHistory`；它不持有文档状态或历史记录转发方法。
 - `EditorSession` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
 - `CommandHistory` 由组合根创建并同时注入执行器与 EditorSession，是真正的 Caretaker；命令栈和历史锁均由它维护。
 - `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。

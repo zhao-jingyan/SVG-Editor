@@ -2,301 +2,146 @@ import type { CommandReceiver } from "../protocol/CommandReceiver";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "../protocol/commands/memento/ShapePlacement";
-import { CommandErrorCode } from "../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../protocol/errors/ProtocolError";
 import type { CommandResult } from "../protocol/results/CommandResult";
-import { CommandSuccessResult } from "../protocol/results/outcomes/CommandSuccessResult";
-import { GroupShape } from "../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../protocol/shapes/model/Shape";
-import { HelpText } from "./display/HelpText";
-import { ShapeDetailVisitor } from "./display/ShapeDetailVisitor";
-import { TreeDisplay } from "./display/TreeDisplay";
-import { Document } from "./document/Document";
 import { CommandHistory } from "./history/CommandHistory";
 import { FileSvgStorage } from "./io/FileSvgStorage";
-import { SvgDocumentParser } from "./io/SvgDocumentParser";
-import { SvgDocumentWriter } from "./io/SvgDocumentWriter";
 import type { SvgStorage } from "./io/SvgStorage";
+import { DocumentCommands } from "./receiver/DocumentCommands";
+import { ShapeCommands } from "./receiver/ShapeCommands";
+import { ViewCommands } from "./receiver/ViewCommands";
 
 export class EditorSession implements CommandReceiver {
-  private document?: Document;
-  private currentPath?: string;
-  private readonly helpText: HelpText = new HelpText();
-  private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
-  private readonly treeDisplay: TreeDisplay = new TreeDisplay();
-  private readonly svgDocumentParser: SvgDocumentParser = new SvgDocumentParser();
-  private readonly svgDocumentWriter: SvgDocumentWriter = new SvgDocumentWriter();
+  private readonly documents: DocumentCommands;
+  private readonly shapes: ShapeCommands;
+  private readonly views: ViewCommands;
 
   public constructor(
     private readonly history: CommandHistory = new CommandHistory(),
-    private readonly svgStorage: SvgStorage = new FileSvgStorage(),
-  ) {}
-
-  public async init(width?: number, height?: number): Promise<CommandResult> {
-    const document = new Document(width ?? 800, height ?? 600);
-    this.document = document;
-    this.currentPath = undefined;
-    this.history.clear();
-    this.history.lock();
-    return new CommandSuccessResult(
-      `canvas ${document.getWidth()}x${document.getHeight()} created`,
-    );
+    svgStorage: SvgStorage = new FileSvgStorage(),
+  ) {
+    this.documents = new DocumentCommands(history, svgStorage);
+    this.shapes = new ShapeCommands(this.documents);
+    this.views = new ViewCommands(this.documents);
   }
 
-  public async read(path: string): Promise<CommandResult> {
-    let content: string;
-
-    try {
-      content = await this.svgStorage.read(path);
-    } catch {
-      throw ProtocolError.commandExecution(
-        CommandErrorCode.IoRead,
-        `cannot read file: ${path}`,
-      );
-    }
-
-    const parsed = this.svgDocumentParser.parse(content);
-    this.document = parsed.getDocument();
-    this.currentPath = path;
-    this.history.clear();
-    this.history.lock();
-    return new CommandSuccessResult([
-      ...parsed.getWarnings(),
-      `read ${path} (${parsed.getElementCount()} elements)`,
-    ].join("\n"));
+  public init(width?: number, height?: number): Promise<CommandResult> {
+    return this.documents.init(width, height);
   }
 
-  public async save(path?: string): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const targetPath = path ?? this.currentPath;
-
-    if (targetPath === undefined) {
-      throw ProtocolError.document(
-        CommandErrorCode.InvalidArgument,
-        "save requires a file path",
-      );
-    }
-
-    const content = this.svgDocumentWriter.render(document);
-
-    try {
-      await this.svgStorage.write(targetPath, content);
-    } catch {
-      throw ProtocolError.commandExecution(
-        CommandErrorCode.IoWrite,
-        `cannot write file: ${targetPath}`,
-      );
-    }
-
-    this.currentPath = targetPath;
-    this.history.lock();
-    return new CommandSuccessResult(
-      `saved to ${targetPath} (${this.svgDocumentWriter.countElements(document)} elements)`,
-    );
+  public read(path: string): Promise<CommandResult> {
+    return this.documents.read(path);
   }
 
-  public async canvas(width?: number, height?: number): Promise<CommandResult> {
-    const document = this.requireDocument();
-
-    if (width === undefined && height === undefined) {
-      return new CommandSuccessResult(
-        `canvas ${document.getWidth()}x${document.getHeight()}`,
-      );
-    }
-
-    if (width === undefined || height === undefined) {
-      throw ProtocolError.document(
-        CommandErrorCode.InvalidArgument,
-        "canvas requires both width and height",
-      );
-    }
-
-    document.resize(width, height);
-    this.history.lock();
-    return new CommandSuccessResult(
-      `canvas ${document.getWidth()}x${document.getHeight()} resized`,
-    );
+  public save(path?: string): Promise<CommandResult> {
+    return this.documents.save(path);
   }
 
-  public async createShape(
+  public canvas(width?: number, height?: number): Promise<CommandResult> {
+    return this.documents.canvas(width, height);
+  }
+
+  public createShape(
     shape: Shape,
     parentId?: string,
   ): Promise<CommandResult> {
-    this.requireDocument().addShape(shape, parentId);
-    const suffix = parentId === undefined ? "" : ` in g#${parentId}`;
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} created${suffix}`,
-    );
+    return this.shapes.createShape(shape, parentId);
   }
 
-  public async deleteShape(shapeId: string): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    document.deleteShape(shapeId);
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} deleted`,
-    );
+  public deleteShape(shapeId: string): Promise<CommandResult> {
+    return this.shapes.deleteShape(shapeId);
   }
 
-  public async moveShape(
+  public moveShape(
     shapeId: string,
     dx: number,
     dy: number,
   ): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    document.moveShape(shapeId, dx, dy);
-    const position = shape.getPosition();
-
-    if (position !== undefined) {
-      return new CommandSuccessResult(
-        `${shape.getType()}#${shape.getId()} moved to (${position.getX()},${position.getY()})`,
-      );
-    }
-
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} moved by (${dx},${dy})`,
-    );
+    return this.shapes.moveShape(shapeId, dx, dy);
   }
 
-  public async scaleShape(
+  public scaleShape(
     shapeId: string,
     factor: number,
   ): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    document.scaleShape(shapeId, factor);
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} scaled by ${factor}`,
-    );
+    return this.shapes.scaleShape(shapeId, factor);
   }
 
-  public async setAttribute(
+  public setAttribute(
     shapeId: string,
     attribute: EditableAttribute,
     value: string | number,
   ): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    document.setAttribute(shapeId, attribute, value);
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} updated: ${attribute}=${this.formatValue(value)}`,
-    );
+    return this.shapes.setAttribute(shapeId, attribute, value);
   }
 
-  public async groupShapes(
+  public groupShapes(
     containerId: string,
     memberIds: readonly string[],
   ): Promise<CommandResult> {
-    this.requireDocument().groupShapes(containerId, memberIds);
-    return new CommandSuccessResult(
-      `g#${containerId} created with ${memberIds.length} children`,
-    );
+    return this.shapes.groupShapes(containerId, memberIds);
   }
 
-  public async ungroupShapes(containerId: string): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const container = document.getShape(containerId);
-    const childCount = container instanceof GroupShape
-      ? container.getChildren().length
-      : 0;
-    document.ungroupShapes(containerId);
-    return new CommandSuccessResult(
-      `g#${containerId} ungrouped into ${childCount} children`,
-    );
+  public ungroupShapes(containerId: string): Promise<CommandResult> {
+    return this.shapes.ungroupShapes(containerId);
   }
 
-  public async addToContainer(
+  public addToContainer(
     containerId: string,
     shapeId: string,
   ): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    document.addToContainer(containerId, shapeId);
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} added to g#${containerId}`,
-    );
+    return this.shapes.addToContainer(containerId, shapeId);
   }
 
-  public async reorderShape(
+  public reorderShape(
     shapeId: string,
     position: "front" | "back",
   ): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    document.reorderShape(shapeId, position);
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} moved to ${position}`,
-    );
+    return this.shapes.reorderShape(shapeId, position);
   }
 
   public capturePlacement(shapeId: string): ShapePlacement {
-    return this.requireDocument().capturePlacement(shapeId);
+    return this.shapes.capturePlacement(shapeId);
   }
 
   public restorePlacements(placements: readonly ShapePlacement[]): void {
-    this.requireDocument().restorePlacements(placements);
+    this.shapes.restorePlacements(placements);
   }
 
   public restoreGroup(placement: ShapePlacement): void {
-    this.requireDocument().restoreGroup(placement);
+    this.shapes.restoreGroup(placement);
   }
 
   public captureAttribute(
     shapeId: string,
     attribute: EditableAttribute,
   ): ShapeAttributeSnapshot {
-    return this.requireDocument().captureAttribute(shapeId, attribute);
+    return this.shapes.captureAttribute(shapeId, attribute);
   }
 
   public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {
-    this.requireDocument().restoreAttribute(snapshot);
+    this.shapes.restoreAttribute(snapshot);
   }
 
-  public async tree(shapeId?: string): Promise<CommandResult> {
-    return new CommandSuccessResult(
-      this.treeDisplay.render(this.requireDocument(), shapeId),
-    );
+  public tree(shapeId?: string): Promise<CommandResult> {
+    return this.views.tree(shapeId);
   }
 
-  public async show(shapeId: string): Promise<CommandResult> {
-    const document = this.requireDocument();
-    const shape = document.getShape(shapeId);
-    const parentId = document.getParentId(shapeId);
-    const parentLabel = parentId === undefined ? "svg" : `g#${parentId}`;
-    const lines = [
-      `${shape.getType()}#${shape.getId()}  parent=${parentLabel}`,
-      ...shape.accept(this.shapeDetailVisitor).map((line) => `  ${line}`),
-    ];
-    return new CommandSuccessResult(lines.join("\n"));
+  public show(shapeId: string): Promise<CommandResult> {
+    return this.views.show(shapeId);
   }
 
-  public async help(): Promise<CommandResult> {
-    return new CommandSuccessResult(this.helpText.render());
+  public help(): Promise<CommandResult> {
+    return this.views.help();
   }
 
-  public async undo(): Promise<CommandResult> {
-    this.requireDocument();
+  public undo(): Promise<CommandResult> {
+    this.documents.requireDocument();
     return this.history.undo(this);
   }
 
-  public async redo(): Promise<CommandResult> {
-    this.requireDocument();
+  public redo(): Promise<CommandResult> {
+    this.documents.requireDocument();
     return this.history.redo(this);
-  }
-
-  private requireDocument(): Document {
-    if (this.document === undefined) {
-      throw ProtocolError.document(
-        CommandErrorCode.NoDocument,
-        "no document. use 'init' or 'read' first",
-      );
-    }
-
-    return this.document;
-  }
-
-  private formatValue(value: string | number): string {
-    return typeof value === "string" ? `"${value}"` : `${value}`;
   }
 }
