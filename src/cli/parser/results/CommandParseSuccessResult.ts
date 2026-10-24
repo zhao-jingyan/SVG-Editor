@@ -1,6 +1,8 @@
-import type { Command } from "../../protocol/Command";
-import { CommandParseResult } from "./CommandParseResult";
-import type { CommandParseResultDto } from "./CommandParseResultDto";
+import type { Command } from "../../../protocol/Command";
+import {
+  CommandParseResult,
+  type CommandParseResultDto,
+} from "./CommandParseResult";
 
 export class CommandParseSuccessResult extends CommandParseResult {
   private readonly command: Command;

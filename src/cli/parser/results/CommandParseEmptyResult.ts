@@ -1,5 +1,7 @@
-import { CommandParseResult } from "./CommandParseResult";
-import type { CommandParseResultDto } from "./CommandParseResultDto";
+import {
+  CommandParseResult,
+  type CommandParseResultDto,
+} from "./CommandParseResult";
 
 export class CommandParseEmptyResult extends CommandParseResult {
   public toCommandParseResultDto(): CommandParseResultDto {
