@@ -1,6 +1,6 @@
-import { CreateCommand } from "../../../../protocol/commands/CreateCommand";
-import type { ShapeFactory } from "../../../../protocol/shapes/ShapeFactory";
-import type { CommandArguments } from "../../syntax/CommandArguments";
+import { CreateCommand } from "../../../../../protocol/commands/CreateCommand";
+import type { ShapeFactory } from "../../../../../protocol/shapes/ShapeFactory";
+import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**
  * 构造 create 命令并解析可选的 in 尾缀。

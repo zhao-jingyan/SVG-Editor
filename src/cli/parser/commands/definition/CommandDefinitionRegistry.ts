@@ -2,10 +2,10 @@ import type { Command } from "../../../../protocol/Command";
 import type { ShapeFactory } from "../../../../protocol/shapes/ShapeFactory";
 import type { CommandArguments } from "../../syntax/CommandArguments";
 import type { CommandDefinition } from "./CommandDefinition";
-import { DocumentCommandParser } from "../document/DocumentCommandParser";
-import { CreateCommandParser } from "../shape/CreateCommandParser";
-import { ShapeCommandParser } from "../shape/ShapeCommandParser";
-import { ViewCommandParser } from "../view/ViewCommandParser";
+import { DocumentCommandParser } from "../CommandsParser/doc/DocumentCommandParser";
+import { CreateCommandParser } from "../CommandsParser/shape/CreateCommandParser";
+import { ShapeCommandParser } from "../CommandsParser/shape/ShapeCommandParser";
+import { ViewCommandParser } from "../CommandsParser/view/ViewCommandParser";
 
 /**
  * 集中维护命令名与参数构造器的唯一映射。

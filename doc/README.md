@@ -53,7 +53,9 @@ package "src/cli" {
       package "definition" {
         [CommandDefinitionRegistry] as Registry
       }
-      [Command family parsers] as CommandParsers
+      package "CommandsParser" {
+        [doc / shape / view parsers] as CommandParsers
+      }
     }
     package "results" {
       [CommandParseResult hierarchy] as ParseResults

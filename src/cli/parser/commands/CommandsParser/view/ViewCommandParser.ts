@@ -1,10 +1,10 @@
-import { ExitCommand } from "../../../../protocol/commands/ExitCommand";
-import { HelpCommand } from "../../../../protocol/commands/HelpCommand";
-import { RedoCommand } from "../../../../protocol/commands/RedoCommand";
-import { ShowCommand } from "../../../../protocol/commands/ShowCommand";
-import { TreeCommand } from "../../../../protocol/commands/TreeCommand";
-import { UndoCommand } from "../../../../protocol/commands/UndoCommand";
-import type { CommandArguments } from "../../syntax/CommandArguments";
+import { ExitCommand } from "../../../../../protocol/commands/ExitCommand";
+import { HelpCommand } from "../../../../../protocol/commands/HelpCommand";
+import { RedoCommand } from "../../../../../protocol/commands/RedoCommand";
+import { ShowCommand } from "../../../../../protocol/commands/ShowCommand";
+import { TreeCommand } from "../../../../../protocol/commands/TreeCommand";
+import { UndoCommand } from "../../../../../protocol/commands/UndoCommand";
+import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**
  * 构造显示、历史和会话命令。

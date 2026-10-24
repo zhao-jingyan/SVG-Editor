@@ -1,15 +1,15 @@
-import { AddToCommand } from "../../../../protocol/commands/AddToCommand";
-import { DeleteCommand } from "../../../../protocol/commands/DeleteCommand";
-import { GroupCommand } from "../../../../protocol/commands/GroupCommand";
-import { MoveCommand } from "../../../../protocol/commands/MoveCommand";
-import { ReorderCommand } from "../../../../protocol/commands/ReorderCommand";
-import { ScaleCommand } from "../../../../protocol/commands/ScaleCommand";
-import { SetCommand } from "../../../../protocol/commands/SetCommand";
-import { UngroupCommand } from "../../../../protocol/commands/UngroupCommand";
-import { CommandErrorCode } from "../../../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../../protocol/errors/CommandParseError";
-import type { EditableAttribute } from "../../../../protocol/EditableAttribute";
-import type { CommandArguments } from "../../syntax/CommandArguments";
+import { AddToCommand } from "../../../../../protocol/commands/AddToCommand";
+import { DeleteCommand } from "../../../../../protocol/commands/DeleteCommand";
+import { GroupCommand } from "../../../../../protocol/commands/GroupCommand";
+import { MoveCommand } from "../../../../../protocol/commands/MoveCommand";
+import { ReorderCommand } from "../../../../../protocol/commands/ReorderCommand";
+import { ScaleCommand } from "../../../../../protocol/commands/ScaleCommand";
+import { SetCommand } from "../../../../../protocol/commands/SetCommand";
+import { UngroupCommand } from "../../../../../protocol/commands/UngroupCommand";
+import { CommandErrorCode } from "../../../../../protocol/errors/CommandErrorCode";
+import { CommandParseError } from "../../../../../protocol/errors/CommandParseError";
+import type { EditableAttribute } from "../../../../../protocol/EditableAttribute";
+import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**
  * 构造除 create 以外的图形编辑命令。

@@ -24,13 +24,14 @@ src/cli
 │   │   ├── definition
 │   │   │   ├── CommandDefinition.ts
 │   │   │   └── CommandDefinitionRegistry.ts
-│   │   ├── document
-│   │   │   └── DocumentCommandParser.ts
-│   │   ├── shape
-│   │   │   ├── CreateCommandParser.ts
-│   │   │   └── ShapeCommandParser.ts
-│   │   └── view
-│   │       └── ViewCommandParser.ts
+│   │   └── CommandsParser
+│   │       ├── doc
+│   │       │   └── DocumentCommandParser.ts
+│   │       ├── shape
+│   │       │   ├── CreateCommandParser.ts
+│   │       │   └── ShapeCommandParser.ts
+│   │       └── view
+│   │           └── ViewCommandParser.ts
 │   ├── results
 │   │   ├── CommandParseEmptyResult.ts
 │   │   ├── CommandParseErrorResult.ts
