@@ -1,7 +1,7 @@
 import type { Command } from "../protocol/commands/Command";
 import { ProtocolError } from "../protocol/errors/ProtocolError";
 import type { Executor } from "../protocol/Executor";
-import { CommandErrorResult } from "../protocol/results/CommandErrorResult";
+import { CommandErrorResult } from "../protocol/results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../protocol/results/CommandResult";
 import { EditorContext } from "./EditorContext";
 

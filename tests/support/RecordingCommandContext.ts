@@ -3,7 +3,7 @@ import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
 import { ShapeAttributeSnapshot } from "../../src/protocol/commands/memento/ShapeAttributeSnapshot";
 import { ShapePlacement } from "../../src/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
+import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 import type { Shape } from "../../src/protocol/shapes/Shape";
 import { ShapeType } from "../../src/protocol/shapes/ShapeType";

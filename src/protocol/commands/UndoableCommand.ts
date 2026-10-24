@@ -2,7 +2,7 @@ import { Command } from "./Command";
 import type { CommandContext } from "../CommandContext";
 import { CommandErrorCode } from "../errors/CommandErrorCode";
 import { CommandExecutionError } from "../errors/command/CommandExecutionError";
-import { CommandErrorResult } from "../results/CommandErrorResult";
+import { CommandErrorResult } from "../results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../results/CommandResult";
 
 export abstract class UndoableCommand extends Command {

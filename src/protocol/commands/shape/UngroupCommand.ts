@@ -1,4 +1,4 @@
-import { CommandSuccessResult } from "../../results/CommandSuccessResult";
+import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapePlacement } from "../memento/ShapePlacement";
 import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";

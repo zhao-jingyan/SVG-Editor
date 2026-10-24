@@ -49,7 +49,7 @@ src/cli
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形类与工厂放在 `protocol/shapes`，结果类放在 `protocol/results`，错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
+- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形类与工厂放在 `protocol/shapes`，结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
@@ -74,9 +74,9 @@ export abstract class Command {
 
 ## 结果模型
 
-- `CommandResult` 是抽象基类，定义 `isSuccess()` 和 `toCommandResultDto()`；具体结果为 `CommandSuccessResult`、`CommandErrorResult` 和 `CommandExitResult`。
+- `CommandResult` 是根目录的抽象基类，定义 `isSuccess()` 和 `toCommandResultDto()`；具体结果为 `outcomes` 下的 `CommandSuccessResult`、`CommandErrorResult` 和 `CommandExitResult`。
 - `CommandErrorResult` 持有 `ProtocolError` 运行时对象，在转换为 `CommandResultDto` 时才生成 `CommandErrorDto`。
-- `CommandResultDto` 是协议层边界结果 DTO，保持 `success/error/exit` 三种结构和既有字段名。
+- `CommandResultDto` 位于 `results/dto`，保持 `success/error/exit` 三种结构和既有字段名。
 - CLI 解析结果同样采用类层次：`CommandParseResult` 抽象基类，具体为 `CommandParseSuccessResult`、`CommandParseEmptyResult` 和 `CommandParseErrorResult`。
 - `CommandParseResultDto` 是 CLI 边界结果 DTO，与抽象基类放在同一文件，携带已解析的 `Command`，不承诺可持久化。
 - `CommandSession` 在解析和命令执行边界调用 `toCommandParseResultDto()` / `toCommandResultDto()`，之后只消费 DTO 判别字段。

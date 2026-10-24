@@ -10,9 +10,9 @@ import { ExitCommand } from "../../../src/protocol/commands/session/ExitCommand"
 import { HelpCommand } from "../../../src/protocol/commands/view/HelpCommand";
 import type { Command } from "../../../src/protocol/commands/Command";
 import type { Executor } from "../../../src/protocol/Executor";
-import { CommandExitResult } from "../../../src/protocol/results/CommandExitResult";
+import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../../src/protocol/results/CommandSuccessResult";
+import { CommandSuccessResult } from "../../../src/protocol/results/outcomes/CommandSuccessResult";
 
 class FakeInputReader implements InputReader {
   public readCount = 0;

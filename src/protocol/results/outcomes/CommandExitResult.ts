@@ -1,5 +1,5 @@
-import { CommandResult } from "./CommandResult";
-import type { CommandResultDto } from "./CommandResultDto";
+import { CommandResult } from "../CommandResult";
+import type { CommandResultDto } from "../dto/CommandResultDto";
 
 export class CommandExitResult extends CommandResult {
   public isSuccess(): boolean {

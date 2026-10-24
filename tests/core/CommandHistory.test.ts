@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { CommandHistory } from "../../src/core/history/CommandHistory";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
-import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
-import { CommandExitResult } from "../../src/protocol/results/CommandExitResult";
-import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
+import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
+import { CommandExitResult } from "../../src/protocol/results/outcomes/CommandExitResult";
+import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
 import { RecordingCommandContext } from "../support/RecordingCommandContext";
 import { ScriptedUndoableCommand } from "../support/ScriptedUndoableCommand";
 

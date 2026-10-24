@@ -14,10 +14,10 @@ import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode"
 import { CommandExecutionError } from "../../../src/protocol/errors/command/CommandExecutionError";
 import { CommandParseError } from "../../../src/protocol/errors/command/CommandParseError";
 import type { Executor } from "../../../src/protocol/Executor";
-import { CommandErrorResult } from "../../../src/protocol/results/CommandErrorResult";
-import { CommandExitResult } from "../../../src/protocol/results/CommandExitResult";
+import { CommandErrorResult } from "../../../src/protocol/results/outcomes/CommandErrorResult";
+import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../../src/protocol/results/CommandSuccessResult";
+import { CommandSuccessResult } from "../../../src/protocol/results/outcomes/CommandSuccessResult";
 
 class FakeOutputWriter implements OutputWriter {
   public readonly lines: string[] = [];

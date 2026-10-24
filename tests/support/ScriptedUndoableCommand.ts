@@ -1,7 +1,7 @@
 import type { CommandContext } from "../../src/protocol/CommandContext";
 import type { CommandType } from "../../src/protocol/commands/CommandType";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
+import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
 import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
 
 type ScriptedOutcome = CommandResult | Error;

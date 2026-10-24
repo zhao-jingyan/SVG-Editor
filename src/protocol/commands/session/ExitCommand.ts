@@ -1,6 +1,6 @@
 import { Command } from "../Command";
 import type { CommandContext } from "../../CommandContext";
-import { CommandExitResult } from "../../results/CommandExitResult";
+import { CommandExitResult } from "../../results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class ExitCommand extends Command {

@@ -33,7 +33,7 @@ import { RectShape } from "../../../src/protocol/shapes/RectShape";
 import { Shape } from "../../../src/protocol/shapes/Shape";
 import { ShapeFactory } from "../../../src/protocol/shapes/ShapeFactory";
 import { TextShape } from "../../../src/protocol/shapes/TextShape";
-import { CommandExitResult } from "../../../src/protocol/results/CommandExitResult";
+import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";
 import {
   RecordingCommandContext,

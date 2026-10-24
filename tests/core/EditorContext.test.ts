@@ -21,7 +21,7 @@ import { TreeCommand } from "../../src/protocol/commands/view/TreeCommand";
 import { UndoCommand } from "../../src/protocol/commands/history/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/shape/UngroupCommand";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
+import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CircleShape } from "../../src/protocol/shapes/CircleShape";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";

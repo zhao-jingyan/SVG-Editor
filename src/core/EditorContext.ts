@@ -7,7 +7,7 @@ import { CommandErrorCode } from "../protocol/errors/CommandErrorCode";
 import { CommandExecutionError } from "../protocol/errors/command/CommandExecutionError";
 import { DocumentError } from "../protocol/errors/domain/DocumentError";
 import type { CommandResult } from "../protocol/results/CommandResult";
-import { CommandSuccessResult } from "../protocol/results/CommandSuccessResult";
+import { CommandSuccessResult } from "../protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../protocol/shapes/GroupShape";
 import type { Shape } from "../protocol/shapes/Shape";
 import { UndoableCommand } from "../protocol/commands/UndoableCommand";
