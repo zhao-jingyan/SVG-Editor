@@ -6,7 +6,7 @@
 - Document 持有画布宽高和私有 `ShapeHierarchy`；查询与结构编辑统一委托给层级对象。
 - `ShapeHierarchy` 持有根级有序图形并实现增删、容器嵌套、group/ungroup、归属迁移和同级重排。
 - `ShapeIndex` 维护全局 `id -> Shape` 索引、`id -> parent GroupShape` 映射、子树注册/注销和祖先判断。
-- Document 不直接维护索引或编辑规则，也不持有文件路径、历史栈、SVG DOM、命令结果或 IO 状态；这些属于 `DocumentCommands` 或 IO 边界。
+- Document 不直接维护索引或编辑规则，也不持有文件路径、历史栈、SVG DOM、命令结果或 IO 状态；这些属于 `DocumentManager` 或 IO 边界。
 
 ## 存储模型
 
@@ -62,7 +62,7 @@
 ## 后续模式边界
 
 - Command：具体命令封装请求，Document 只是接收者背后的领域模型；Document 不保存历史栈。
-- DocumentCommands：持有当前 Document，并把编辑与恢复操作委托给 Document；EditorReceiver 只聚合并转发命令接收者能力。
+- DocumentManager：持有当前 Document，并把编辑与恢复操作委托给 Document；EditorReceiver 只聚合并转发命令接收者能力。
 - Factory：`ShapeFactory` 负责从文本或 SVG 创建具体 Shape，Document 只接收已创建对象。
 - Memento：具体命令通过 `ShapePlacement` 和 `ShapeAttributeSnapshot` 保存局部状态、父节点、顺序和旧属性值；Document 不保存整文档快照。
 - Visitor：`tree/show` 已通过 `Shape.accept` 使用外部显示 Visitor；后续 `save` 等按图形类型输出的算法继续复用该扩展点，Document 只提供树查询，不实现 Visitor。

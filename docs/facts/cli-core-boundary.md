@@ -141,8 +141,8 @@ src/core -/-> src/cli
 - `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
 - `CommandExecutor` 位于 Core，实现 `Executor`，依赖 `CommandReceiver` 与 `CommandHistory`；调用命令成功时直接记录 `UndoableCommand`，并转换 `ProtocolError`。
-- `EditorReceiver` 位于 Core，实现聚合 `CommandReceiver`，把文档、图形和显示操作委托给 `DocumentCommands`、`ShapeCommands`、`ViewCommands`，并与执行器共享 `CommandHistory`；它不持有文档状态或历史记录转发方法。
-- `DocumentCommands` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
+- `EditorReceiver` 位于 Core，实现聚合 `CommandReceiver`，把文档、图形和显示操作委托给 `DocumentManager`、`ShapeEditor`、`EditorView`，并与执行器共享 `CommandHistory`；它不持有文档状态或历史记录转发方法。
+- `DocumentManager` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
 - `CommandHistory` 由组合根创建并同时注入执行器与 EditorReceiver，是真正的 Caretaker；命令栈和历史锁均由它维护。
 - `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。
 

@@ -6,16 +6,16 @@ import type { CommandResult } from "../../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../protocol/shapes/model/Shape";
-import type { DocumentCommands } from "./DocumentCommands";
+import type { DocumentManager } from "./DocumentManager";
 
-export class ShapeCommands implements ShapeCommandReceiver {
-  public constructor(private readonly documents: DocumentCommands) {}
+export class ShapeEditor implements ShapeCommandReceiver {
+  public constructor(private readonly documentManager: DocumentManager) {}
 
   public async createShape(
     shape: Shape,
     parentId?: string,
   ): Promise<CommandResult> {
-    this.documents.requireDocument().addShape(shape, parentId);
+    this.documentManager.requireDocument().addShape(shape, parentId);
     const suffix = parentId === undefined ? "" : ` in g#${parentId}`;
     return new CommandSuccessResult(
       `${shape.getType()}#${shape.getId()} created${suffix}`,
@@ -23,7 +23,7 @@ export class ShapeCommands implements ShapeCommandReceiver {
   }
 
   public async deleteShape(shapeId: string): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const shape = document.getShape(shapeId);
     document.deleteShape(shapeId);
     return new CommandSuccessResult(
@@ -36,7 +36,7 @@ export class ShapeCommands implements ShapeCommandReceiver {
     dx: number,
     dy: number,
   ): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const shape = document.getShape(shapeId);
     document.moveShape(shapeId, dx, dy);
     const position = shape.getPosition();
@@ -56,7 +56,7 @@ export class ShapeCommands implements ShapeCommandReceiver {
     shapeId: string,
     factor: number,
   ): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const shape = document.getShape(shapeId);
     document.scaleShape(shapeId, factor);
     return new CommandSuccessResult(
@@ -69,7 +69,7 @@ export class ShapeCommands implements ShapeCommandReceiver {
     attribute: EditableAttribute,
     value: string | number,
   ): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const shape = document.getShape(shapeId);
     document.setAttribute(shapeId, attribute, value);
     return new CommandSuccessResult(
@@ -81,14 +81,14 @@ export class ShapeCommands implements ShapeCommandReceiver {
     containerId: string,
     memberIds: readonly string[],
   ): Promise<CommandResult> {
-    this.documents.requireDocument().groupShapes(containerId, memberIds);
+    this.documentManager.requireDocument().groupShapes(containerId, memberIds);
     return new CommandSuccessResult(
       `g#${containerId} created with ${memberIds.length} children`,
     );
   }
 
   public async ungroupShapes(containerId: string): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const container = document.getShape(containerId);
     const childCount = container instanceof GroupShape
       ? container.getChildren().length
@@ -103,7 +103,7 @@ export class ShapeCommands implements ShapeCommandReceiver {
     containerId: string,
     shapeId: string,
   ): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const shape = document.getShape(shapeId);
     document.addToContainer(containerId, shapeId);
     return new CommandSuccessResult(
@@ -115,7 +115,7 @@ export class ShapeCommands implements ShapeCommandReceiver {
     shapeId: string,
     position: "front" | "back",
   ): Promise<CommandResult> {
-    const document = this.documents.requireDocument();
+    const document = this.documentManager.requireDocument();
     const shape = document.getShape(shapeId);
     document.reorderShape(shapeId, position);
     return new CommandSuccessResult(
@@ -124,26 +124,26 @@ export class ShapeCommands implements ShapeCommandReceiver {
   }
 
   public capturePlacement(shapeId: string): ShapePlacement {
-    return this.documents.requireDocument().capturePlacement(shapeId);
+    return this.documentManager.requireDocument().capturePlacement(shapeId);
   }
 
   public restorePlacements(placements: readonly ShapePlacement[]): void {
-    this.documents.requireDocument().restorePlacements(placements);
+    this.documentManager.requireDocument().restorePlacements(placements);
   }
 
   public restoreGroup(placement: ShapePlacement): void {
-    this.documents.requireDocument().restoreGroup(placement);
+    this.documentManager.requireDocument().restoreGroup(placement);
   }
 
   public captureAttribute(
     shapeId: string,
     attribute: EditableAttribute,
   ): ShapeAttributeSnapshot {
-    return this.documents.requireDocument().captureAttribute(shapeId, attribute);
+    return this.documentManager.requireDocument().captureAttribute(shapeId, attribute);
   }
 
   public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {
-    this.documents.requireDocument().restoreAttribute(snapshot);
+    this.documentManager.requireDocument().restoreAttribute(snapshot);
   }
 
   private formatValue(value: string | number): string {

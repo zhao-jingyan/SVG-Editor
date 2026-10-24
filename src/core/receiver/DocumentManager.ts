@@ -10,7 +10,7 @@ import { SvgDocumentParser } from "../io/SvgDocumentParser";
 import { SvgDocumentWriter } from "../io/SvgDocumentWriter";
 import type { SvgStorage } from "../io/SvgStorage";
 
-export class DocumentCommands implements DocumentCommandReceiver {
+export class DocumentManager implements DocumentCommandReceiver {
   private document?: Document;
   private currentPath?: string;
   private readonly svgDocumentParser: SvgDocumentParser = new SvgDocumentParser();

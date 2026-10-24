@@ -47,7 +47,7 @@ Shape（抽象类：id、类型和统一行为）
 
 ## 当前边界
 
-- `Document` 位于 `src/core/document`，通过 `ShapeHierarchy` 和 `ShapeIndex` 实现全局 id 唯一性、父子归属、顺序、容器操作、删除子树和精确位置恢复；已通过 `ShapeCommands` 接入命令执行；SVG 读写实现受控子集，尚未覆盖复杂转换与无损保留。
+- `Document` 位于 `src/core/document`，通过 `ShapeHierarchy` 和 `ShapeIndex` 实现全局 id 唯一性、父子归属、顺序、容器操作、删除子树和精确位置恢复；已通过 `ShapeEditor` 接入命令执行；SVG 读写实现受控子集，尚未覆盖复杂转换与无损保留。
 - 属性撤销使用 `ShapeAttributeSnapshot` 捕获叶子旧值，不依赖整文档快照；容器公共样式恢复由各叶子分别执行。
 - 空组设置公共样式是合法空操作；未来 Document 若采用组样式继承，需要重新评估该语义。
 - `box` 插件与 ShapeProvider 注册表属于后续阶段；SVG 解析复用 `ShapeFactory`，写出复用 `SvgShapeWriter` Visitor，文件逻辑不进入 Shape 领域对象。

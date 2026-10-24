@@ -7,49 +7,49 @@ import type { Shape } from "../../protocol/shapes/model/Shape";
 import { CommandHistory } from "../history/CommandHistory";
 import { FileSvgStorage } from "../io/FileSvgStorage";
 import type { SvgStorage } from "../io/SvgStorage";
-import { DocumentCommands } from "./DocumentCommands";
-import { ShapeCommands } from "./ShapeCommands";
-import { ViewCommands } from "./ViewCommands";
+import { DocumentManager } from "./DocumentManager";
+import { EditorView } from "./EditorView";
+import { ShapeEditor } from "./ShapeEditor";
 
 export class EditorReceiver implements CommandReceiver {
-  private readonly documents: DocumentCommands;
-  private readonly shapes: ShapeCommands;
-  private readonly views: ViewCommands;
+  private readonly documentManager: DocumentManager;
+  private readonly shapeEditor: ShapeEditor;
+  private readonly editorView: EditorView;
 
   public constructor(
     private readonly history: CommandHistory = new CommandHistory(),
     svgStorage: SvgStorage = new FileSvgStorage(),
   ) {
-    this.documents = new DocumentCommands(history, svgStorage);
-    this.shapes = new ShapeCommands(this.documents);
-    this.views = new ViewCommands(this.documents);
+    this.documentManager = new DocumentManager(history, svgStorage);
+    this.shapeEditor = new ShapeEditor(this.documentManager);
+    this.editorView = new EditorView(this.documentManager);
   }
 
   public init(width?: number, height?: number): Promise<CommandResult> {
-    return this.documents.init(width, height);
+    return this.documentManager.init(width, height);
   }
 
   public read(path: string): Promise<CommandResult> {
-    return this.documents.read(path);
+    return this.documentManager.read(path);
   }
 
   public save(path?: string): Promise<CommandResult> {
-    return this.documents.save(path);
+    return this.documentManager.save(path);
   }
 
   public canvas(width?: number, height?: number): Promise<CommandResult> {
-    return this.documents.canvas(width, height);
+    return this.documentManager.canvas(width, height);
   }
 
   public createShape(
     shape: Shape,
     parentId?: string,
   ): Promise<CommandResult> {
-    return this.shapes.createShape(shape, parentId);
+    return this.shapeEditor.createShape(shape, parentId);
   }
 
   public deleteShape(shapeId: string): Promise<CommandResult> {
-    return this.shapes.deleteShape(shapeId);
+    return this.shapeEditor.deleteShape(shapeId);
   }
 
   public moveShape(
@@ -57,14 +57,14 @@ export class EditorReceiver implements CommandReceiver {
     dx: number,
     dy: number,
   ): Promise<CommandResult> {
-    return this.shapes.moveShape(shapeId, dx, dy);
+    return this.shapeEditor.moveShape(shapeId, dx, dy);
   }
 
   public scaleShape(
     shapeId: string,
     factor: number,
   ): Promise<CommandResult> {
-    return this.shapes.scaleShape(shapeId, factor);
+    return this.shapeEditor.scaleShape(shapeId, factor);
   }
 
   public setAttribute(
@@ -72,76 +72,76 @@ export class EditorReceiver implements CommandReceiver {
     attribute: EditableAttribute,
     value: string | number,
   ): Promise<CommandResult> {
-    return this.shapes.setAttribute(shapeId, attribute, value);
+    return this.shapeEditor.setAttribute(shapeId, attribute, value);
   }
 
   public groupShapes(
     containerId: string,
     memberIds: readonly string[],
   ): Promise<CommandResult> {
-    return this.shapes.groupShapes(containerId, memberIds);
+    return this.shapeEditor.groupShapes(containerId, memberIds);
   }
 
   public ungroupShapes(containerId: string): Promise<CommandResult> {
-    return this.shapes.ungroupShapes(containerId);
+    return this.shapeEditor.ungroupShapes(containerId);
   }
 
   public addToContainer(
     containerId: string,
     shapeId: string,
   ): Promise<CommandResult> {
-    return this.shapes.addToContainer(containerId, shapeId);
+    return this.shapeEditor.addToContainer(containerId, shapeId);
   }
 
   public reorderShape(
     shapeId: string,
     position: "front" | "back",
   ): Promise<CommandResult> {
-    return this.shapes.reorderShape(shapeId, position);
+    return this.shapeEditor.reorderShape(shapeId, position);
   }
 
   public capturePlacement(shapeId: string): ShapePlacement {
-    return this.shapes.capturePlacement(shapeId);
+    return this.shapeEditor.capturePlacement(shapeId);
   }
 
   public restorePlacements(placements: readonly ShapePlacement[]): void {
-    this.shapes.restorePlacements(placements);
+    this.shapeEditor.restorePlacements(placements);
   }
 
   public restoreGroup(placement: ShapePlacement): void {
-    this.shapes.restoreGroup(placement);
+    this.shapeEditor.restoreGroup(placement);
   }
 
   public captureAttribute(
     shapeId: string,
     attribute: EditableAttribute,
   ): ShapeAttributeSnapshot {
-    return this.shapes.captureAttribute(shapeId, attribute);
+    return this.shapeEditor.captureAttribute(shapeId, attribute);
   }
 
   public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {
-    this.shapes.restoreAttribute(snapshot);
+    this.shapeEditor.restoreAttribute(snapshot);
   }
 
   public tree(shapeId?: string): Promise<CommandResult> {
-    return this.views.tree(shapeId);
+    return this.editorView.tree(shapeId);
   }
 
   public show(shapeId: string): Promise<CommandResult> {
-    return this.views.show(shapeId);
+    return this.editorView.show(shapeId);
   }
 
   public help(): Promise<CommandResult> {
-    return this.views.help();
+    return this.editorView.help();
   }
 
   public undo(): Promise<CommandResult> {
-    this.documents.requireDocument();
+    this.documentManager.requireDocument();
     return this.history.undo(this);
   }
 
   public redo(): Promise<CommandResult> {
-    this.documents.requireDocument();
+    this.documentManager.requireDocument();
     return this.history.redo(this);
   }
 }

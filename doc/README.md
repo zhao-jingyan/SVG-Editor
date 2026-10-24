@@ -161,7 +161,7 @@ stdin
 | Memento | `protocol/commands/memento/ShapePlacement.ts`、`ShapeAttributeSnapshot.ts` | 命令保存局部结构与属性状态，实现精确撤销而不复制整份文档 | 整文档快照简单但内存和一致性成本高，也掩盖了命令的真实逆操作，不采用 |
 | Facade | `core/receiver/EditorReceiver.ts`、`core/document/Document.ts` | 对 CLI 隐藏文档、历史、错误转换和树/索引协作细节 | 让 CommandSession 直接持有 Document/History 会把应用编排推入 UI 层，不采用 |
 | Caretaker | `core/history/CommandHistory.ts` | 管理 undo/redo 两栈，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
-| Adapter / Port | `core/io/SvgStorage.ts` 与 `FileSvgStorage.ts` | 隔离文件系统，允许测试注入内存存储 | 在 DocumentCommands 内直接调用 `fs` 会破坏可测试性和依赖边界，不采用 |
+| Adapter / Port | `core/io/SvgStorage.ts` 与 `FileSvgStorage.ts` | 隔离文件系统，允许测试注入内存存储 | 在 DocumentManager 内直接调用 `fs` 会破坏可测试性和依赖边界，不采用 |
 
 按名字分派只集中在两个位置：`CommandDefinitionRegistry` 的命令名分派和 `ShapeFactory` 的图形类型分派。其他业务流程依赖多态行为，不按 `type` 字段扩散分支。
 
