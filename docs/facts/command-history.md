@@ -13,7 +13,7 @@
 - `undo` 先窥视 undo 栈顶并调用 `command.undo(context)`；只有 `CommandResult.isSuccess()` 为真时才弹栈并压入 redo 栈。
 - `redo` 先窥视 redo 栈顶并重新调用 `command.execute(context)`；只有成功时才弹栈并压回 undo 栈。
 - 失败结果和异常都不会改变两个栈，避免一次失败导致命令丢失。
-- 空历史返回 `CommandErrorResult(CommandExecutionError(HistoryUnavailable, ...))`。
+- 空历史返回 `CommandErrorResult`，其中错误为 `ErrorSource.CommandExecution` 来源的 `ProtocolError(HistoryUnavailable, ...)`。
 - `clear` 同时清空 undo 与 redo 栈。
 - `EditorContext` 在 `init` 后清空历史并锁定 undo/redo；`canvas` 修改尺寸只锁定历史；下一次成功编辑重新解锁。
 - 历史锁定时 undo/redo 返回 `HistoryUnavailable`，消息为 `undo not allowed after io command`。

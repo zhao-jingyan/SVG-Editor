@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
+import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
 import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
 import { CommandExitResult } from "../../src/protocol/results/outcomes/CommandExitResult";
 import { CommandResult } from "../../src/protocol/results/CommandResult";
@@ -11,7 +11,7 @@ describe("CommandResult 类层次", () => {
     const results: CommandResult[] = [
       new CommandSuccessResult("created"),
       new CommandErrorResult(
-        new CommandExecutionError(CommandErrorCode.ShapeNotFound, "missing"),
+        ProtocolError.commandExecution(CommandErrorCode.ShapeNotFound, "missing"),
       ),
       new CommandExitResult(),
     ];
@@ -36,7 +36,7 @@ describe("CommandResult 类层次", () => {
   });
 
   it("错误结果持有 ProtocolError 并生成可序列化 DTO", () => {
-    const error = new CommandExecutionError(
+    const error = ProtocolError.commandExecution(
       CommandErrorCode.CommandNotImplemented,
       "undo is not implemented",
     );

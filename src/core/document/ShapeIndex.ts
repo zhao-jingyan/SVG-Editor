@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/domain/DocumentError";
+import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../protocol/shapes/model/Shape";
 
@@ -20,7 +20,7 @@ export class ShapeIndex {
 
     for (const id of ids) {
       if (this.shapesById.has(id)) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.DuplicateId,
           `id already exists: ${id}`,
         );
@@ -70,7 +70,7 @@ export class ShapeIndex {
     const shapeId = shape.getId();
 
     if (ids.has(shapeId)) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.DuplicateId,
         `id already exists: ${shapeId}`,
       );

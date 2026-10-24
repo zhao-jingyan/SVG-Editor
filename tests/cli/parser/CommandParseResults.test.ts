@@ -5,7 +5,7 @@ import { CommandParseResult } from "../../../src/cli/parser/results/CommandParse
 import { CommandParseSuccessResult } from "../../../src/cli/parser/results/CommandParseSuccessResult";
 import { HelpCommand } from "../../../src/protocol/commands/view/HelpCommand";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../src/protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 
 describe("CommandParseResult 类层次", () => {
   it("具体解析结果共享基类并转换为边界 DTO", () => {
@@ -14,7 +14,7 @@ describe("CommandParseResult 类层次", () => {
       new CommandParseSuccessResult(command),
       new CommandParseEmptyResult(),
       new CommandParseErrorResult(
-        new CommandParseError(CommandErrorCode.InvalidCommand, "unknown"),
+        ProtocolError.commandParse(CommandErrorCode.InvalidCommand, "unknown"),
       ),
     ];
 
@@ -35,7 +35,7 @@ describe("CommandParseResult 类层次", () => {
 
   it("解析错误 DTO 可序列化", () => {
     const result = new CommandParseErrorResult(
-      new CommandParseError(CommandErrorCode.InvalidArgument, "bad input"),
+      ProtocolError.commandParse(CommandErrorCode.InvalidArgument, "bad input"),
     );
     const dto = result.toCommandParseResultDto();
 

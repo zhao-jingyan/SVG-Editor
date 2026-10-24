@@ -1,6 +1,6 @@
 import type { EditableAttribute } from "../../EditableAttribute";
 import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { ShapeError } from "../../errors/domain/ShapeError";
+import { ProtocolError } from "../../errors/ProtocolError";
 import { Shape } from "../model/Shape";
 import type { ShapePosition } from "../model/ShapePosition";
 import { ShapeType } from "../model/ShapeType";
@@ -36,7 +36,7 @@ export class GroupShape extends Shape {
 
   public insertChild(child: Shape, index: number): void {
     if (child === this) {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.InvalidArgument,
         "cannot add a container to itself",
       );
@@ -46,14 +46,14 @@ export class GroupShape extends Shape {
       child.getId() === this.getId() ||
       this.children.some((existing) => existing.getId() === child.getId())
     ) {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.DuplicateId,
         `id already exists: ${child.getId()}`,
       );
     }
 
     if (!Number.isInteger(index) || index < 0 || index > this.children.length) {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.InvalidArgument,
         `invalid child index: ${index}`,
       );
@@ -98,7 +98,7 @@ export class GroupShape extends Shape {
     value: string | number,
   ): void {
     if (attribute !== "fill" && attribute !== "stroke" && attribute !== "stroke-width") {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.UnknownAttribute,
         `unknown attribute: ${attribute}`,
       );
@@ -117,7 +117,7 @@ export class GroupShape extends Shape {
 
   public override unsetAttribute(attribute: EditableAttribute): void {
     if (attribute !== "fill" && attribute !== "stroke" && attribute !== "stroke-width") {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.UnknownAttribute,
         `unknown attribute: ${attribute}`,
       );

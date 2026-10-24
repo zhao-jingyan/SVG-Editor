@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/domain/DocumentError";
+import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../protocol/shapes/model/Shape";
@@ -80,7 +80,7 @@ export class ShapeHierarchy {
     const shape = placement.getShape();
 
     if (!(shape instanceof GroupShape)) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.NotContainer,
         `not a container: ${shape.getId()}`,
       );
@@ -89,7 +89,7 @@ export class ShapeHierarchy {
     const parentId = placement.getParentId();
 
     if (parentId === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `cannot restore top-level container: ${shape.getId()}`,
       );
@@ -98,7 +98,7 @@ export class ShapeHierarchy {
     const parent = this.requireContainer(parentId);
 
     if (this.findShape(shape.getId()) !== undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.DuplicateId,
         `id already exists: ${shape.getId()}`,
       );
@@ -108,14 +108,14 @@ export class ShapeHierarchy {
 
     for (const child of children) {
       if (this.shapeIndex.getParent(child.getId()) !== parent) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `group children no longer share the original parent: ${shape.getId()}`,
         );
       }
 
       if (this.shapeIndex.isAncestor(child.getId(), parentId)) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `cannot restore a container into its own descendant: ${shape.getId()}`,
         );
@@ -159,7 +159,7 @@ export class ShapeHierarchy {
 
   public groupShapes(containerId: string, memberIds: readonly string[]): void {
     if (memberIds.length < 2) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         "group requires at least two members",
       );
@@ -169,7 +169,7 @@ export class ShapeHierarchy {
 
     for (const memberId of memberIds) {
       if (memberIdSet.has(memberId)) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `duplicate member id: ${memberId}`,
         );
@@ -181,7 +181,7 @@ export class ShapeHierarchy {
     const members = memberIds.map((memberId) => this.requireShape(memberId));
 
     if (this.shapeIndex.findShape(containerId) !== undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.DuplicateId,
         `id already exists: ${containerId}`,
       );
@@ -224,7 +224,7 @@ export class ShapeHierarchy {
     const container = this.requireShape(containerId);
 
     if (!(container instanceof GroupShape)) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.NotContainer,
         `not a container: ${containerId}`,
       );
@@ -233,7 +233,7 @@ export class ShapeHierarchy {
     const parent = this.shapeIndex.getParent(containerId);
 
     if (parent === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `cannot ungroup top-level container: ${containerId}`,
       );
@@ -261,7 +261,7 @@ export class ShapeHierarchy {
       shape.getId() === containerId ||
       this.shapeIndex.isAncestor(shapeId, containerId)
     ) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `cannot add a container into its own descendant: ${shapeId}`,
       );
@@ -336,7 +336,7 @@ export class ShapeHierarchy {
           this.shapeIndex.isAncestor(shape.getId(), targetParent.getId())
         )
       ) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `cannot move a container into its own descendant: ${shape.getId()}`,
         );
@@ -355,7 +355,7 @@ export class ShapeHierarchy {
       targetParent !== undefined &&
       this.containsShape(shape, targetParent.getId())
     ) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `cannot move a container into its own descendant: ${shape.getId()}`,
       );
@@ -383,7 +383,7 @@ export class ShapeHierarchy {
       const shapeId = shape.getId();
 
       if (placedShapeIds.has(shapeId)) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `duplicate placement: ${shapeId}`,
         );
@@ -411,7 +411,7 @@ export class ShapeHierarchy {
           targetParent !== undefined &&
           this.shapeIndex.isAncestor(shapeId, targetParent.getId())
         ) {
-          throw new DocumentError(
+          throw ProtocolError.document(
             CommandErrorCode.InvalidArgument,
             `cannot move a container into its own descendant: ${shapeId}`,
           );
@@ -426,7 +426,7 @@ export class ShapeHierarchy {
         targetParent !== undefined &&
         this.containsShape(shape, targetParent.getId())
       ) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `cannot move a container into its own descendant: ${shapeId}`,
         );
@@ -464,7 +464,7 @@ export class ShapeHierarchy {
 
   private requireInsertionIndex(length: number, index: number): void {
     if (!Number.isInteger(index) || index < 0 || index > length) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid child index: ${index}`,
       );
@@ -489,7 +489,7 @@ export class ShapeHierarchy {
     const shape = this.findShape(shapeId);
 
     if (shape === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.ShapeNotFound,
         `no such shape: ${shapeId}`,
       );
@@ -502,14 +502,14 @@ export class ShapeHierarchy {
     const shape = this.findShape(containerId);
 
     if (shape === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.ContainerNotFound,
         `no such container: ${containerId}`,
       );
     }
 
     if (!(shape instanceof GroupShape)) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.NotContainer,
         `not a container: ${containerId}`,
       );
@@ -524,7 +524,7 @@ export class ShapeHierarchy {
       .findIndex((child) => child.getId() === shapeId);
 
     if (index < 0) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.ShapeNotFound,
         `no such shape: ${shapeId}`,
       );
@@ -565,8 +565,8 @@ export class ShapeHierarchy {
     }
   }
 
-  private groupDescendantError(containerId: string): DocumentError {
-    return new DocumentError(
+  private groupDescendantError(containerId: string): ProtocolError {
+    return ProtocolError.document(
       CommandErrorCode.InvalidArgument,
       `cannot group a container into its own descendant: ${containerId}`,
     );

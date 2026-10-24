@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { ShapeError } from "../../errors/domain/ShapeError";
+import { ProtocolError } from "../../errors/ProtocolError";
 import { CircleShape } from "../concrete/CircleShape";
 import { EllipseShape } from "../concrete/EllipseShape";
 import { GroupShape } from "../concrete/GroupShape";
@@ -24,7 +24,7 @@ export class ShapeFactory {
       case "g":
         return this.createGroup(id, args);
       default:
-        throw new ShapeError(
+        throw ProtocolError.shape(
           CommandErrorCode.UnknownShapeType,
           `unknown shape type: ${typeName} (is the plugin loaded?)`,
         );
@@ -125,7 +125,7 @@ export class ShapeFactory {
     usage: string,
   ): void {
     if (args.length < minimum || args.length > maximum) {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.InvalidArgument,
         `invalid arguments; usage: ${usage}`,
       );
@@ -144,13 +144,13 @@ export class ShapeFactory {
 
   private parseNumber(token: string): number {
     if (token.trim().length === 0) {
-      throw new ShapeError(CommandErrorCode.InvalidNumber, "empty numeric value");
+      throw ProtocolError.shape(CommandErrorCode.InvalidNumber, "empty numeric value");
     }
 
     const value = Number(token);
 
     if (!Number.isFinite(value)) {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.InvalidNumber,
         `invalid number: ${token}`,
       );
@@ -165,14 +165,14 @@ export class ShapeFactory {
     }
 
     if (style === "in") {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.InvalidArgument,
         "expected 'in <containerId>' at the end of the command",
       );
     }
 
     if (style.trim().length === 0) {
-      throw new ShapeError(
+      throw ProtocolError.shape(
         CommandErrorCode.InvalidArgument,
         "style value must not be empty",
       );

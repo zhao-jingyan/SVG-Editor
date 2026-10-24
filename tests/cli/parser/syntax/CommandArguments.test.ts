@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandArguments } from "../../../../src/cli/parser/syntax/CommandArguments";
 import { CommandErrorCode } from "../../../../src/protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../../src/protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../../src/protocol/errors/ProtocolError";
 
 function createArguments(tokens: readonly string[]): CommandArguments {
   return new CommandArguments(tokens, "move <id> <dx> <dy>");
@@ -14,7 +14,7 @@ describe("CommandArguments", () => {
     expect(() => args.expectLength(4)).toThrow(
       "invalid arguments; usage: move <id> <dx> <dy>",
     );
-    expect(() => args.expectMinimumLength(5)).toThrow(CommandParseError);
+    expect(() => args.expectMinimumLength(5)).toThrow(ProtocolError);
   });
 
   it("读取必填文本和数字", () => {
@@ -37,7 +37,7 @@ describe("CommandArguments", () => {
     const args = createArguments(["move", "r1", "abc", "0"]);
 
     expect(() => args.number(2)).toThrow(
-      new CommandParseError(
+      ProtocolError.commandParse(
         CommandErrorCode.InvalidNumber,
         "invalid number: abc",
       ),

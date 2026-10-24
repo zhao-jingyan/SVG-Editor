@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { DocumentError } from "../../errors/domain/DocumentError";
+import { ProtocolError } from "../../errors/ProtocolError";
 import type { Shape } from "../../shapes/model/Shape";
 
 export class ShapePlacement {
@@ -9,7 +9,7 @@ export class ShapePlacement {
 
   public constructor(shape: Shape, parentId: string | undefined, index: number) {
     if (!Number.isInteger(index) || index < 0) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid placement index: ${index}`,
       );

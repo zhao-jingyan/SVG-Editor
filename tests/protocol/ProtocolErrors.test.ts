@@ -1,37 +1,53 @@
 import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
-import { CommandParseError } from "../../src/protocol/errors/command/CommandParseError";
-import { DocumentError } from "../../src/protocol/errors/domain/DocumentError";
+import { ErrorSource } from "../../src/protocol/errors/ErrorSource";
 import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { ShapeError } from "../../src/protocol/errors/domain/ShapeError";
 
-describe("ProtocolError 类层次", () => {
-  it("按来源区分的错误共享基类行为", () => {
-    const errors: ProtocolError[] = [
-      new CommandParseError(
-        CommandErrorCode.InvalidArgument,
-        "invalid arguments",
-      ),
-      new CommandExecutionError(
-        CommandErrorCode.CommandNotImplemented,
-        "undo is not implemented",
-      ),
-      new ShapeError(CommandErrorCode.InvalidScale, "scale factor must be positive"),
-      new DocumentError(CommandErrorCode.ShapeNotFound, "no such shape: r1"),
+describe("ProtocolError", () => {
+  it("通过来源枚举区分错误而不建立子类", () => {
+    const errors: Array<[ProtocolError, ErrorSource]> = [
+      [
+        ProtocolError.commandParse(
+          CommandErrorCode.InvalidArgument,
+          "invalid arguments",
+        ),
+        ErrorSource.CommandParse,
+      ],
+      [
+        ProtocolError.commandExecution(
+          CommandErrorCode.CommandNotImplemented,
+          "undo is not implemented",
+        ),
+        ErrorSource.CommandExecution,
+      ],
+      [
+        ProtocolError.shape(
+          CommandErrorCode.InvalidScale,
+          "scale factor must be positive",
+        ),
+        ErrorSource.Shape,
+      ],
+      [
+        ProtocolError.document(
+          CommandErrorCode.ShapeNotFound,
+          "no such shape: r1",
+        ),
+        ErrorSource.Document,
+      ],
     ];
 
-    for (const error of errors) {
+    for (const [error, source] of errors) {
       expect(error).toBeInstanceOf(ProtocolError);
       expect(error).toBeInstanceOf(Error);
-      expect(error.name).toBe(error.constructor.name);
+      expect(error.name).toBe(source);
+      expect(error.getSource()).toBe(source);
       expect(error.getCode()).toBe(error.toCommandErrorDto().code);
       expect(error.toCommandErrorDto().message).toBe(error.message);
     }
   });
 
   it("边界 DTO 是普通对象且可 JSON 序列化", () => {
-    const error = new ShapeError(
+    const error = ProtocolError.shape(
       CommandErrorCode.UnknownAttribute,
       "unknown attribute: opacity",
     );
@@ -46,6 +62,10 @@ describe("ProtocolError 类层次", () => {
   });
 
   it("错误码字符串值保持稳定", () => {
+    expect(ErrorSource.CommandParse).toBe("command-parse");
+    expect(ErrorSource.CommandExecution).toBe("command-execution");
+    expect(ErrorSource.Document).toBe("document");
+    expect(ErrorSource.Shape).toBe("shape");
     expect(CommandErrorCode.InvalidCommand).toBe("invalid-command");
     expect(CommandErrorCode.InvalidArgument).toBe("invalid-argument");
     expect(CommandErrorCode.InvalidNumber).toBe("invalid-number");

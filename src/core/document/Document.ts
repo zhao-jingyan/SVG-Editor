@@ -2,7 +2,7 @@ import type { EditableAttribute } from "../../protocol/EditableAttribute";
 import { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
 import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/domain/DocumentError";
+import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../protocol/shapes/model/Shape";
 import { ShapeHierarchy } from "./ShapeHierarchy";
@@ -141,7 +141,7 @@ export class Document {
 
   private requireCanvasDimension(value: number, label: string): number {
     if (!Number.isFinite(value) || value <= 0) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidNumber,
         `canvas ${label} must be a positive finite number`,
       );

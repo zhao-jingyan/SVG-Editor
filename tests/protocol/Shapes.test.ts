@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
+import { ErrorSource } from "../../src/protocol/errors/ErrorSource";
 import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { ShapeError } from "../../src/protocol/errors/domain/ShapeError";
 import { CircleShape } from "../../src/protocol/shapes/concrete/CircleShape";
 import { EllipseShape } from "../../src/protocol/shapes/concrete/EllipseShape";
 import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
@@ -12,7 +12,7 @@ import { ShapeFactory } from "../../src/protocol/shapes/factory/ShapeFactory";
 import { ShapeType } from "../../src/protocol/shapes/model/ShapeType";
 import { TextShape } from "../../src/protocol/shapes/concrete/TextShape";
 
-function expectShapeError(
+function expectShapeProtocolError(
   action: () => void,
   code: CommandErrorCode,
   message?: string,
@@ -25,10 +25,10 @@ function expectShapeError(
     caught = error;
   }
 
-  expect(caught).toBeInstanceOf(ShapeError);
   expect(caught).toBeInstanceOf(ProtocolError);
 
-  if (caught instanceof ShapeError) {
+  if (caught instanceof ProtocolError) {
+    expect(caught.getSource()).toBe(ErrorSource.Shape);
     expect(caught.getCode()).toBe(code);
 
     if (message !== undefined) {
@@ -76,15 +76,15 @@ describe("Shape 多态模型", () => {
   });
 
   it("构造器拒绝空 id 和非有限数字", () => {
-    expectShapeError(
+    expectShapeProtocolError(
       () => new RectShape("", 0, 0, 10, 10),
       CommandErrorCode.InvalidArgument,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => new CircleShape("c1", Number.NaN, 0, 10),
       CommandErrorCode.InvalidNumber,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => new TextShape("t1", 0, Number.POSITIVE_INFINITY, "text"),
       CommandErrorCode.InvalidNumber,
     );
@@ -144,9 +144,9 @@ describe("Shape 多态模型", () => {
   it("非法缩放不修改任何几何状态", () => {
     const rect = new RectShape("r1", 10, 20, 100, 50);
 
-    expectShapeError(() => rect.scale(0), CommandErrorCode.InvalidScale);
-    expectShapeError(() => rect.scale(-1), CommandErrorCode.InvalidScale);
-    expectShapeError(() => rect.scale(Number.NaN), CommandErrorCode.InvalidScale);
+    expectShapeProtocolError(() => rect.scale(0), CommandErrorCode.InvalidScale);
+    expectShapeProtocolError(() => rect.scale(-1), CommandErrorCode.InvalidScale);
+    expectShapeProtocolError(() => rect.scale(Number.NaN), CommandErrorCode.InvalidScale);
     expect(rect.getAttribute("x")).toBe(10);
     expect(rect.getAttribute("width")).toBe(100);
   });
@@ -178,19 +178,19 @@ describe("Shape 多态模型", () => {
     expect(line.getAttribute("stroke")).toBe("blue");
     expect(text.getAttribute("text")).toBe("新标题");
 
-    expectShapeError(
+    expectShapeProtocolError(
       () => circle.setAttribute("width", 10),
       CommandErrorCode.UnknownAttribute,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => line.setAttribute("text", "line"),
       CommandErrorCode.UnknownAttribute,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => text.setAttribute("r", 1),
       CommandErrorCode.UnknownAttribute,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => rect.setAttribute("width", "wide"),
       CommandErrorCode.InvalidArgument,
     );
@@ -234,11 +234,11 @@ describe("Shape 多态模型", () => {
     const children = group.getChildren() as Shape[];
     children.pop();
     expect(group.getChildren()).toEqual([circle]);
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.addChild(new RectShape("c1", 0, 0, 1, 1)),
       CommandErrorCode.DuplicateId,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.addChild(new RectShape("g1", 0, 0, 1, 1)),
       CommandErrorCode.DuplicateId,
     );
@@ -253,11 +253,11 @@ describe("Shape 多态模型", () => {
     group.insertChild(inserted, 1);
     expect(group.getChildren()).toEqual([rect, inserted, circle]);
 
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.insertChild(new RectShape("r3", 0, 0, 1, 1), -1),
       CommandErrorCode.InvalidArgument,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.insertChild(new RectShape("r4", 0, 0, 1, 1), 4),
       CommandErrorCode.InvalidArgument,
     );
@@ -268,21 +268,21 @@ describe("Shape 多态模型", () => {
     const rect = new RectShape("r1", 0, 0, 10, 10);
     const group = new GroupShape("g1", [rect]);
 
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.setAttribute("width", 100),
       CommandErrorCode.UnknownAttribute,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.setAttribute("text", "group"),
       CommandErrorCode.UnknownAttribute,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.setAttribute("fill", 10),
       CommandErrorCode.InvalidArgument,
     );
     expect(rect.getAttribute("width")).toBe(10);
 
-    expectShapeError(() => group.scale(0), CommandErrorCode.InvalidScale);
+    expectShapeProtocolError(() => group.scale(0), CommandErrorCode.InvalidScale);
     expect(rect.getAttribute("width")).toBe(10);
 
     const empty = new GroupShape("empty");
@@ -305,31 +305,31 @@ describe("Shape 多态模型", () => {
     expect(rect.getAttribute("stroke")).toBeUndefined();
     expect(rect.getAttribute("stroke-width")).toBeUndefined();
 
-    expectShapeError(
+    expectShapeProtocolError(
       () => group.unsetAttribute("width"),
       CommandErrorCode.UnknownAttribute,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => rect.unsetAttribute("x"),
       CommandErrorCode.UnknownAttribute,
     );
   });
 
   it("ShapeFactory 报告未知类型和非法参数", () => {
-    expectShapeError(
+    expectShapeProtocolError(
       () => factory.create("hexagon", "h1", []),
       CommandErrorCode.UnknownShapeType,
       "unknown shape type: hexagon (is the plugin loaded?)",
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => factory.create("rect", "r1", ["x", "0", "10", "10"]),
       CommandErrorCode.InvalidNumber,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => factory.create("circle", "c1", ["0", "0"]),
       CommandErrorCode.InvalidArgument,
     );
-    expectShapeError(
+    expectShapeProtocolError(
       () => factory.create("line", "l1", ["0", "0", "1", "1", ""]),
       CommandErrorCode.InvalidArgument,
     );

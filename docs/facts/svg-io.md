@@ -14,7 +14,7 @@
 - 显式 id 全局唯一；重复 id 返回 `DuplicateId`，消息为 `id already exists: <id>`。
 - 缺 id 的元素按标签自动分配 `<tag><n>`，并输出 `warning: assigned id <id> to unnamed <<tag>>`；分配会避开文件后续出现的显式 id。
 - 读取并解析成功后替换 Document、记录当前路径、清空历史并锁定 undo/redo；失败时保留原文档与历史。
-- 文件读取失败返回 `IoRead`，消息为 `cannot read file: <path>`；XML 或属性错误返回现有 `InvalidArgument` / `InvalidNumber` / `ShapeError` 分支。
+- 文件读取失败返回 `IoRead`，消息为 `cannot read file: <path>`；XML 或属性错误返回 `InvalidArgument` / `InvalidNumber`，图形构造错误使用 `ErrorSource.Shape`。
 
 ## save
 

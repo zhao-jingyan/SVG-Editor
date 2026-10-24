@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { Document } from "../../../src/core/document/Document";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../../src/protocol/errors/domain/DocumentError";
+import { ErrorSource } from "../../../src/protocol/errors/ErrorSource";
+import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 import { CircleShape } from "../../../src/protocol/shapes/concrete/CircleShape";
 import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
 
-function expectDocumentError(
+function expectDocumentProtocolError(
   action: () => void,
   code: CommandErrorCode,
   message: string,
@@ -19,9 +20,10 @@ function expectDocumentError(
     caught = error;
   }
 
-  expect(caught).toBeInstanceOf(DocumentError);
+  expect(caught).toBeInstanceOf(ProtocolError);
 
-  if (caught instanceof DocumentError) {
+  if (caught instanceof ProtocolError) {
+    expect(caught.getSource()).toBe(ErrorSource.Document);
     expect(caught.getCode()).toBe(code);
     expect(caught.message).toBe(message);
   }
@@ -38,7 +40,7 @@ describe("Document 聚合根", () => {
     expect(document.getWidth()).toBe(1024);
     expect(document.getHeight()).toBe(768);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.resize(0, 600),
       CommandErrorCode.InvalidNumber,
       "canvas width must be a positive finite number",
@@ -46,7 +48,7 @@ describe("Document 聚合根", () => {
     expect(document.getWidth()).toBe(1024);
     expect(document.getHeight()).toBe(768);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.resize(800, Number.NaN),
       CommandErrorCode.InvalidNumber,
       "canvas height must be a positive finite number",
@@ -80,17 +82,17 @@ describe("Document 聚合根", () => {
     const rect = new RectShape("r1", 0, 0, 10, 10);
     document.addShape(rect);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.addShape(new CircleShape("r1", 0, 0, 5)),
       CommandErrorCode.DuplicateId,
       "id already exists: r1",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.addShape(new RectShape("r2", 0, 0, 1, 1), "missing"),
       CommandErrorCode.ContainerNotFound,
       "no such container: missing",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.addShape(new RectShape("r2", 0, 0, 1, 1), "r1"),
       CommandErrorCode.NotContainer,
       "not a container: r1",
@@ -104,7 +106,7 @@ describe("Document 聚合根", () => {
       new GroupShape("right", [new RectShape("duplicate", 1, 1, 1, 1)]),
     ]);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.addShape(duplicateGroup),
       CommandErrorCode.DuplicateId,
       "id already exists: duplicate",
@@ -131,7 +133,7 @@ describe("Document 聚合根", () => {
     expect(document.findShape("c1")).toBeUndefined();
     expect(document.getRootShapes()).toEqual([]);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.deleteShape("missing"),
       CommandErrorCode.ShapeNotFound,
       "no such shape: missing",
@@ -153,7 +155,7 @@ describe("Document 聚合根", () => {
     expect(rect.getAttribute("height")).toBe(100);
     expect(rect.getAttribute("fill")).toBe("red");
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.moveShape("missing", 1, 1),
       CommandErrorCode.ShapeNotFound,
       "no such shape: missing",
@@ -212,27 +214,27 @@ describe("Document 聚合根", () => {
     document.addShape(outer);
     document.addShape(new CircleShape("sibling", 0, 0, 2));
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.groupShapes("cluster", []),
       CommandErrorCode.InvalidArgument,
       "group requires at least two members",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.groupShapes("cluster", ["child"]),
       CommandErrorCode.InvalidArgument,
       "group requires at least two members",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.groupShapes("cluster", ["child", "child"]),
       CommandErrorCode.InvalidArgument,
       "duplicate member id: child",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.groupShapes("outer", ["child", "sibling"]),
       CommandErrorCode.DuplicateId,
       "id already exists: outer",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.groupShapes("cluster", ["outer", "child"]),
       CommandErrorCode.InvalidArgument,
       "cannot group a container into its own descendant: outer",
@@ -258,7 +260,7 @@ describe("Document 聚合根", () => {
     expect(document.getParentId("second")).toBe("parent");
     expect(document.findShape("container")).toBeUndefined();
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.ungroupShapes("first"),
       CommandErrorCode.NotContainer,
       "not a container: first",
@@ -266,7 +268,7 @@ describe("Document 聚合根", () => {
 
     const topLevel = new GroupShape("top");
     document.addShape(topLevel);
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.ungroupShapes("top"),
       CommandErrorCode.InvalidArgument,
       "cannot ungroup top-level container: top",
@@ -286,7 +288,7 @@ describe("Document 聚合根", () => {
     expect(document.getChildren("target")).toEqual([source]);
     expect(document.getParentId("r1")).toBe("target");
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.addToContainer("target", "target"),
       CommandErrorCode.InvalidArgument,
       "cannot add a container into its own descendant: target",
@@ -294,7 +296,7 @@ describe("Document 聚合根", () => {
 
     const nested = new GroupShape("nested");
     document.addShape(nested, "target");
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.addToContainer("nested", "target"),
       CommandErrorCode.InvalidArgument,
       "cannot add a container into its own descendant: target",

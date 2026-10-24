@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { ShapeIndex } from "../../../src/core/document/ShapeIndex";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../../src/protocol/errors/domain/DocumentError";
+import { ErrorSource } from "../../../src/protocol/errors/ErrorSource";
+import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 import { CircleShape } from "../../../src/protocol/shapes/concrete/CircleShape";
 import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
@@ -19,9 +20,10 @@ function expectIndexError(
     caught = error;
   }
 
-  expect(caught).toBeInstanceOf(DocumentError);
+  expect(caught).toBeInstanceOf(ProtocolError);
 
-  if (caught instanceof DocumentError) {
+  if (caught instanceof ProtocolError) {
+    expect(caught.getSource()).toBe(ErrorSource.Document);
     expect(caught.getCode()).toBe(code);
     expect(caught.message).toBe(message);
   }

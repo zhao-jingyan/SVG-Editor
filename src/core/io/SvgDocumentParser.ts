@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import type { EditableAttribute } from "../../protocol/EditableAttribute";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/domain/DocumentError";
+import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../protocol/shapes/model/Shape";
 import { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
@@ -48,14 +48,14 @@ export class SvgDocumentParser {
     try {
       parsed = this.xmlParser.parse(source);
     } catch {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         "invalid SVG: invalid XML",
       );
     }
 
     if (!this.isRecord(parsed) || !this.isRecord(parsed.svg)) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         "invalid SVG: missing <svg> root",
       );
@@ -166,7 +166,7 @@ export class SvgDocumentParser {
         const group = this.shapeFactory.create(tag, id, []);
 
         if (!(group instanceof GroupShape)) {
-          throw new DocumentError(
+          throw ProtocolError.document(
             CommandErrorCode.InvalidArgument,
             `invalid SVG: <g> did not create a group`,
           );
@@ -179,7 +179,7 @@ export class SvgDocumentParser {
         return group;
       }
       default:
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `invalid SVG: unsupported element <${tag}>`,
         );
@@ -195,7 +195,7 @@ export class SvgDocumentParser {
       }
 
       if (typeof value !== "string" && typeof value !== "number") {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.InvalidArgument,
           `invalid SVG: attribute ${attribute} must be text`,
         );
@@ -219,7 +219,7 @@ export class SvgDocumentParser {
 
         if (id !== undefined) {
           if (reservedIds.has(id)) {
-            throw new DocumentError(
+            throw ProtocolError.document(
               CommandErrorCode.DuplicateId,
               `id already exists: ${id}`,
             );
@@ -250,7 +250,7 @@ export class SvgDocumentParser {
     const viewBox = this.readOptionalString(root, viewBoxAttribute);
 
     if (viewBox === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid SVG: missing ${attribute} or viewBox`,
       );
@@ -259,7 +259,7 @@ export class SvgDocumentParser {
     const values = viewBox.trim().split(/[\s,]+/).map(Number);
 
     if (values.length !== 4 || values.some((value) => !Number.isFinite(value))) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid SVG: invalid viewBox: ${viewBox}`,
       );
@@ -272,7 +272,7 @@ export class SvgDocumentParser {
     const value = node[attribute];
 
     if (value === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid <${tag}>: missing attribute ${attribute}`,
       );
@@ -286,7 +286,7 @@ export class SvgDocumentParser {
       (typeof value !== "string" && typeof value !== "number") ||
       `${value}`.trim().length === 0
     ) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidNumber,
         `invalid number: ${String(value)}`,
       );
@@ -295,7 +295,7 @@ export class SvgDocumentParser {
     const number = Number(value);
 
     if (!Number.isFinite(number)) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidNumber,
         `invalid number: ${String(value)}`,
       );
@@ -317,7 +317,7 @@ export class SvgDocumentParser {
     }
 
     if (typeof value !== "string" && typeof value !== "number") {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid SVG: attribute ${attribute} must be text`,
       );

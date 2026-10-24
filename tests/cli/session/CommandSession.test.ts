@@ -11,8 +11,7 @@ import type { Command } from "../../../src/protocol/commands/Command";
 import { ExitCommand } from "../../../src/protocol/commands/session/ExitCommand";
 import { HelpCommand } from "../../../src/protocol/commands/view/HelpCommand";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../../src/protocol/errors/command/CommandExecutionError";
-import { CommandParseError } from "../../../src/protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 import type { Executor } from "../../../src/protocol/Executor";
 import { CommandErrorResult } from "../../../src/protocol/results/outcomes/CommandErrorResult";
 import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
@@ -84,7 +83,7 @@ describe("CommandSession", () => {
   it("输出解析错误并继续会话", async () => {
     const parser = new FakeCommandParser([
       new CommandParseErrorResult(
-        new CommandParseError(
+        ProtocolError.commandParse(
           CommandErrorCode.InvalidCommand,
           "unknown command: bad",
         ),
@@ -126,7 +125,7 @@ describe("CommandSession", () => {
     ]);
     const executor = new FakeExecutor([
       new CommandErrorResult(
-        new CommandExecutionError(
+        ProtocolError.commandExecution(
           CommandErrorCode.ShapeNotFound,
           "no such shape: missing",
         ),

@@ -15,12 +15,12 @@ Shape（抽象类：id、类型和统一行为）
 
 - `Shape`、`StyledShape`、`ShapeType` 和 `ShapePosition` 位于 `src/protocol/shapes/model`；六种具体图形位于 `src/protocol/shapes/concrete`，共同作为 CLI 与 Core 共享的领域模型。
 - 每个具体形状拥有私有几何状态，不通过公共字段或属性袋暴露。
-- `getAttribute` 是查询行为，`setAttribute` 由具体形状按自身白名单处理；未知属性抛出 `ShapeError(CommandErrorCode.UnknownAttribute)`。
+- `getAttribute` 是查询行为，`setAttribute` 由具体形状按自身白名单处理；未知属性创建 `ErrorSource.Shape` 来源的 `ProtocolError(CommandErrorCode.UnknownAttribute)`。
 - `unsetAttribute` 用于撤销时恢复“属性原本不存在”的状态：叶子形状可清除 `fill`、`stroke`、`stroke-width`，容器递归清除公共样式，几何属性和文本内容拒绝清除。
 - `accept` 是每个图形的 Visitor 分派入口；新增按类型输出的算法只需实现 `ShapeVisitor<T>`，不修改形状类。
-- `scale` 在修改状态前校验正整数因子；非法因子抛出 `ShapeError(CommandErrorCode.InvalidScale)`，不会产生部分修改。
-- `ShapeError` 位于 `src/protocol/errors/domain`，继承 `ProtocolError`；形状只负责抛出领域错误，Parser 在顶层将其包装为 `CommandParseErrorResult`，再由 CLI 边界转换为 DTO。
-- `DocumentError` 位于 `src/protocol/errors/domain`，用于 Core 中 Document 的领域错误；它同样继承 `ProtocolError`。
+- `scale` 在修改状态前校验正整数因子；非法因子创建 `ErrorSource.Shape` 来源的 `ProtocolError(CommandErrorCode.InvalidScale)`，不会产生部分修改。
+- 形状只负责创建 `ErrorSource.Shape` 来源的协议错误，Parser 在顶层统一包装为 `CommandParseErrorResult`，再由 CLI 边界转换为 DTO。
+- Core 中 Document 的领域错误使用 `ErrorSource.Document` 来源，不再定义独立错误类。
 
 ## Composite 模式
 

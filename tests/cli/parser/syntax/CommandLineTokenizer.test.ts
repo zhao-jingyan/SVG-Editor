@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandLineTokenizer } from "../../../../src/cli/parser/syntax/CommandLineTokenizer";
-import { CommandParseError } from "../../../../src/protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../../src/protocol/errors/ProtocolError";
 
 const tokenizer = new CommandLineTokenizer();
 
@@ -30,7 +30,7 @@ describe("CommandLineTokenizer", () => {
 
   it("拒绝未闭合的引号", () => {
     expect(() => tokenizer.tokenize('create text t1 0 0 "unterminated')).toThrow(
-      CommandParseError,
+      ProtocolError,
     );
   });
 });

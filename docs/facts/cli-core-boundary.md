@@ -83,11 +83,11 @@ export abstract class Command {
 
 ## 错误模型
 
-- `ProtocolError` 是继承 `Error` 的抽象基类，封装私有 `CommandErrorCode`，提供 `getCode()` 和 `toCommandErrorDto()`；构造器负责建立错误码与消息不变量。
-- 具体错误按来源分为命令侧的 `CommandParseError`、`CommandExecutionError` 和领域侧的 `ShapeError`、`DocumentError`，分别位于 `src/protocol/errors/command` 与 `src/protocol/errors/domain`，均继承根目录的 `ProtocolError`。
+- `ProtocolError` 是继承 `Error` 的唯一运行时错误类，封装私有 `ErrorSource` 与 `CommandErrorCode`，提供 `getSource()`、`getCode()` 和 `toCommandErrorDto()`。
+- `ErrorSource` 以枚举区分 `command-parse`、`command-execution`、`document` 和 `shape` 来源，不再为每种来源建立没有差异化行为的错误子类。
 - `CommandErrorCode` 是封闭枚举，字符串值与既有 CLI 错误码完全一致；枚举成员使用 PascalCase 命名。
 - `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。结果对象可以持有 `ProtocolError`，但跨边界只暴露 `CommandErrorDto`，保证错误结果可序列化。
-- 命令构造器和 Tokenizer 失败时抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`CommandLineParser.parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
+- 命令构造器和 Tokenizer 失败时创建 `command-parse` 来源的 `ProtocolError`；`ShapeFactory` 失败创建 `shape` 来源；`CommandLineParser.parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
 - `CommandSession` 只输出 `error: <message>`，不暴露错误码；未知异常不属于已建模的协议错误，因此继续向上抛出。
 - `main.ts` 是进程最外层边界：已知命令失败由结果模型表达；未知异常打印到标准错误、设置非零退出码并结束进程，不伪装成普通命令失败。
 - 拒绝方案：让结果 DTO 直接持有 `Error` 实例会破坏边界可序列化性；为每个错误码建立独立类会产生大量只有消息差异的类型。`CommandExecutor` 在真实执行边界捕获 `ProtocolError` 并转换为 `CommandErrorResult`，未知异常继续上抛。

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { SvgDocumentParser } from "../../../src/core/io/SvgDocumentParser";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../../src/protocol/errors/domain/DocumentError";
+import { ErrorSource } from "../../../src/protocol/errors/ErrorSource";
+import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
 
-function expectDocumentError(
+function expectDocumentProtocolError(
   action: () => void,
   code: CommandErrorCode,
   message: string,
@@ -17,9 +18,10 @@ function expectDocumentError(
     caught = error;
   }
 
-  expect(caught).toBeInstanceOf(DocumentError);
+  expect(caught).toBeInstanceOf(ProtocolError);
 
-  if (caught instanceof DocumentError) {
+  if (caught instanceof ProtocolError) {
+    expect(caught.getSource()).toBe(ErrorSource.Document);
     expect(caught.getCode()).toBe(code);
     expect(caught.message).toBe(message);
   }
@@ -92,7 +94,7 @@ describe("SvgDocumentParser", () => {
     expect(result.getDocument().getWidth()).toBe(320);
     expect(result.getDocument().getHeight()).toBe(240);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => parser.parse(`<svg width="10" height="10">
         <rect id="r1" x="0" y="0" width="1" height="1"/>
         <circle id="r1" cx="0" cy="0" r="1"/>
@@ -100,17 +102,17 @@ describe("SvgDocumentParser", () => {
       CommandErrorCode.DuplicateId,
       "id already exists: r1",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => parser.parse("<not-svg/>"),
       CommandErrorCode.InvalidArgument,
       "invalid SVG: missing <svg> root",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => parser.parse('<svg width="10" height="10"><rect id="r1" x="0" width="1" height="1"/></svg>'),
       CommandErrorCode.InvalidArgument,
       "invalid <rect>: missing attribute y",
     );
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => parser.parse("<svg"),
       CommandErrorCode.InvalidArgument,
       "invalid SVG: invalid XML",

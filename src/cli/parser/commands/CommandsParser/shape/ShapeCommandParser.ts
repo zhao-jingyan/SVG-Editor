@@ -7,7 +7,7 @@ import { ScaleCommand } from "../../../../../protocol/commands/shape/ScaleComman
 import { SetCommand } from "../../../../../protocol/commands/shape/SetCommand";
 import { UngroupCommand } from "../../../../../protocol/commands/shape/UngroupCommand";
 import { CommandErrorCode } from "../../../../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../../../protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../../../protocol/errors/ProtocolError";
 import type { EditableAttribute } from "../../../../../protocol/EditableAttribute";
 import type { CommandArguments } from "../../../syntax/CommandArguments";
 
@@ -121,7 +121,7 @@ export class ShapeCommandParser {
 
   private parseAttribute(token: string): EditableAttribute {
     if (!ShapeCommandParser.editableAttributes.has(token as EditableAttribute)) {
-      throw new CommandParseError(
+      throw ProtocolError.commandParse(
         CommandErrorCode.UnknownAttribute,
         `unknown attribute: ${token}`,
       );

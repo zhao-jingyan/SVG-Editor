@@ -4,8 +4,7 @@ import type { EditableAttribute } from "../protocol/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../protocol/errors/command/CommandExecutionError";
-import { DocumentError } from "../protocol/errors/domain/DocumentError";
+import { ProtocolError } from "../protocol/errors/ProtocolError";
 import type { CommandResult } from "../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../protocol/shapes/concrete/GroupShape";
@@ -64,7 +63,7 @@ export class EditorContext implements CommandContext {
     try {
       content = await this.svgStorage.read(path);
     } catch {
-      throw new CommandExecutionError(
+      throw ProtocolError.commandExecution(
         CommandErrorCode.IoRead,
         `cannot read file: ${path}`,
       );
@@ -86,7 +85,7 @@ export class EditorContext implements CommandContext {
     const targetPath = path ?? this.currentPath;
 
     if (targetPath === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         "save requires a file path",
       );
@@ -97,7 +96,7 @@ export class EditorContext implements CommandContext {
     try {
       await this.svgStorage.write(targetPath, content);
     } catch {
-      throw new CommandExecutionError(
+      throw ProtocolError.commandExecution(
         CommandErrorCode.IoWrite,
         `cannot write file: ${targetPath}`,
       );
@@ -120,7 +119,7 @@ export class EditorContext implements CommandContext {
     }
 
     if (width === undefined || height === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         "canvas requires both width and height",
       );
@@ -304,7 +303,7 @@ export class EditorContext implements CommandContext {
 
   private requireDocument(): Document {
     if (this.document === undefined) {
-      throw new DocumentError(
+      throw ProtocolError.document(
         CommandErrorCode.NoDocument,
         "no document. use 'init' or 'read' first",
       );
@@ -315,7 +314,7 @@ export class EditorContext implements CommandContext {
 
   private requireHistoryUnlocked(): void {
     if (this.historyLocked) {
-      throw new CommandExecutionError(
+      throw ProtocolError.commandExecution(
         CommandErrorCode.HistoryUnavailable,
         "undo not allowed after io command",
       );

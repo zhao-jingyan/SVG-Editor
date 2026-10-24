@@ -1,14 +1,14 @@
 import { Command } from "./Command";
 import type { CommandContext } from "../CommandContext";
 import { CommandErrorCode } from "../errors/CommandErrorCode";
-import { CommandExecutionError } from "../errors/command/CommandExecutionError";
+import { ProtocolError } from "../errors/ProtocolError";
 import { CommandErrorResult } from "../results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../results/CommandResult";
 
 export abstract class UndoableCommand extends Command {
   public async undo(_context: CommandContext): Promise<CommandResult> {
     return new CommandErrorResult(
-      new CommandExecutionError(
+      ProtocolError.commandExecution(
         CommandErrorCode.CommandNotImplemented,
         `undo is not implemented for command: ${this.type}`,
       ),
@@ -17,7 +17,7 @@ export abstract class UndoableCommand extends Command {
 
   protected notExecutedResult(): CommandResult {
     return new CommandErrorResult(
-      new CommandExecutionError(
+      ProtocolError.commandExecution(
         CommandErrorCode.InvalidArgument,
         `command has not been executed: ${this.type}`,
       ),

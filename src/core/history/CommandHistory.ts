@@ -1,6 +1,6 @@
 import type { CommandContext } from "../../protocol/CommandContext";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../protocol/errors/command/CommandExecutionError";
+import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { CommandErrorResult } from "../../protocol/results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../../protocol/results/CommandResult";
 import type { UndoableCommand } from "../../protocol/commands/UndoableCommand";
@@ -65,7 +65,7 @@ export class CommandHistory {
 
   private unavailable(message: string): CommandResult {
     return new CommandErrorResult(
-      new CommandExecutionError(CommandErrorCode.HistoryUnavailable, message),
+      ProtocolError.commandExecution(CommandErrorCode.HistoryUnavailable, message),
     );
   }
 }

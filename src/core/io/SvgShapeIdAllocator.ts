@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/domain/DocumentError";
+import { ProtocolError } from "../../protocol/errors/ProtocolError";
 
 export class SvgShapeIdAllocator {
   private readonly reservedIds: ReadonlySet<string>;
@@ -13,7 +13,7 @@ export class SvgShapeIdAllocator {
   public allocate(tag: string, explicitId?: string): string {
     if (explicitId !== undefined) {
       if (this.usedIds.has(explicitId)) {
-        throw new DocumentError(
+        throw ProtocolError.document(
           CommandErrorCode.DuplicateId,
           `id already exists: ${explicitId}`,
         );

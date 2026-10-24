@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandHistory } from "../../src/core/history/CommandHistory";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
+import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
 import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
 import { CommandExitResult } from "../../src/protocol/results/outcomes/CommandExitResult";
 import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
@@ -59,7 +59,7 @@ describe("CommandHistory", () => {
   it("undo 返回失败结果时保留两个栈", async () => {
     const history = new CommandHistory();
     const failure = new CommandErrorResult(
-      new CommandExecutionError(CommandErrorCode.ShapeNotFound, "missing"),
+      ProtocolError.commandExecution(CommandErrorCode.ShapeNotFound, "missing"),
     );
     const command = new ScriptedUndoableCommand(undefined, failure);
 
@@ -77,7 +77,7 @@ describe("CommandHistory", () => {
   it("redo 返回失败结果时保留两个栈", async () => {
     const history = new CommandHistory();
     const failure = new CommandErrorResult(
-      new CommandExecutionError(CommandErrorCode.ShapeNotFound, "missing"),
+      ProtocolError.commandExecution(CommandErrorCode.ShapeNotFound, "missing"),
     );
     const command = new ScriptedUndoableCommand(failure);
 

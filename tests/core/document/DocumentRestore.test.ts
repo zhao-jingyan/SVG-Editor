@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import { Document } from "../../../src/core/document/Document";
 import { ShapePlacement } from "../../../src/protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../../src/protocol/errors/domain/DocumentError";
+import { ErrorSource } from "../../../src/protocol/errors/ErrorSource";
+import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 import { CircleShape } from "../../../src/protocol/shapes/concrete/CircleShape";
 import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
 
-function expectDocumentError(
+function expectDocumentProtocolError(
   action: () => void,
   code: CommandErrorCode,
   message: string,
@@ -20,9 +21,10 @@ function expectDocumentError(
     caught = error;
   }
 
-  expect(caught).toBeInstanceOf(DocumentError);
+  expect(caught).toBeInstanceOf(ProtocolError);
 
-  if (caught instanceof DocumentError) {
+  if (caught instanceof ProtocolError) {
+    expect(caught.getSource()).toBe(ErrorSource.Document);
     expect(caught.getCode()).toBe(code);
     expect(caught.message).toBe(message);
   }
@@ -162,7 +164,7 @@ describe("Document 恢复能力", () => {
       99,
     );
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.restorePlacements([invalidPlacement]),
       CommandErrorCode.InvalidArgument,
       "invalid child index: 99",
@@ -183,7 +185,7 @@ describe("Document 恢复能力", () => {
     const secondPlacement = document.capturePlacement("second");
     const invalidPlacement = new ShapePlacement(third, undefined, 99);
 
-    expectDocumentError(
+    expectDocumentProtocolError(
       () => document.restorePlacements([
         firstPlacement,
         invalidPlacement,

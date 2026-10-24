@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../protocol/errors/ProtocolError";
 
 /**
  * 把一行 CLI 文本切分为带引号感知的参数。
@@ -42,7 +42,7 @@ export class CommandLineTokenizer {
     }
 
     if (inQuotes) {
-      throw new CommandParseError(
+      throw ProtocolError.commandParse(
         CommandErrorCode.InvalidArgument,
         "unterminated quoted string",
       );

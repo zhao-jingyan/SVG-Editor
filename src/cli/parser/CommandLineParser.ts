@@ -1,5 +1,4 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../protocol/errors/command/CommandParseError";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
 import { CommandArguments } from "./syntax/CommandArguments";
@@ -37,7 +36,7 @@ export class CommandLineParser implements CommandParser {
       const definition = this.definitions.find(commandName);
 
       if (definition === undefined) {
-        throw new CommandParseError(
+        throw ProtocolError.commandParse(
           CommandErrorCode.InvalidCommand,
           `unknown command: ${commandName}`,
         );

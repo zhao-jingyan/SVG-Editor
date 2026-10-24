@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../protocol/errors/command/CommandParseError";
+import { ProtocolError } from "../../../protocol/errors/ProtocolError";
 
 /**
  * 封装命令参数的元数校验和类型转换。
@@ -38,7 +38,7 @@ export class CommandArguments {
     const token = this.tokenAt(index);
 
     if (token === undefined || token.trim().length === 0) {
-      throw new CommandParseError(
+      throw ProtocolError.commandParse(
         CommandErrorCode.InvalidArgument,
         `missing ${label}`,
       );
@@ -51,7 +51,7 @@ export class CommandArguments {
     const token = this.tokenAt(index);
 
     if (token === undefined) {
-      throw new CommandParseError(
+      throw ProtocolError.commandParse(
         CommandErrorCode.InvalidArgument,
         `missing ${label}`,
       );
@@ -64,7 +64,7 @@ export class CommandArguments {
     const token = this.rawText(index, `numeric argument at position ${index + 1}`);
 
     if (token.trim().length === 0) {
-      throw new CommandParseError(
+      throw ProtocolError.commandParse(
         CommandErrorCode.InvalidNumber,
         "empty numeric value",
       );
@@ -73,7 +73,7 @@ export class CommandArguments {
     const value = Number(token);
 
     if (!Number.isFinite(value)) {
-      throw new CommandParseError(
+      throw ProtocolError.commandParse(
         CommandErrorCode.InvalidNumber,
         `invalid number: ${token}`,
       );
@@ -97,7 +97,7 @@ export class CommandArguments {
   }
 
   private invalidArguments(): never {
-    throw new CommandParseError(
+    throw ProtocolError.commandParse(
       CommandErrorCode.InvalidArgument,
       `invalid arguments; usage: ${this.usage}`,
     );
