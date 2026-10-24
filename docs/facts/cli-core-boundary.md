@@ -119,8 +119,8 @@ src/core -/-> src/cli
 - `CommandLoop` 接受可选启动提示；组合根传入 `svg-editor 0.1 — type 'help' for commands`，UI 文案不进入命令解析器。
 - `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
-- `CommandExecutor` 位于 Core，实现 `Executor`，委托 `EditorContext.execute`，只依赖协议层 `Command`、`ProtocolError` 和结果类层次。
-- `EditorContext` 位于 Core，实现 `CommandReceiver`，持有可选 `Document`、`CommandHistory` 和历史锁；成功执行编辑命令后记录历史并解除锁定。
+- `CommandExecutor` 位于 Core，实现 `Executor`，调用 `command.execute(EditorContext)`，成功记录 `UndoableCommand`，并转换 `ProtocolError`。
+- `EditorContext` 位于 Core，实现 `CommandReceiver`，持有可选 `Document`、`CommandHistory` 和历史锁；通过 `recordSuccessfulCommand` 接收成功命令入栈事件并解除锁定。
 - `EditorContext` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
 - `CommandHistory` 由 `EditorContext` 持有，是真正的 Caretaker；undo/redo 命令通过 Context 委托历史栈。
 - `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。
@@ -131,10 +131,9 @@ src/core -/-> src/cli
 ConsoleInputReader -> CommandLoop -> CommandSession -> CommandLineParser -> 具体 Command
                                                                |
                                                                v
-CommandExecutor -> EditorContext.execute -> command.execute(EditorContext)
-                                                               |
-                                                               v
-                                             Document / CommandHistory / Shape 多态行为
+CommandExecutor -> command.execute(EditorContext) -> Document / Shape 多态行为
+       |
+       +-> EditorContext.recordSuccessfulCommand -> CommandHistory
 ```
 
 - Parser 把空行和首个非空字符为 `#` 的注释行识别为 `empty`，把语法或参数失败识别为 `error`。

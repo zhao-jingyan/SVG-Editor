@@ -5,7 +5,7 @@
 - `CommandHistory` 位于 `src/core/history`，是 Command 模式中的 Caretaker，只保存 `UndoableCommand` 对象引用。
 - 历史栈不保存图形、文档快照或命令结果；撤销状态由具体命令自行负责。
 - `CommandHistory` 不决定命令是否执行成功，调用方只应在成功后调用 `record`。
-- `EditorContext.execute` 是唯一记录点：编辑命令执行成功后入栈，`CommandHistory` 已接入真实执行链路。
+- `CommandExecutor.execute` 是唯一记录点：编辑命令执行成功后入栈，`CommandHistory` 已接入真实执行链路。
 
 ## 公共行为
 
@@ -22,4 +22,4 @@
 
 - 采用“先执行、成功后再弹栈”：如果先弹出再执行，命令失败后会从历史中消失，无法重试。
 - redo 直接重新执行同一命令对象，而不是保存第二份命令或文档快照；具体命令必须保证 undo 后再次 execute 可恢复原效果。
-- 历史锁定和文档类命令清栈由 `EditorContext` 负责，`CommandHistory` 保持纯粹的 Caretaker 语义。
+- 历史锁定和文档类命令清栈由 `EditorContext` 负责，成功命令的入栈决策由 `CommandExecutor` 负责，`CommandHistory` 保持纯粹的 Caretaker 语义。

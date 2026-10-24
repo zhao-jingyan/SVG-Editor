@@ -1,4 +1,3 @@
-import type { Command } from "../protocol/commands/Command";
 import type { CommandReceiver } from "../protocol/CommandReceiver";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
@@ -35,15 +34,9 @@ export class EditorContext implements CommandReceiver {
     private readonly svgStorage: SvgStorage = new FileSvgStorage(),
   ) {}
 
-  public async execute(command: Command): Promise<CommandResult> {
-    const result = await command.execute(this);
-
-    if (result.isSuccess() && command instanceof UndoableCommand) {
-      this.history.record(command);
-      this.historyLocked = false;
-    }
-
-    return result;
+  public recordSuccessfulCommand(command: UndoableCommand): void {
+    this.history.record(command);
+    this.historyLocked = false;
   }
 
   public async init(width?: number, height?: number): Promise<CommandResult> {

@@ -1,4 +1,5 @@
 import type { Command } from "../protocol/commands/Command";
+import { UndoableCommand } from "../protocol/commands/UndoableCommand";
 import { ProtocolError } from "../protocol/errors/ProtocolError";
 import type { Executor } from "../protocol/Executor";
 import { CommandErrorResult } from "../protocol/results/outcomes/CommandErrorResult";
@@ -6,11 +7,17 @@ import type { CommandResult } from "../protocol/results/CommandResult";
 import { EditorContext } from "./EditorContext";
 
 export class CommandExecutor implements Executor {
-  public constructor(private readonly context: EditorContext) {}
+  public constructor(private readonly receiver: EditorContext) {}
 
   public async execute(command: Command): Promise<CommandResult> {
     try {
-      return await this.context.execute(command);
+      const result = await command.execute(this.receiver);
+
+      if (result.isSuccess() && command instanceof UndoableCommand) {
+        this.receiver.recordSuccessfulCommand(command);
+      }
+
+      return result;
     } catch (error: unknown) {
       if (error instanceof ProtocolError) {
         return new CommandErrorResult(error);
