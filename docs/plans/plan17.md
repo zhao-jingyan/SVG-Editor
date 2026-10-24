@@ -12,8 +12,6 @@
 src/cli/parser
 ├── CommandLineParser.ts
 ├── CommandParser.ts
-├── arguments
-│   └── CommandArguments.ts
 ├── commands
 │   ├── document
 │   │   └── DocumentCommandParser.ts
@@ -30,14 +28,14 @@ src/cli/parser
 │   ├── CommandParseErrorResult.ts
 │   ├── CommandParseResult.ts
 │   └── CommandParseSuccessResult.ts
-└── tokenization
+└── syntax
+    ├── CommandArguments.ts
     └── CommandLineTokenizer.ts
 ```
 
 ## 职责
 
-- `tokenization`：文本到 token。
-- `arguments`：token 元数、类型和切片校验。
+- `syntax`：文本到 token，以及 token 的元数、类型和切片校验。
 - `commands`：按文档、图形、显示三个命令族构造 Command。
 - `definition`：命令名与对应构造器的集中注册。
 - `results`：解析结果类层次和边界 DTO。
@@ -45,6 +43,6 @@ src/cli/parser
 
 ## 验证
 
-- 单元测试按 `tests/cli/parser/arguments`、`tests/cli/parser/tokenization` 镜像。
+- 单元测试按 `tests/cli/parser/syntax` 镜像。
 - 解析入口测试和结果测试保留在 `tests/cli/parser` 根目录。
 - 运行 `npm test` 与 `npm run build`。

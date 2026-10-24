@@ -1,6 +1,6 @@
 import type { Command } from "../../../protocol/Command";
 import type { ShapeFactory } from "../../../protocol/shapes/ShapeFactory";
-import type { CommandArguments } from "../arguments/CommandArguments";
+import type { CommandArguments } from "../syntax/CommandArguments";
 import type { CommandDefinition } from "./CommandDefinition";
 import { DocumentCommandParser } from "../commands/document/DocumentCommandParser";
 import { CreateCommandParser } from "../commands/shape/CreateCommandParser";

@@ -20,8 +20,6 @@ src/cli
 ├── parser
 │   ├── CommandLineParser.ts
 │   ├── CommandParser.ts
-│   ├── arguments
-│   │   └── CommandArguments.ts
 │   ├── commands
 │   │   ├── document
 │   │   │   └── DocumentCommandParser.ts
@@ -38,7 +36,8 @@ src/cli
 │   │   ├── CommandParseErrorResult.ts
 │   │   ├── CommandParseResult.ts
 │   │   └── CommandParseSuccessResult.ts
-│   └── tokenization
+│   └── syntax
+│       ├── CommandArguments.ts
 │       └── CommandLineTokenizer.ts
 └── session
     ├── CommandLoop.ts

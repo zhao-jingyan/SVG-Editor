@@ -45,10 +45,8 @@ package "src/cli" {
   }
   package "parser" {
     [CommandLineParser] as Parser
-    package "tokenization" {
+    package "syntax" {
       [CommandLineTokenizer] as Tokenizer
-    }
-    package "arguments" {
       [CommandArguments] as Arguments
     }
     package "definition" {

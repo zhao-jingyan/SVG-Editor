@@ -2,7 +2,7 @@ import { CanvasCommand } from "../../../../protocol/commands/CanvasCommand";
 import { InitCommand } from "../../../../protocol/commands/InitCommand";
 import { ReadCommand } from "../../../../protocol/commands/ReadCommand";
 import { SaveCommand } from "../../../../protocol/commands/SaveCommand";
-import type { CommandArguments } from "../../arguments/CommandArguments";
+import type { CommandArguments } from "../../syntax/CommandArguments";
 
 /**
  * 构造文档生命周期命令。

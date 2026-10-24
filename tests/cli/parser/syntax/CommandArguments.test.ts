@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CommandArguments } from "../../../../src/cli/parser/arguments/CommandArguments";
+import { CommandArguments } from "../../../../src/cli/parser/syntax/CommandArguments";
 import { CommandErrorCode } from "../../../../src/protocol/errors/CommandErrorCode";
 import { CommandParseError } from "../../../../src/protocol/errors/CommandParseError";
 

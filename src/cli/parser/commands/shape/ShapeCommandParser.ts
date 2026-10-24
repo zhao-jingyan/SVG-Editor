@@ -9,7 +9,7 @@ import { UngroupCommand } from "../../../../protocol/commands/UngroupCommand";
 import { CommandErrorCode } from "../../../../protocol/errors/CommandErrorCode";
 import { CommandParseError } from "../../../../protocol/errors/CommandParseError";
 import type { EditableAttribute } from "../../../../protocol/EditableAttribute";
-import type { CommandArguments } from "../../arguments/CommandArguments";
+import type { CommandArguments } from "../../syntax/CommandArguments";
 
 /**
  * 构造除 create 以外的图形编辑命令。

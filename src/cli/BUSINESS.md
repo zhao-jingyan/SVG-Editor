@@ -9,8 +9,8 @@
 
 ## 核心规则
 
-- 一行输入只有三种业务结果：空输入、已解析命令或解析错误。空行、纯空白行和首个非空字符为 `#` 的注释行不产生命令，也不产生输出。依据：[CommandLineTokenizer](parser/tokenization/CommandLineTokenizer.ts) 的 `tokenize`。
-- 双引号用于保留参数中的空白；`""` 表示空字符串参数。引号未闭合属于解析错误。依据：[CommandLineTokenizer](parser/tokenization/CommandLineTokenizer.ts) 的 `scan` 与 [CommandArguments](parser/arguments/CommandArguments.ts)。
+- 一行输入只有三种业务结果：空输入、已解析命令或解析错误。空行、纯空白行和首个非空字符为 `#` 的注释行不产生命令，也不产生输出。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `tokenize`。
+- 双引号用于保留参数中的空白；`""` 表示空字符串参数。引号未闭合属于解析错误。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `scan` 与 [CommandArguments](parser/syntax/CommandArguments.ts)。
 - 解析错误和已建模的命令失败都输出一条 `error: <message>`，随后继续读取下一条输入；CLI 当前不向用户显示错误码。依据：[CommandSession](session/CommandSession.ts) 的 `handle` 与 `writeError`。
 - 命令成功后输出命令结果中的业务消息。成功的命令名分派只由 [CommandDefinitionRegistry](parser/definition/CommandDefinitionRegistry.ts) 维护，CLI 其他对象不得再增加第二套命令名分派。
 - `exit` 或输入流 EOF 结束会话；结束前已经执行的命令不回滚。依据：[CommandLoop](session/CommandLoop.ts) 的 `run`。
@@ -44,6 +44,6 @@
 
 - 会话控制：[CommandLoop](session/CommandLoop.ts)、[CommandSession](session/CommandSession.ts)。
 - 解析入口与分派：[CommandLineParser](parser/CommandLineParser.ts)、[CommandDefinitionRegistry](parser/definition/CommandDefinitionRegistry.ts)。
-- 切词与参数规则：[CommandLineTokenizer](parser/tokenization/CommandLineTokenizer.ts)、[CommandArguments](parser/arguments/CommandArguments.ts)。
+- 切词与参数规则：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts)、[CommandArguments](parser/syntax/CommandArguments.ts)。
 - 进程边界：[main.ts](../main.ts)。
-- 业务回归：[CommandLineTokenizer.test.ts](../../tests/cli/parser/tokenization/CommandLineTokenizer.test.ts)、[CommandSession.test.ts](../../tests/cli/session/CommandSession.test.ts)、[CommandLoop.test.ts](../../tests/cli/session/CommandLoop.test.ts)。
+- 业务回归：[CommandLineTokenizer.test.ts](../../tests/cli/parser/syntax/CommandLineTokenizer.test.ts)、[CommandSession.test.ts](../../tests/cli/session/CommandSession.test.ts)、[CommandLoop.test.ts](../../tests/cli/session/CommandLoop.test.ts)。
