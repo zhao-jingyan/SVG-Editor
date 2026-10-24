@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandExecutor } from "../../src/core/CommandExecutor";
 import { EditorContext } from "../../src/core/EditorContext";
-import { Command } from "../../src/protocol/Command";
+import { Command } from "../../src/protocol/commands/Command";
 import { AddToCommand } from "../../src/protocol/commands/shape/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/doc/CanvasCommand";
 import { CreateCommand } from "../../src/protocol/commands/shape/CreateCommand";

@@ -3,7 +3,7 @@ import type { ShapeAttributeSnapshot } from "../memento/ShapeAttributeSnapshot";
 import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";
 import type { EditableAttribute } from "../../EditableAttribute";
-import { UndoableCommand } from "../../UndoableCommand";
+import { UndoableCommand } from "../UndoableCommand";
 
 export class SetCommand extends UndoableCommand {
   public readonly type = "set";

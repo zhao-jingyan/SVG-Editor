@@ -1,4 +1,4 @@
-import type { Command } from "../../../../protocol/Command";
+import type { Command } from "../../../../protocol/commands/Command";
 import type { ShapeFactory } from "../../../../protocol/shapes/ShapeFactory";
 import type { CommandArguments } from "../../syntax/CommandArguments";
 import type { CommandDefinition } from "./CommandDefinition";

@@ -1,6 +1,6 @@
 import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";
-import { UndoableCommand } from "../../UndoableCommand";
+import { UndoableCommand } from "../UndoableCommand";
 import type { Shape } from "../../shapes/Shape";
 
 export class CreateCommand extends UndoableCommand {

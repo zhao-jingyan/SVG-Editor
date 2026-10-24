@@ -3,7 +3,7 @@ import { CommandLineParser } from "../../../src/cli/parser/CommandLineParser";
 import type { CommandParseResultDto } from "../../../src/cli/parser/results/CommandParseResult";
 import { CommandParseEmptyResult } from "../../../src/cli/parser/results/CommandParseEmptyResult";
 import { CommandParseErrorResult } from "../../../src/cli/parser/results/CommandParseErrorResult";
-import type { Command } from "../../../src/protocol/Command";
+import type { Command } from "../../../src/protocol/commands/Command";
 import type { EditableAttribute } from "../../../src/protocol/EditableAttribute";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
 import { AddToCommand } from "../../../src/protocol/commands/shape/AddToCommand";

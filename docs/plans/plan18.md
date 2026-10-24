@@ -10,6 +10,9 @@
 
 ```text
 src/protocol/commands
+├── Command.ts
+├── CommandType.ts
+├── UndoableCommand.ts
 ├── doc
 │   ├── CanvasCommand.ts
 │   ├── InitCommand.ts
@@ -41,6 +44,7 @@ src/protocol/commands
 
 ## 职责
 
+- 根目录：命令抽象基类、可撤销命令基类和命令类型集合。
 - `doc`：文档创建、读取、保存和画布尺寸。
 - `shape`：创建、删除、变换、属性和容器结构编辑。
 - `view`：树、明细和帮助显示。

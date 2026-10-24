@@ -1,4 +1,4 @@
-import type { Command } from "../protocol/Command";
+import type { Command } from "../protocol/commands/Command";
 import type { CommandContext } from "../protocol/CommandContext";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
@@ -10,7 +10,7 @@ import type { CommandResult } from "../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../protocol/results/CommandSuccessResult";
 import { GroupShape } from "../protocol/shapes/GroupShape";
 import type { Shape } from "../protocol/shapes/Shape";
-import { UndoableCommand } from "../protocol/UndoableCommand";
+import { UndoableCommand } from "../protocol/commands/UndoableCommand";
 import { HelpText } from "./display/HelpText";
 import { ShapeDetailVisitor } from "./display/ShapeDetailVisitor";
 import { TreeDisplay } from "./display/TreeDisplay";

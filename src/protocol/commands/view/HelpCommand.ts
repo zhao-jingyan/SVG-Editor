@@ -1,4 +1,4 @@
-import { Command } from "../../Command";
+import { Command } from "../Command";
 import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";
 

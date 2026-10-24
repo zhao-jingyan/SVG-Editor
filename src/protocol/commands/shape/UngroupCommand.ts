@@ -2,7 +2,7 @@ import { CommandSuccessResult } from "../../results/CommandSuccessResult";
 import type { ShapePlacement } from "../memento/ShapePlacement";
 import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";
-import { UndoableCommand } from "../../UndoableCommand";
+import { UndoableCommand } from "../UndoableCommand";
 
 export class UngroupCommand extends UndoableCommand {
   public readonly type = "ungroup";

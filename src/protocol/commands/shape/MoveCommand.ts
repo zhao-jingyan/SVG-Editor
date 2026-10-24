@@ -2,7 +2,7 @@ import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";
 import { CommandSuccessResult } from "../../results/CommandSuccessResult";
 import type { ShapeType } from "../../shapes/ShapeType";
-import { UndoableCommand } from "../../UndoableCommand";
+import { UndoableCommand } from "../UndoableCommand";
 
 export class MoveCommand extends UndoableCommand {
   public readonly type = "move";

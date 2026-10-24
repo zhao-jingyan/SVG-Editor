@@ -154,7 +154,7 @@ stdin
 
 | 模式 | 参与者与代码位置 | 解决的问题 | 替代方案与取舍 |
 |---|---|---|---|
-| Command | `protocol/Command.ts`、`protocol/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandContext` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
+| Command | `protocol/commands/Command.ts`、`protocol/commands/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandContext` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
 | Composite | `protocol/shapes/Shape.ts`、`GroupShape.ts` 与五种叶子图形 | 容器与叶子统一支持移动、缩放、公共样式设置和删除 | 在 Context/命令层到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
 | Factory | `protocol/shapes/ShapeFactory.ts` | 集中处理“图形类型名 -> 具体 Shape”，统一参数校验 | Parser 内重复 `switch(type)` 会产生第二个类型分派点，不采用 |
 | Visitor | `protocol/shapes/ShapeVisitor.ts`、各 Shape 的 `accept`；Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示与序列化层按类型分支会增加分派点，不采用 |

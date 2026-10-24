@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Command } from "../../src/protocol/Command";
+import { Command } from "../../src/protocol/commands/Command";
 import { AddToCommand } from "../../src/protocol/commands/shape/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/doc/CanvasCommand";
 import { CreateCommand } from "../../src/protocol/commands/shape/CreateCommand";
@@ -19,7 +19,7 @@ import { ShowCommand } from "../../src/protocol/commands/view/ShowCommand";
 import { TreeCommand } from "../../src/protocol/commands/view/TreeCommand";
 import { UndoCommand } from "../../src/protocol/commands/history/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/shape/UngroupCommand";
-import { UndoableCommand } from "../../src/protocol/UndoableCommand";
+import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";
 import { RecordingCommandContext } from "../support/RecordingCommandContext";
 
