@@ -8,7 +8,6 @@ import type { CommandResult } from "../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../protocol/shapes/model/Shape";
-import { UndoableCommand } from "../protocol/commands/UndoableCommand";
 import { HelpText } from "./display/HelpText";
 import { ShapeDetailVisitor } from "./display/ShapeDetailVisitor";
 import { TreeDisplay } from "./display/TreeDisplay";
@@ -22,29 +21,23 @@ import type { SvgStorage } from "./io/SvgStorage";
 export class EditorSession implements CommandReceiver {
   private document?: Document;
   private currentPath?: string;
-  private readonly history: CommandHistory = new CommandHistory();
   private readonly helpText: HelpText = new HelpText();
   private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
   private readonly treeDisplay: TreeDisplay = new TreeDisplay();
   private readonly svgDocumentParser: SvgDocumentParser = new SvgDocumentParser();
   private readonly svgDocumentWriter: SvgDocumentWriter = new SvgDocumentWriter();
-  private historyLocked: boolean = false;
 
   public constructor(
+    private readonly history: CommandHistory = new CommandHistory(),
     private readonly svgStorage: SvgStorage = new FileSvgStorage(),
   ) {}
-
-  public recordSuccessfulCommand(command: UndoableCommand): void {
-    this.history.record(command);
-    this.historyLocked = false;
-  }
 
   public async init(width?: number, height?: number): Promise<CommandResult> {
     const document = new Document(width ?? 800, height ?? 600);
     this.document = document;
     this.currentPath = undefined;
     this.history.clear();
-    this.historyLocked = true;
+    this.history.lock();
     return new CommandSuccessResult(
       `canvas ${document.getWidth()}x${document.getHeight()} created`,
     );
@@ -66,7 +59,7 @@ export class EditorSession implements CommandReceiver {
     this.document = parsed.getDocument();
     this.currentPath = path;
     this.history.clear();
-    this.historyLocked = true;
+    this.history.lock();
     return new CommandSuccessResult([
       ...parsed.getWarnings(),
       `read ${path} (${parsed.getElementCount()} elements)`,
@@ -96,7 +89,7 @@ export class EditorSession implements CommandReceiver {
     }
 
     this.currentPath = targetPath;
-    this.historyLocked = true;
+    this.history.lock();
     return new CommandSuccessResult(
       `saved to ${targetPath} (${this.svgDocumentWriter.countElements(document)} elements)`,
     );
@@ -119,7 +112,7 @@ export class EditorSession implements CommandReceiver {
     }
 
     document.resize(width, height);
-    this.historyLocked = true;
+    this.history.lock();
     return new CommandSuccessResult(
       `canvas ${document.getWidth()}x${document.getHeight()} resized`,
     );
@@ -284,13 +277,11 @@ export class EditorSession implements CommandReceiver {
 
   public async undo(): Promise<CommandResult> {
     this.requireDocument();
-    this.requireHistoryUnlocked();
     return this.history.undo(this);
   }
 
   public async redo(): Promise<CommandResult> {
     this.requireDocument();
-    this.requireHistoryUnlocked();
     return this.history.redo(this);
   }
 
@@ -303,15 +294,6 @@ export class EditorSession implements CommandReceiver {
     }
 
     return this.document;
-  }
-
-  private requireHistoryUnlocked(): void {
-    if (this.historyLocked) {
-      throw ProtocolError.commandExecution(
-        CommandErrorCode.HistoryUnavailable,
-        "undo not allowed after io command",
-      );
-    }
   }
 
   private formatValue(value: string | number): string {

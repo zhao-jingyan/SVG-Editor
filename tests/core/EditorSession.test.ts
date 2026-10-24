@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandExecutor } from "../../src/core/CommandExecutor";
 import { EditorSession } from "../../src/core/EditorSession";
+import { CommandHistory } from "../../src/core/history/CommandHistory";
 import { Command } from "../../src/protocol/commands/Command";
 import { AddToCommand } from "../../src/protocol/commands/shape/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/doc/CanvasCommand";
@@ -45,8 +46,9 @@ function createEditor(storage?: InMemorySvgStorage): {
   session: EditorSession;
   executor: CommandExecutor;
 } {
-  const session = new EditorSession(storage);
-  return { session, executor: new CommandExecutor(session) };
+  const history = new CommandHistory();
+  const session = new EditorSession(history, storage);
+  return { session, executor: new CommandExecutor(session, history) };
 }
 
 async function initialize(

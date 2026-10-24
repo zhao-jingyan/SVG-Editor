@@ -8,10 +8,12 @@ import type { UndoableCommand } from "../../protocol/commands/UndoableCommand";
 export class CommandHistory {
   private readonly undoStack: UndoableCommand[] = [];
   private readonly redoStack: UndoableCommand[] = [];
+  private locked: boolean = false;
 
   public record(command: UndoableCommand): void {
     this.undoStack.push(command);
     this.redoStack.length = 0;
+    this.locked = false;
   }
 
   public canUndo(): boolean {
@@ -23,6 +25,10 @@ export class CommandHistory {
   }
 
   public async undo(receiver: CommandReceiver): Promise<CommandResult> {
+    if (this.locked) {
+      return this.unavailable("undo not allowed after io command");
+    }
+
     const command = this.undoStack[this.undoStack.length - 1];
 
     if (command === undefined) {
@@ -41,6 +47,10 @@ export class CommandHistory {
   }
 
   public async redo(receiver: CommandReceiver): Promise<CommandResult> {
+    if (this.locked) {
+      return this.unavailable("undo not allowed after io command");
+    }
+
     const command = this.redoStack[this.redoStack.length - 1];
 
     if (command === undefined) {
@@ -61,6 +71,10 @@ export class CommandHistory {
   public clear(): void {
     this.undoStack.length = 0;
     this.redoStack.length = 0;
+  }
+
+  public lock(): void {
+    this.locked = true;
   }
 
   private unavailable(message: string): CommandResult {

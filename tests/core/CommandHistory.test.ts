@@ -174,4 +174,32 @@ describe("CommandHistory", () => {
     expect(history.canUndo()).toBe(false);
     expect(history.canRedo()).toBe(false);
   });
+
+  it("自行维护历史锁，并在记录成功命令后重新解锁", async () => {
+    const history = new CommandHistory();
+    history.record(new ScriptedUndoableCommand());
+    history.lock();
+
+    const undoResult = await history.undo(receiver);
+    const redoResult = await history.redo(receiver);
+
+    expect(undoResult.toCommandResultDto()).toEqual({
+      type: "error",
+      error: {
+        code: CommandErrorCode.HistoryUnavailable,
+        message: "undo not allowed after io command",
+      },
+    });
+    expect(redoResult.toCommandResultDto()).toEqual({
+      type: "error",
+      error: {
+        code: CommandErrorCode.HistoryUnavailable,
+        message: "undo not allowed after io command",
+      },
+    });
+    expect(history.canUndo()).toBe(true);
+
+    history.record(new ScriptedUndoableCommand());
+    expect((await history.undo(receiver)).isSuccess()).toBe(true);
+  });
 });

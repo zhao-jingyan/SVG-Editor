@@ -1,20 +1,24 @@
+import type { CommandReceiver } from "../protocol/CommandReceiver";
 import type { Command } from "../protocol/commands/Command";
 import { UndoableCommand } from "../protocol/commands/UndoableCommand";
 import { ProtocolError } from "../protocol/errors/ProtocolError";
 import type { Executor } from "../protocol/Executor";
 import { CommandErrorResult } from "../protocol/results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../protocol/results/CommandResult";
-import { EditorSession } from "./EditorSession";
+import type { CommandHistory } from "./history/CommandHistory";
 
 export class CommandExecutor implements Executor {
-  public constructor(private readonly receiver: EditorSession) {}
+  public constructor(
+    private readonly receiver: CommandReceiver,
+    private readonly history: CommandHistory,
+  ) {}
 
   public async execute(command: Command): Promise<CommandResult> {
     try {
       const result = await command.execute(this.receiver);
 
       if (result.isSuccess() && command instanceof UndoableCommand) {
-        this.receiver.recordSuccessfulCommand(command);
+        this.history.record(command);
       }
 
       return result;

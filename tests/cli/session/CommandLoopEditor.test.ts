@@ -6,6 +6,7 @@ import type { InputReader } from "../../../src/cli/io/InputReader";
 import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
 import { EditorSession } from "../../../src/core/EditorSession";
+import { CommandHistory } from "../../../src/core/history/CommandHistory";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 
 class FakeInputReader implements InputReader {
@@ -37,10 +38,11 @@ describe("CommandLoop 真实编辑链路", () => {
       "exit",
     ]);
     const output = new FakeOutputWriter();
-    const editor = new EditorSession();
+    const history = new CommandHistory();
+    const editor = new EditorSession(history);
     const session = new CommandSession(
       new CommandLineParser(new ShapeFactory()),
-      new CommandExecutor(editor),
+      new CommandExecutor(editor, history),
       output,
     );
     const commandLoop = new CommandLoop(

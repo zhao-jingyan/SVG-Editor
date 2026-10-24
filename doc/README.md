@@ -136,7 +136,7 @@ stdin
   -> 具体 Command
   -> CommandExecutor
   -> command.execute(CommandReceiver)
-  -> EditorSession.recordSuccessfulCommand
+  -> CommandHistory.record
   -> Document / Shape / CommandHistory
   -> CommandResultDto
   -> stdout
@@ -145,8 +145,8 @@ stdin
 - Parser 只把文本转换为 Command，不执行文档编辑。
 - CommandSession 负责单次输入的交互策略：跳过空输入、反馈解析错误、执行命令、输出结果和决定是否退出。
 - CommandLoop 只负责提示符、逐行读取、会话生命周期与终止，不解释 Parser 或 Executor 的结果。
-- CommandExecutor 负责调用命令、成功命令入栈与 `ProtocolError -> CommandErrorResult` 转换。
-- EditorSession 负责文档生命周期、历史锁和历史栈状态。
+- CommandExecutor 负责调用命令、直接记录成功命令与 `ProtocolError -> CommandErrorResult` 转换。
+- EditorSession 负责文档生命周期、IO 与撤销入口；历史栈和历史锁由共享的 `CommandHistory` 管理。
 - 具体命令通过 `CommandReceiver` 操作文档，并通过局部快照实现逆操作。
 - `CommandHistory` 只保存成功执行过的 `UndoableCommand`，不保存整文档快照。
 
