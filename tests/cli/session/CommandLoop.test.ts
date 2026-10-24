@@ -84,9 +84,9 @@ describe("CommandLoop", () => {
       output,
     );
 
-    await new CommandLoop(input, output, session, "svg-editor 0.1").run();
+    await new CommandLoop(input, output, session, "svg-editor 1.0.0").run();
 
-    expect(output.lines).toEqual(["svg-editor 0.1"]);
+    expect(output.lines).toEqual(["svg-editor 1.0.0"]);
     expect(output.prompts).toEqual(["svg> "]);
   });
 

@@ -1,7 +1,7 @@
 {
   "name": "svg-editor",
-  "version": "0.0.1",
-  "description": "SVG editor CLI boundary prototype",
+  "version": "1.0.0",
+  "description": "SVG editor CLI",
   "main": "dist/main.js",
   "directories": {
     "doc": "doc"

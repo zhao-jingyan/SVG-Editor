@@ -49,13 +49,13 @@ describe("CommandLoop 真实编辑链路", () => {
       input,
       output,
       session,
-      "svg-editor 0.1 — type 'help' for commands",
+      "svg-editor 1.0.0 — type 'help' for commands",
     );
 
     await commandLoop.run();
 
     expect(output.lines).toEqual([
-      "svg-editor 0.1 — type 'help' for commands",
+      "svg-editor 1.0.0 — type 'help' for commands",
       "canvas 800x600 created",
       "rect#r1 created",
       "rect#r1 moved to (5,5)",

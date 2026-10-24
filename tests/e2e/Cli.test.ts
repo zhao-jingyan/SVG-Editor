@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
 const repositoryRoot = process.cwd();
-const startupMessage = "svg-editor 0.1 — type 'help' for commands";
+const startupMessage = "svg-editor 1.0.0 — type 'help' for commands";
 
 interface CliRun {
   readonly status: number | null;

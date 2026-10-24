@@ -2,7 +2,7 @@
 
 ## 1. 项目范围
 
-本项目实现一个面向 SVG 图形文档的命令行编辑器。当前阶段覆盖：
+本项目发布版本为 `1.0.0`，实现一个面向 SVG 图形文档的命令行编辑器。当前阶段覆盖：
 
 - `init` / `read` / `save` / `canvas` 文档命令；
 - `create` / `delete` / `move` / `scale` / `set` / `group` / `ungroup` / `addto` / `front` / `back` 编辑命令；
@@ -13,7 +13,7 @@
 
 CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要或 `error:` 消息。图形统一以 `id` 定位，容器与叶子图形共享 `move`、`scale`、`set`、`delete` 等编辑语义。
 
-本阶段暂不实现 `box` 插件、ShapeProvider 注册表、复杂 SVG 特性（`defs`、外部引用、复杂 `transform` 等）、GUI 或渲染器。架构重构已在行为基线完成后持续进行；当前不创建 `final` tag，待重构验收完成后再确定发布节点。
+本阶段暂不实现 `box` 插件、ShapeProvider 注册表、复杂 SVG 特性（`defs`、外部引用、复杂 `transform` 等）、GUI 或渲染器。架构重构已在行为基线完成后持续进行；`1.0.0` 作为本阶段交付版本，`final` tag 指向对应发布提交。
 
 ## 2. 模块划分与职责
 
@@ -229,7 +229,7 @@ src/core -/-> src/cli
 - `CommandExecutor` 是唯一成功命令记录点；`CommandHistory` 是撤销/重做栈和历史锁的唯一所有者；Document 不持有历史。
 - `EditorCommandReceiver` 只做接口聚合和能力委托，当前文档由 `EditorDocumentCommandReceiver` 持有，图形和显示能力通过该对象取得文档。
 - 组件图、执行链路、设计模式参与者和模块目录均按当前源码核对；`docs/facts/` 记录局部实现事实，`docs/plans/` 记录阶段计划。
-- 当前未打 `final` tag。最终验收前仍需再次核对本文件、事实文档、依赖方向和 E2E 回归。
+- `1.0.0` 发布提交已通过本文件、事实文档、依赖方向和 E2E 回归核对，并由 `final` tag 标记。
 
 ## 8. 质量保证
 

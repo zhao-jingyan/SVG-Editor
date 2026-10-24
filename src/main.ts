@@ -22,7 +22,7 @@ async function main(): Promise<void> {
     inputReader,
     outputWriter,
     session,
-    "svg-editor 0.1 — type 'help' for commands",
+    "svg-editor 1.0.0 — type 'help' for commands",
   );
 
   try {
