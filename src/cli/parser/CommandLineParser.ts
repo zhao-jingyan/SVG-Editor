@@ -3,7 +3,7 @@ import { CommandParseError } from "../../protocol/errors/CommandParseError";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import type { ShapeFactory } from "../../protocol/shapes/ShapeFactory";
 import { CommandArguments } from "./syntax/CommandArguments";
-import { CommandDefinitionRegistry } from "./definition/CommandDefinitionRegistry";
+import { CommandDefinitionRegistry } from "./commands/definition/CommandDefinitionRegistry";
 import type { CommandParser } from "./CommandParser";
 import { CommandLineTokenizer } from "./syntax/CommandLineTokenizer";
 import { CommandParseEmptyResult } from "./results/CommandParseEmptyResult";

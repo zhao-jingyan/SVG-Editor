@@ -49,10 +49,10 @@ package "src/cli" {
       [CommandLineTokenizer] as Tokenizer
       [CommandArguments] as Arguments
     }
-    package "definition" {
-      [CommandDefinitionRegistry] as Registry
-    }
     package "commands" {
+      package "definition" {
+        [CommandDefinitionRegistry] as Registry
+      }
       [Command family parsers] as CommandParsers
     }
     package "results" {

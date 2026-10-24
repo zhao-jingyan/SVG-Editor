@@ -13,6 +13,9 @@ src/cli/parser
 ├── CommandLineParser.ts
 ├── CommandParser.ts
 ├── commands
+│   ├── definition
+│   │   ├── CommandDefinition.ts
+│   │   └── CommandDefinitionRegistry.ts
 │   ├── document
 │   │   └── DocumentCommandParser.ts
 │   ├── shape
@@ -20,9 +23,6 @@ src/cli/parser
 │   │   └── ShapeCommandParser.ts
 │   └── view
 │       └── ViewCommandParser.ts
-├── definition
-│   ├── CommandDefinition.ts
-│   └── CommandDefinitionRegistry.ts
 ├── results
 │   ├── CommandParseEmptyResult.ts
 │   ├── CommandParseErrorResult.ts
@@ -36,8 +36,7 @@ src/cli/parser
 ## 职责
 
 - `syntax`：文本到 token，以及 token 的元数、类型和切片校验。
-- `commands`：按文档、图形、显示三个命令族构造 Command。
-- `definition`：命令名与对应构造器的集中注册。
+- `commands`：命令定义与注册，以及按文档、图形、显示三个命令族构造 Command。
 - `results`：解析结果类层次和边界 DTO。
 - 根目录：只暴露解析能力和解析入口。
 

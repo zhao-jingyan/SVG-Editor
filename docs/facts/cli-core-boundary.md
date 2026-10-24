@@ -21,6 +21,9 @@ src/cli
 │   ├── CommandLineParser.ts
 │   ├── CommandParser.ts
 │   ├── commands
+│   │   ├── definition
+│   │   │   ├── CommandDefinition.ts
+│   │   │   └── CommandDefinitionRegistry.ts
 │   │   ├── document
 │   │   │   └── DocumentCommandParser.ts
 │   │   ├── shape
@@ -28,9 +31,6 @@ src/cli
 │   │   │   └── ShapeCommandParser.ts
 │   │   └── view
 │   │       └── ViewCommandParser.ts
-│   ├── definition
-│   │   ├── CommandDefinition.ts
-│   │   └── CommandDefinitionRegistry.ts
 │   ├── results
 │   │   ├── CommandParseEmptyResult.ts
 │   │   ├── CommandParseErrorResult.ts
