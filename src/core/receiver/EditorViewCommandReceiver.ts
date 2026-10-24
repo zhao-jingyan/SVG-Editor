@@ -4,23 +4,25 @@ import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuc
 import { HelpText } from "../display/HelpText";
 import { ShapeDetailVisitor } from "../display/ShapeDetailVisitor";
 import { TreeDisplay } from "../display/TreeDisplay";
-import type { DocumentManager } from "./DocumentManager";
+import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
-export class EditorView implements ViewCommandReceiver {
+export class EditorViewCommandReceiver implements ViewCommandReceiver {
   private readonly helpText: HelpText = new HelpText();
   private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
   private readonly treeDisplay: TreeDisplay = new TreeDisplay();
 
-  public constructor(private readonly documentManager: DocumentManager) {}
+  public constructor(
+    private readonly documentReceiver: EditorDocumentCommandReceiver,
+  ) {}
 
   public async tree(shapeId?: string): Promise<CommandResult> {
     return new CommandSuccessResult(
-      this.treeDisplay.render(this.documentManager.requireDocument(), shapeId),
+      this.treeDisplay.render(this.documentReceiver.requireDocument(), shapeId),
     );
   }
 
   public async show(shapeId: string): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     const parentId = document.getParentId(shapeId);
     const parentLabel = parentId === undefined ? "svg" : `g#${parentId}`;

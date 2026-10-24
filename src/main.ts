@@ -5,17 +5,17 @@ import { CommandLoop } from "./cli/session/CommandLoop";
 import { CommandSession } from "./cli/session/CommandSession";
 import { CommandExecutor } from "./core/CommandExecutor";
 import { CommandHistory } from "./core/history/CommandHistory";
-import { EditorReceiver } from "./core/receiver/EditorReceiver";
+import { EditorCommandReceiver } from "./core/receiver/EditorCommandReceiver";
 import { ShapeFactory } from "./protocol/shapes/factory/ShapeFactory";
 
 async function main(): Promise<void> {
   const inputReader = new ConsoleInputReader();
   const outputWriter = new ConsoleOutputWriter();
   const history = new CommandHistory();
-  const editorReceiver = new EditorReceiver(history);
+  const editorCommandReceiver = new EditorCommandReceiver(history);
   const session = new CommandSession(
     new CommandLineParser(new ShapeFactory()),
-    new CommandExecutor(editorReceiver, history),
+    new CommandExecutor(editorCommandReceiver, history),
     outputWriter,
   );
   const commandLoop = new CommandLoop(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
-import { EditorReceiver } from "../../../src/core/receiver/EditorReceiver";
+import { EditorCommandReceiver } from "../../../src/core/receiver/EditorCommandReceiver";
 import { CommandHistory } from "../../../src/core/history/CommandHistory";
 import { Command } from "../../../src/protocol/commands/Command";
 import { AddToCommand } from "../../../src/protocol/commands/shape/AddToCommand";
@@ -43,11 +43,11 @@ function expectErrorMessage(
 }
 
 function createReceiver(storage?: InMemorySvgStorage): {
-  receiver: EditorReceiver;
+  receiver: EditorCommandReceiver;
   executor: CommandExecutor;
 } {
   const history = new CommandHistory();
-  const receiver = new EditorReceiver(history, storage);
+  const receiver = new EditorCommandReceiver(history, storage);
   return { receiver, executor: new CommandExecutor(receiver, history) };
 }
 
@@ -63,7 +63,7 @@ async function initialize(
   });
 }
 
-describe("EditorReceiver", () => {
+describe("EditorCommandReceiver", () => {
   it("管理文档生命周期、画布查询和历史锁", async () => {
     const { executor } = createReceiver();
 

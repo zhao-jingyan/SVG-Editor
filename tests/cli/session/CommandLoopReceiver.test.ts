@@ -5,7 +5,7 @@ import { CommandSession } from "../../../src/cli/session/CommandSession";
 import type { InputReader } from "../../../src/cli/io/InputReader";
 import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
-import { EditorReceiver } from "../../../src/core/receiver/EditorReceiver";
+import { EditorCommandReceiver } from "../../../src/core/receiver/EditorCommandReceiver";
 import { CommandHistory } from "../../../src/core/history/CommandHistory";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 
@@ -39,7 +39,7 @@ describe("CommandLoop 真实编辑链路", () => {
     ]);
     const output = new FakeOutputWriter();
     const history = new CommandHistory();
-    const receiver = new EditorReceiver(history);
+    const receiver = new EditorCommandReceiver(history);
     const session = new CommandSession(
       new CommandLineParser(new ShapeFactory()),
       new CommandExecutor(receiver, history),

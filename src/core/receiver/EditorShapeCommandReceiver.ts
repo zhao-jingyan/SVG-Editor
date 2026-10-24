@@ -6,16 +6,18 @@ import type { CommandResult } from "../../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../protocol/shapes/model/Shape";
-import type { DocumentManager } from "./DocumentManager";
+import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
-export class ShapeEditor implements ShapeCommandReceiver {
-  public constructor(private readonly documentManager: DocumentManager) {}
+export class EditorShapeCommandReceiver implements ShapeCommandReceiver {
+  public constructor(
+    private readonly documentReceiver: EditorDocumentCommandReceiver,
+  ) {}
 
   public async createShape(
     shape: Shape,
     parentId?: string,
   ): Promise<CommandResult> {
-    this.documentManager.requireDocument().addShape(shape, parentId);
+    this.documentReceiver.requireDocument().addShape(shape, parentId);
     const suffix = parentId === undefined ? "" : ` in g#${parentId}`;
     return new CommandSuccessResult(
       `${shape.getType()}#${shape.getId()} created${suffix}`,
@@ -23,7 +25,7 @@ export class ShapeEditor implements ShapeCommandReceiver {
   }
 
   public async deleteShape(shapeId: string): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     document.deleteShape(shapeId);
     return new CommandSuccessResult(
@@ -36,7 +38,7 @@ export class ShapeEditor implements ShapeCommandReceiver {
     dx: number,
     dy: number,
   ): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     document.moveShape(shapeId, dx, dy);
     const position = shape.getPosition();
@@ -56,7 +58,7 @@ export class ShapeEditor implements ShapeCommandReceiver {
     shapeId: string,
     factor: number,
   ): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     document.scaleShape(shapeId, factor);
     return new CommandSuccessResult(
@@ -69,7 +71,7 @@ export class ShapeEditor implements ShapeCommandReceiver {
     attribute: EditableAttribute,
     value: string | number,
   ): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     document.setAttribute(shapeId, attribute, value);
     return new CommandSuccessResult(
@@ -81,14 +83,14 @@ export class ShapeEditor implements ShapeCommandReceiver {
     containerId: string,
     memberIds: readonly string[],
   ): Promise<CommandResult> {
-    this.documentManager.requireDocument().groupShapes(containerId, memberIds);
+    this.documentReceiver.requireDocument().groupShapes(containerId, memberIds);
     return new CommandSuccessResult(
       `g#${containerId} created with ${memberIds.length} children`,
     );
   }
 
   public async ungroupShapes(containerId: string): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const container = document.getShape(containerId);
     const childCount = container instanceof GroupShape
       ? container.getChildren().length
@@ -103,7 +105,7 @@ export class ShapeEditor implements ShapeCommandReceiver {
     containerId: string,
     shapeId: string,
   ): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     document.addToContainer(containerId, shapeId);
     return new CommandSuccessResult(
@@ -115,7 +117,7 @@ export class ShapeEditor implements ShapeCommandReceiver {
     shapeId: string,
     position: "front" | "back",
   ): Promise<CommandResult> {
-    const document = this.documentManager.requireDocument();
+    const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
     document.reorderShape(shapeId, position);
     return new CommandSuccessResult(
@@ -124,26 +126,26 @@ export class ShapeEditor implements ShapeCommandReceiver {
   }
 
   public capturePlacement(shapeId: string): ShapePlacement {
-    return this.documentManager.requireDocument().capturePlacement(shapeId);
+    return this.documentReceiver.requireDocument().capturePlacement(shapeId);
   }
 
   public restorePlacements(placements: readonly ShapePlacement[]): void {
-    this.documentManager.requireDocument().restorePlacements(placements);
+    this.documentReceiver.requireDocument().restorePlacements(placements);
   }
 
   public restoreGroup(placement: ShapePlacement): void {
-    this.documentManager.requireDocument().restoreGroup(placement);
+    this.documentReceiver.requireDocument().restoreGroup(placement);
   }
 
   public captureAttribute(
     shapeId: string,
     attribute: EditableAttribute,
   ): ShapeAttributeSnapshot {
-    return this.documentManager.requireDocument().captureAttribute(shapeId, attribute);
+    return this.documentReceiver.requireDocument().captureAttribute(shapeId, attribute);
   }
 
   public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {
-    this.documentManager.requireDocument().restoreAttribute(snapshot);
+    this.documentReceiver.requireDocument().restoreAttribute(snapshot);
   }
 
   private formatValue(value: string | number): string {
