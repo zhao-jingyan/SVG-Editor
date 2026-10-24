@@ -1,4 +1,4 @@
-import type { CommandContext } from "../../protocol/CommandContext";
+import type { CommandReceiver } from "../../protocol/CommandReceiver";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { CommandErrorResult } from "../../protocol/results/outcomes/CommandErrorResult";
@@ -22,14 +22,14 @@ export class CommandHistory {
     return this.redoStack.length > 0;
   }
 
-  public async undo(context: CommandContext): Promise<CommandResult> {
+  public async undo(receiver: CommandReceiver): Promise<CommandResult> {
     const command = this.undoStack[this.undoStack.length - 1];
 
     if (command === undefined) {
       return this.unavailable("no command to undo");
     }
 
-    const result = await command.undo(context);
+    const result = await command.undo(receiver);
 
     if (!result.isSuccess()) {
       return result;
@@ -40,14 +40,14 @@ export class CommandHistory {
     return result;
   }
 
-  public async redo(context: CommandContext): Promise<CommandResult> {
+  public async redo(receiver: CommandReceiver): Promise<CommandResult> {
     const command = this.redoStack[this.redoStack.length - 1];
 
     if (command === undefined) {
       return this.unavailable("no command to redo");
     }
 
-    const result = await command.execute(context);
+    const result = await command.execute(receiver);
 
     if (!result.isSuccess()) {
       return result;

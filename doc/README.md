@@ -23,7 +23,7 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 | `src/cli/io` | 交互输入输出端口与终端适配器 | 仅自身端口 |
 | `src/cli/parser` | 文本到具体 Command 的解析、CLI 解析结果与边界 DTO | `src/protocol` |
 | `src/cli/session` | 交互循环、单次命令编排、反馈与继续/退出策略 | `src/cli/io`、`src/cli/parser`、`src/protocol` |
-| `src/protocol` | CLI 与 Core 共享的命令模型、图形领域模型、`CommandContext` / `Executor` 端口、结果与错误模型、SVG 图形工厂 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
+| `src/protocol` | CLI 与 Core 共享的命令模型、图形领域模型、`CommandReceiver` / `Executor` 端口、结果与错误模型、SVG 图形工厂 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
 | `src/core` | 应用编排、文档聚合、历史栈、显示格式化、SVG 解析与文件适配 | `src/protocol`；仅 `core/io/FileSvgStorage` 使用 Node `fs/promises` |
 | `scripts/e2e.mjs` | 黑盒端到端回归脚本，启动真实编译产物并检查输出与文件结果 | Node 标准库 |
 | `tests` | 单元测试、协议测试、Core 协作测试与进程级 E2E 测试 | 按测试对象使用相应模块 |
@@ -69,7 +69,7 @@ package "src/cli" {
 
 package "src/protocol" {
   [Command / UndoableCommand] as Command
-  [CommandContext / Executor] as Ports
+  [CommandReceiver / Executor] as Ports
   [Shape / ShapeFactory] as Shapes
   [Results / Errors] as Results
 }
@@ -136,7 +136,7 @@ stdin
   -> 具体 Command
   -> CommandExecutor
   -> EditorContext.execute
-  -> command.execute(CommandContext)
+  -> command.execute(CommandReceiver)
   -> Document / Shape / CommandHistory
   -> CommandResultDto
   -> stdout
@@ -147,14 +147,14 @@ stdin
 - CommandLoop 只负责提示符、逐行读取、会话生命周期与终止，不解释 Parser 或 Executor 的结果。
 - CommandExecutor 负责执行入口与 `ProtocolError -> CommandErrorResult` 转换。
 - EditorContext 负责文档生命周期、历史锁和历史记录。
-- 具体命令通过 `CommandContext` 操作文档，并通过局部快照实现逆操作。
+- 具体命令通过 `CommandReceiver` 操作文档，并通过局部快照实现逆操作。
 - `CommandHistory` 只保存成功执行过的 `UndoableCommand`，不保存整文档快照。
 
 ## 3. 设计模式与落地位置
 
 | 模式 | 参与者与代码位置 | 解决的问题 | 替代方案与取舍 |
 |---|---|---|---|
-| Command | `protocol/commands/Command.ts`、`protocol/commands/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandContext` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
+| Command | `protocol/commands/Command.ts`、`protocol/commands/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandReceiver` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
 | Composite | `protocol/shapes/model/Shape.ts`、`protocol/shapes/concrete/GroupShape.ts` 与五种叶子图形 | 容器与叶子统一支持移动、缩放、公共样式设置和删除 | 在 Context/命令层到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
 | Factory | `protocol/shapes/factory/ShapeFactory.ts` | 集中处理“图形类型名 -> 具体 Shape”，统一参数校验 | Parser 内重复 `switch(type)` 会产生第二个类型分派点，不采用 |
 | Visitor | `protocol/shapes/visitor/ShapeVisitor.ts`、各 Shape 的 `accept`；Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示与序列化层按类型分支会增加分派点，不采用 |
@@ -179,7 +179,7 @@ src/core -/-> src/cli
 
 理由：
 
-- `protocol` 是 CLI 与 Core 的共同语言。它同时放置 `CommandContext` 与 `Executor` 端口，避免 CLI 为了执行命令反向依赖 Core。
+- `protocol` 是 CLI 与 Core 的共同语言。它同时放置 `CommandReceiver` 与 `Executor` 端口，避免 CLI 为了执行命令反向依赖 Core。
 - `cli` 只处理输入输出、解析和协议转换；业务规则与文档状态留在 Core。
 - `core` 编排命令执行、历史、文档和 IO；它可以使用 Protocol 的领域对象与端口，但不能依赖 UI 适配器。
 - `main.ts` 是唯一知道所有具体实现并完成组装的组合根。
@@ -193,7 +193,7 @@ src/core -/-> src/cli
 | 图形类型扩展 | `box`、流程图节点、插件提供的复合图形 | `ShapeFactory` 集中创建；`Shape`/`GroupShape` 支持组合与 Visitor | 尚无插件生命周期和第三方注册需求，提前做注册表会引入不稳定接口 |
 | SVG 保真度 | 保留未知元素、注释、`defs`、复杂 `transform`、样式继承 | `SvgStorage`、Parser、Writer 已隔离在 `core/io` | 当前只要求受控子集，复杂 DOM 保真策略尚未确定 |
 | 新入口 | GUI、IPC、Web API、批量脚本 | `protocol` 的命令、图形、结果、错误与端口可复用 | 还没有第二个真实入口，不先造通用应用框架 |
-| 更多命令或接收者能力 | `CommandContext` 继续增长，或需要拆分能力端口 | 编辑、捕获、显示方法已集中在接口中 | 当前规模可控；若接口继续膨胀，可在重构中按能力拆分 |
+| 更多命令或接收者能力 | `CommandReceiver` 继续增长，或需要拆分能力端口 | 编辑、捕获、显示方法已集中在接口中 | 当前规模可控；若接口继续膨胀，可在重构中按能力拆分 |
 | 渲染与预览 | 画布渲染、坐标变换、命中测试 | 领域状态与 CLI 输出解耦 | CLI 阶段没有渲染器需求，不为假设中的 UI 建空抽象 |
 | 持久化格式演进 | 文档版本、迁移、非 SVG 存储 | `SvgStorage` 作为文件边界 | SVG 是当前唯一格式，版本迁移需求尚未出现 |
 

@@ -1,4 +1,4 @@
-import type { CommandContext } from "../../src/protocol/CommandContext";
+import type { CommandReceiver } from "../../src/protocol/CommandReceiver";
 import type { CommandType } from "../../src/protocol/commands/CommandType";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
@@ -23,12 +23,12 @@ export class ScriptedUndoableCommand extends UndoableCommand {
     super();
   }
 
-  public async execute(_context: CommandContext): Promise<CommandResult> {
+  public async execute(_receiver: CommandReceiver): Promise<CommandResult> {
     this.executeCount += 1;
     return this.resolve(this.executeOutcome);
   }
 
-  public async undo(_context: CommandContext): Promise<CommandResult> {
+  public async undo(_receiver: CommandReceiver): Promise<CommandResult> {
     this.undoCount += 1;
     return this.resolve(this.undoOutcome);
   }

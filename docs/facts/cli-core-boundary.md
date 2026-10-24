@@ -2,12 +2,12 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 根目录持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；Protocol 根持有 `CommandContext` 接收者接口、`Executor` 入口端口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 根目录持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；Protocol 根持有 `CommandReceiver` 接收者接口、`Executor` 入口端口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`tokenization`、`arguments`、`commands`、`definition`、`results` 分别承载切词、参数校验、命令构造、命令注册和解析结果。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
 - `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorContext`、`CommandHistory`、`document`、`display` 和 `io` 子系统。`EditorContext` 实现命令接收者并持有当前文档与历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
-- `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
+- `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandReceiver。
 - `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core` 存放 EditorContext、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
 
 ```text
@@ -60,17 +60,17 @@ src/cli
 ```typescript
 export abstract class Command {
   public abstract readonly type: CommandType;
-  public abstract execute(context: CommandContext): Promise<CommandResult>;
+  public abstract execute(receiver: CommandReceiver): Promise<CommandResult>;
 }
 ```
 
-- `UndoableCommand` 继承 `Command`，提供 `undo(context)`；九类图形编辑命令均已覆盖逆操作，基类默认实现仍作为未覆盖子类的安全兜底。
+- `UndoableCommand` 继承 `Command`，提供 `undo(receiver)`；九类图形编辑命令均已覆盖逆操作，基类默认实现仍作为未覆盖子类的安全兜底。
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
-- 具体命令封装私有参数，`execute` 通过多态委托给 `CommandContext`，不再由 Executor 根据 `type` 分派。
+- 具体命令封装私有参数，`execute` 通过多态委托给 `CommandReceiver`，不再由 Executor 根据 `type` 分派。
 - `CommandDefinitionRegistry` 集中维护“命令名 → 命令定义”的唯一映射；`DocumentCommandParser`、`CreateCommandParser`、`ShapeCommandParser` 和 `ViewCommandParser` 只负责各自命令族的参数解释与对象构造。
 - `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、注册表查找和解析结果包装。
 - `CommandArguments` 统一处理元数、必填文本、数字转换和参数切片，解析器不再分散维护静态辅助函数。
-- `CommandContext` 是命令接收者接口，编辑方法统一返回 `Promise<CommandResult>`；另提供位置、子树和属性快照的同步捕获/恢复方法，供命令保存局部撤销状态。
+- `CommandReceiver` 是命令接收者接口，编辑方法统一返回 `Promise<CommandResult>`；另提供位置、子树和属性快照的同步捕获/恢复方法，供命令保存局部撤销状态。
 
 ## 结果模型
 
@@ -99,7 +99,7 @@ export abstract class Command {
 - `ShapeFactory` 是唯一的“图形类型名 → 具体类”分派点；Parser 不直接构造领域对象。
 - `ShapeVisitor` 是图形显示扩展点：`Shape.accept` 由各具体类分派到 Visitor，`ShapeSummaryVisitor` 和 `ShapeDetailVisitor` 位于 Core 的 `display` 子系统。
 - SVG 解析通过 `ShapeFactory` 创建具体图形；写出通过 `SvgShapeWriter` Visitor 生成元素，不新增按图形类型分派的业务流程。
-- `CreateCommand` 与 `CommandContext.createShape` 直接携带 `Shape`，不再使用 `ShapeSpec` 或图形 DTO。
+- `CreateCommand` 与 `CommandReceiver.createShape` 直接携带 `Shape`，不再使用 `ShapeSpec` 或图形 DTO。
 - 图形模型的设计模式角色、替代方案和当前边界见 `docs/facts/domain-shapes.md`。
 
 ## 依赖方向
@@ -120,7 +120,7 @@ src/core -/-> src/cli
 - `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
 - `CommandExecutor` 位于 Core，实现 `Executor`，委托 `EditorContext.execute`，只依赖协议层 `Command`、`ProtocolError` 和结果类层次。
-- `EditorContext` 位于 Core，实现 `CommandContext`，持有可选 `Document`、`CommandHistory` 和历史锁；成功执行编辑命令后记录历史并解除锁定。
+- `EditorContext` 位于 Core，实现 `CommandReceiver`，持有可选 `Document`、`CommandHistory` 和历史锁；成功执行编辑命令后记录历史并解除锁定。
 - `EditorContext` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
 - `CommandHistory` 由 `EditorContext` 持有，是真正的 Caretaker；undo/redo 命令通过 Context 委托历史栈。
 - `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。

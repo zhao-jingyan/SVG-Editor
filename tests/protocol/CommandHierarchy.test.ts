@@ -21,7 +21,7 @@ import { UndoCommand } from "../../src/protocol/commands/history/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/shape/UngroupCommand";
 import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
 import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
-import { RecordingCommandContext } from "../support/RecordingCommandContext";
+import { RecordingCommandReceiver } from "../support/RecordingCommandReceiver";
 
 describe("Command 类层次", () => {
   it("编辑命令继承 UndoableCommand", () => {
@@ -64,13 +64,13 @@ describe("Command 类层次", () => {
   });
 
   it("具体撤销命令调用对应的逆操作", async () => {
-    const context = new RecordingCommandContext();
+    const receiver = new RecordingCommandReceiver();
     const command = new MoveCommand("r1", 10, 20);
-    await command.execute(context);
-    const result = await command.undo(context);
+    await command.execute(receiver);
+    const result = await command.undo(receiver);
 
     expect(result.isSuccess()).toBe(true);
-    expect(context.calls).toEqual([
+    expect(receiver.calls).toEqual([
       { method: "moveShape", args: ["r1", 10, 20] },
       { method: "moveShape", args: ["r1", -10, -20] },
     ]);

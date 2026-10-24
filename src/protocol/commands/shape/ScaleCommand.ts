@@ -1,4 +1,4 @@
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapeType } from "../../shapes/model/ShapeType";
@@ -15,12 +15,12 @@ export class ScaleCommand extends UndoableCommand {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    this.shapeType = context.capturePlacement(this.shapeId).getShape().getType();
-    return context.scaleShape(this.shapeId, this.factor);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    this.shapeType = receiver.capturePlacement(this.shapeId).getShape().getType();
+    return receiver.scaleShape(this.shapeId, this.factor);
   }
 
-  public override async undo(context: CommandContext): Promise<CommandResult> {
+  public override async undo(receiver: CommandReceiver): Promise<CommandResult> {
     const shapeType = this.shapeType;
 
     if (shapeType === undefined) {
@@ -28,7 +28,7 @@ export class ScaleCommand extends UndoableCommand {
     }
 
     const inverseFactor = 1 / this.factor;
-    const result = await context.scaleShape(this.shapeId, inverseFactor);
+    const result = await receiver.scaleShape(this.shapeId, inverseFactor);
 
     if (!result.isSuccess()) {
       return result;

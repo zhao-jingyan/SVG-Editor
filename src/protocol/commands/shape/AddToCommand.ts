@@ -1,6 +1,6 @@
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapePlacement } from "../memento/ShapePlacement";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
@@ -15,19 +15,19 @@ export class AddToCommand extends UndoableCommand {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    this.placement = context.capturePlacement(this.shapeId);
-    return context.addToContainer(this.containerId, this.shapeId);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    this.placement = receiver.capturePlacement(this.shapeId);
+    return receiver.addToContainer(this.containerId, this.shapeId);
   }
 
-  public override undo(context: CommandContext): Promise<CommandResult> {
+  public override undo(receiver: CommandReceiver): Promise<CommandResult> {
     const placement = this.placement;
 
     if (placement === undefined) {
       return Promise.resolve(this.notExecutedResult());
     }
 
-    context.restorePlacements([placement]);
+    receiver.restorePlacements([placement]);
     const shape = placement.getShape();
     const parentId = placement.getParentId();
     const suffix = parentId === undefined ? "canvas" : `g#${parentId}`;

@@ -1,5 +1,5 @@
 import type { Command } from "../protocol/commands/Command";
-import type { CommandContext } from "../protocol/CommandContext";
+import type { CommandReceiver } from "../protocol/CommandReceiver";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "../protocol/commands/memento/ShapePlacement";
@@ -20,7 +20,7 @@ import { SvgDocumentParser } from "./io/SvgDocumentParser";
 import { SvgDocumentWriter } from "./io/SvgDocumentWriter";
 import type { SvgStorage } from "./io/SvgStorage";
 
-export class EditorContext implements CommandContext {
+export class EditorContext implements CommandReceiver {
   private document?: Document;
   private currentPath?: string;
   private readonly history: CommandHistory = new CommandHistory();

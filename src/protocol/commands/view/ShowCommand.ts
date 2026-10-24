@@ -1,5 +1,5 @@
 import { Command } from "../Command";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class ShowCommand extends Command {
@@ -9,7 +9,7 @@ export class ShowCommand extends Command {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    return context.show(this.shapeId);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    return receiver.show(this.shapeId);
   }
 }

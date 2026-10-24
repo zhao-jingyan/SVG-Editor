@@ -1,6 +1,6 @@
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapeAttributeSnapshot } from "../memento/ShapeAttributeSnapshot";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import type { EditableAttribute } from "../../EditableAttribute";
 import { UndoableCommand } from "../UndoableCommand";
@@ -17,19 +17,19 @@ export class SetCommand extends UndoableCommand {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    this.snapshot = context.captureAttribute(this.shapeId, this.attribute);
-    return context.setAttribute(this.shapeId, this.attribute, this.value);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    this.snapshot = receiver.captureAttribute(this.shapeId, this.attribute);
+    return receiver.setAttribute(this.shapeId, this.attribute, this.value);
   }
 
-  public override undo(context: CommandContext): Promise<CommandResult> {
+  public override undo(receiver: CommandReceiver): Promise<CommandResult> {
     const snapshot = this.snapshot;
 
     if (snapshot === undefined) {
       return Promise.resolve(this.notExecutedResult());
     }
 
-    context.restoreAttribute(snapshot);
+    receiver.restoreAttribute(snapshot);
     return Promise.resolve(
       new CommandSuccessResult(
         `${snapshot.getShapeType()}#${this.shapeId} updated: ${

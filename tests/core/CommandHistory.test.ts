@@ -5,11 +5,11 @@ import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
 import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
 import { CommandExitResult } from "../../src/protocol/results/outcomes/CommandExitResult";
 import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
-import { RecordingCommandContext } from "../support/RecordingCommandContext";
+import { RecordingCommandReceiver } from "../support/RecordingCommandReceiver";
 import { ScriptedUndoableCommand } from "../support/ScriptedUndoableCommand";
 
 describe("CommandHistory", () => {
-  const context = new RecordingCommandContext();
+  const receiver = new RecordingCommandReceiver();
 
   it("记录命令后可以撤销，并在新编辑后清空 redo", async () => {
     const history = new CommandHistory();
@@ -21,7 +21,7 @@ describe("CommandHistory", () => {
     history.record(first);
     expect(history.canUndo()).toBe(true);
 
-    const undoResult = await history.undo(context);
+    const undoResult = await history.undo(receiver);
     expect(undoResult.isSuccess()).toBe(true);
     expect(first.getUndoCount()).toBe(1);
     expect(history.canUndo()).toBe(false);
@@ -39,18 +39,18 @@ describe("CommandHistory", () => {
     history.record(first);
     history.record(second);
 
-    await history.undo(context);
-    await history.undo(context);
+    await history.undo(receiver);
+    await history.undo(receiver);
     expect(first.getUndoCount()).toBe(1);
     expect(second.getUndoCount()).toBe(1);
     expect(history.canUndo()).toBe(false);
     expect(history.canRedo()).toBe(true);
 
-    await history.redo(context);
+    await history.redo(receiver);
     expect(first.getExecuteCount()).toBe(1);
     expect(second.getExecuteCount()).toBe(0);
 
-    await history.redo(context);
+    await history.redo(receiver);
     expect(second.getExecuteCount()).toBe(1);
     expect(history.canUndo()).toBe(true);
     expect(history.canRedo()).toBe(false);
@@ -64,8 +64,8 @@ describe("CommandHistory", () => {
     const command = new ScriptedUndoableCommand(undefined, failure);
 
     history.record(command);
-    const firstResult = await history.undo(context);
-    const secondResult = await history.undo(context);
+    const firstResult = await history.undo(receiver);
+    const secondResult = await history.undo(receiver);
 
     expect(firstResult).toBe(failure);
     expect(secondResult).toBe(failure);
@@ -82,9 +82,9 @@ describe("CommandHistory", () => {
     const command = new ScriptedUndoableCommand(failure);
 
     history.record(command);
-    await history.undo(context);
-    const firstResult = await history.redo(context);
-    const secondResult = await history.redo(context);
+    await history.undo(receiver);
+    const firstResult = await history.redo(receiver);
+    const secondResult = await history.redo(receiver);
 
     expect(firstResult).toBe(failure);
     expect(secondResult).toBe(failure);
@@ -99,16 +99,16 @@ describe("CommandHistory", () => {
 
     history.record(command);
 
-    await expect(history.undo(context)).rejects.toThrow("undo failed");
+    await expect(history.undo(receiver)).rejects.toThrow("undo failed");
     expect(history.canUndo()).toBe(true);
     expect(history.canRedo()).toBe(false);
 
     const redoFailure = new ScriptedUndoableCommand(new Error("redo failed"));
     const redoHistory = new CommandHistory();
     redoHistory.record(redoFailure);
-    await redoHistory.undo(context);
+    await redoHistory.undo(receiver);
 
-    await expect(redoHistory.redo(context)).rejects.toThrow("redo failed");
+    await expect(redoHistory.redo(receiver)).rejects.toThrow("redo failed");
     expect(redoHistory.canUndo()).toBe(false);
     expect(redoHistory.canRedo()).toBe(true);
   });
@@ -121,7 +121,7 @@ describe("CommandHistory", () => {
     );
 
     history.record(command);
-    const undoResult = await history.undo(context);
+    const undoResult = await history.undo(receiver);
 
     expect(undoResult).toBeInstanceOf(CommandExitResult);
     expect(history.canUndo()).toBe(true);
@@ -130,9 +130,9 @@ describe("CommandHistory", () => {
     const successHistory = new CommandHistory();
     const successCommand = new ScriptedUndoableCommand(new CommandExitResult());
     successHistory.record(successCommand);
-    await successHistory.undo(context);
+    await successHistory.undo(receiver);
 
-    const redoResult = await successHistory.redo(context);
+    const redoResult = await successHistory.redo(receiver);
     expect(redoResult).toBeInstanceOf(CommandExitResult);
     expect(successHistory.canUndo()).toBe(false);
     expect(successHistory.canRedo()).toBe(true);
@@ -141,7 +141,7 @@ describe("CommandHistory", () => {
   it("空历史返回 history-unavailable", async () => {
     const history = new CommandHistory();
 
-    const undoResult = await history.undo(context);
+    const undoResult = await history.undo(receiver);
     expect(undoResult).toBeInstanceOf(CommandErrorResult);
     expect(undoResult.toCommandResultDto()).toEqual({
       type: "error",
@@ -151,7 +151,7 @@ describe("CommandHistory", () => {
       },
     });
 
-    const redoResult = await history.redo(context);
+    const redoResult = await history.redo(receiver);
     expect(redoResult).toBeInstanceOf(CommandErrorResult);
     expect(redoResult.toCommandResultDto()).toEqual({
       type: "error",
@@ -167,7 +167,7 @@ describe("CommandHistory", () => {
     const command = new ScriptedUndoableCommand(new CommandSuccessResult("ok"));
 
     history.record(command);
-    await history.undo(context);
+    await history.undo(receiver);
     expect(history.canRedo()).toBe(true);
 
     history.clear();

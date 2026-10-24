@@ -1,4 +1,4 @@
-import type { CommandContext } from "../../src/protocol/CommandContext";
+import type { CommandReceiver } from "../../src/protocol/CommandReceiver";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
 import { ShapeAttributeSnapshot } from "../../src/protocol/commands/memento/ShapeAttributeSnapshot";
 import { ShapePlacement } from "../../src/protocol/commands/memento/ShapePlacement";
@@ -8,13 +8,13 @@ import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
 import type { Shape } from "../../src/protocol/shapes/model/Shape";
 import { ShapeType } from "../../src/protocol/shapes/model/ShapeType";
 
-export interface ContextCall {
+export interface ReceiverCall {
   readonly method: string;
   readonly args: readonly unknown[];
 }
 
-export class RecordingCommandContext implements CommandContext {
-  public readonly calls: ContextCall[] = [];
+export class RecordingCommandReceiver implements CommandReceiver {
+  public readonly calls: ReceiverCall[] = [];
 
   public constructor(
     private readonly result: CommandResult = new CommandSuccessResult("ok"),

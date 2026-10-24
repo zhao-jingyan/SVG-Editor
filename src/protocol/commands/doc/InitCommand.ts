@@ -1,5 +1,5 @@
 import { Command } from "../Command";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class InitCommand extends Command {
@@ -12,7 +12,7 @@ export class InitCommand extends Command {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    return context.init(this.width, this.height);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    return receiver.init(this.width, this.height);
   }
 }

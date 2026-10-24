@@ -1,4 +1,4 @@
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 import type { Shape } from "../../shapes/model/Shape";
@@ -13,11 +13,11 @@ export class CreateCommand extends UndoableCommand {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    return context.createShape(this.shape, this.parentId);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    return receiver.createShape(this.shape, this.parentId);
   }
 
-  public override undo(context: CommandContext): Promise<CommandResult> {
-    return context.deleteShape(this.shape.getId());
+  public override undo(receiver: CommandReceiver): Promise<CommandResult> {
+    return receiver.deleteShape(this.shape.getId());
   }
 }

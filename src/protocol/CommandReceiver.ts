@@ -4,7 +4,7 @@ import type { ShapeAttributeSnapshot } from "./commands/memento/ShapeAttributeSn
 import type { ShapePlacement } from "./commands/memento/ShapePlacement";
 import type { Shape } from "./shapes/model/Shape";
 
-export interface CommandContext {
+export interface CommandReceiver {
   init(width?: number, height?: number): Promise<CommandResult>;
   read(path: string): Promise<CommandResult>;
   save(path?: string): Promise<CommandResult>;

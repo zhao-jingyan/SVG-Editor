@@ -2,7 +2,7 @@
 
 ## 职责
 
-- `EditorContext` 位于 `src/core/EditorContext.ts`，实现 `CommandContext`，是 CLI 命令与 Core 领域对象之间的应用层接收者。
+- `EditorContext` 位于 `src/core/EditorContext.ts`，实现 `CommandReceiver`，是 CLI 命令与 Core 领域对象之间的应用层接收者。
 - Context 私有持有可选 `Document`、当前文件路径、`CommandHistory`、历史锁、显示协作对象和可注入的 `SvgStorage`；文档不存在时只允许 `init`、`read`、`exit` 和 `help`；`save`、`canvas` 等其余命令仍要求文档存在。
 - `CommandExecutor` 位于 `src/core/CommandExecutor.ts`，实现 `Executor`，委托 `EditorContext.execute` 并把 `ProtocolError` 转成 `CommandErrorResult`。
 - `main.ts` 只负责组装 `ConsoleInputReader`、`CommandLoop`、`CommandSession`、`CommandLineParser`、`EditorContext` 和 `CommandExecutor`，并作为未知异常的进程边界。

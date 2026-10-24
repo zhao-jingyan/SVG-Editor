@@ -36,9 +36,9 @@ import { TextShape } from "../../../src/protocol/shapes/concrete/TextShape";
 import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";
 import {
-  RecordingCommandContext,
-  type ContextCall,
-} from "../../support/RecordingCommandContext";
+  RecordingCommandReceiver,
+  type ReceiverCall,
+} from "../../support/RecordingCommandReceiver";
 
 type CommandConstructor = new (...args: any[]) => Command;
 type ShapeConstructor = new (...args: any[]) => Shape;
@@ -61,11 +61,11 @@ function parseDto(input: string): CommandParseResultDto {
 
 async function execute(
   input: string,
-): Promise<{ command: Command; calls: ContextCall[]; result: CommandResult }> {
+): Promise<{ command: Command; calls: ReceiverCall[]; result: CommandResult }> {
   const command = parseCommand(input);
-  const context = new RecordingCommandContext();
-  const result = await command.execute(context);
-  return { command, calls: context.calls, result };
+  const receiver = new RecordingCommandReceiver();
+  const result = await command.execute(receiver);
+  return { command, calls: receiver.calls, result };
 }
 
 async function expectCommand(

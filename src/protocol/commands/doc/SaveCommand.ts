@@ -1,5 +1,5 @@
 import { Command } from "../Command";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class SaveCommand extends Command {
@@ -9,7 +9,7 @@ export class SaveCommand extends Command {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    return context.save(this.path);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    return receiver.save(this.path);
   }
 }

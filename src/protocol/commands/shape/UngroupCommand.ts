@@ -1,6 +1,6 @@
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapePlacement } from "../memento/ShapePlacement";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
@@ -12,19 +12,19 @@ export class UngroupCommand extends UndoableCommand {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    this.placement = context.capturePlacement(this.containerId);
-    return context.ungroupShapes(this.containerId);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    this.placement = receiver.capturePlacement(this.containerId);
+    return receiver.ungroupShapes(this.containerId);
   }
 
-  public override undo(context: CommandContext): Promise<CommandResult> {
+  public override undo(receiver: CommandReceiver): Promise<CommandResult> {
     const placement = this.placement;
 
     if (placement === undefined) {
       return Promise.resolve(this.notExecutedResult());
     }
 
-    context.restoreGroup(placement);
+    receiver.restoreGroup(placement);
     return Promise.resolve(
       new CommandSuccessResult(`g#${this.containerId} restored`),
     );

@@ -1,5 +1,5 @@
 import { Command } from "../Command";
-import type { CommandContext } from "../../CommandContext";
+import type { CommandReceiver } from "../../CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class CanvasCommand extends Command {
@@ -12,7 +12,7 @@ export class CanvasCommand extends Command {
     super();
   }
 
-  public execute(context: CommandContext): Promise<CommandResult> {
-    return context.canvas(this.width, this.height);
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    return receiver.canvas(this.width, this.height);
   }
 }
