@@ -3,10 +3,48 @@
 ## 目录职责
 
 - `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`Command`/`UndoableCommand` 抽象类、具体命令类、`CommandContext` 接收者接口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
-- `src/cli` 存放用户界面适配代码：REPL 控制循环、输入读取、输出写入，以及把 CLI 文本解析为具体 `Command` 对象的 `CommandLineParser`。
+- `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
+- `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`tokenization`、`arguments`、`commands`、`definition`、`results` 分别承载切词、参数校验、命令构造、命令注册和解析结果。
+- `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
 - `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorContext`、`CommandHistory`、`document`、`display` 和 `io` 子系统。`EditorContext` 实现命令接收者并持有当前文档与历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandContext。
-- `tests/cli` 存放 CLI、解析器和真实编辑链路测试，`tests/core` 存放 EditorContext、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
+- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core` 存放 EditorContext、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
+
+```text
+src/cli
+├── io
+│   ├── ConsoleInputReader.ts
+│   ├── ConsoleOutputWriter.ts
+│   ├── InputReader.ts
+│   └── OutputWriter.ts
+├── parser
+│   ├── CommandLineParser.ts
+│   ├── CommandParser.ts
+│   ├── arguments
+│   │   └── CommandArguments.ts
+│   ├── commands
+│   │   ├── document
+│   │   │   └── DocumentCommandParser.ts
+│   │   ├── shape
+│   │   │   ├── CreateCommandParser.ts
+│   │   │   └── ShapeCommandParser.ts
+│   │   └── view
+│   │       └── ViewCommandParser.ts
+│   ├── definition
+│   │   ├── CommandDefinition.ts
+│   │   └── CommandDefinitionRegistry.ts
+│   ├── results
+│   │   ├── CommandParseEmptyResult.ts
+│   │   ├── CommandParseErrorResult.ts
+│   │   ├── CommandParseResult.ts
+│   │   └── CommandParseSuccessResult.ts
+│   └── tokenization
+│       └── CommandLineTokenizer.ts
+└── session
+    ├── CommandLoop.ts
+    ├── CommandSession.ts
+    └── CommandSessionStatus.ts
+```
 
 ## 文件命名
 
@@ -29,7 +67,9 @@ export abstract class Command {
 - `UndoableCommand` 继承 `Command`，提供 `undo(context)`；九类图形编辑命令均已覆盖逆操作，基类默认实现仍作为未覆盖子类的安全兜底。
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandContext`，不再由 Executor 根据 `type` 分派。
-- `CommandLineParser` 直接实例化具体命令类；命令名 `switch` 是 Lab 允许的命令分发点。
+- `CommandDefinitionRegistry` 集中维护“命令名 → 命令定义”的唯一映射；`DocumentCommandParser`、`CreateCommandParser`、`ShapeCommandParser` 和 `ViewCommandParser` 只负责各自命令族的参数解释与对象构造。
+- `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、注册表查找和解析结果包装。
+- `CommandArguments` 统一处理元数、必填文本、数字转换和参数切片，解析器不再分散维护静态辅助函数。
 - `CommandContext` 是命令接收者接口，编辑方法统一返回 `Promise<CommandResult>`；另提供位置、子树和属性快照的同步捕获/恢复方法，供命令保存局部撤销状态。
 
 ## 结果模型
@@ -38,8 +78,8 @@ export abstract class Command {
 - `CommandErrorResult` 持有 `ProtocolError` 运行时对象，在转换为 `CommandResultDto` 时才生成 `CommandErrorDto`。
 - `CommandResultDto` 是协议层边界结果 DTO，保持 `success/error/exit` 三种结构和既有字段名。
 - CLI 解析结果同样采用类层次：`CommandParseResult` 抽象基类，具体为 `CommandParseSuccessResult`、`CommandParseEmptyResult` 和 `CommandParseErrorResult`。
-- `CommandParseResultDto` 是 CLI 边界结果 DTO，携带已解析的 `Command`，不承诺可持久化。
-- `Repl` 在解析和命令执行边界调用 `toCommandParseResultDto()` / `toCommandResultDto()`，之后只消费 DTO 判别字段。
+- `CommandParseResultDto` 是 CLI 边界结果 DTO，与抽象基类放在同一文件，携带已解析的 `Command`，不承诺可持久化。
+- `CommandSession` 在解析和命令执行边界调用 `toCommandParseResultDto()` / `toCommandResultDto()`，之后只消费 DTO 判别字段。
 
 ## 错误模型
 
@@ -47,8 +87,9 @@ export abstract class Command {
 - 具体错误按来源分为 `CommandParseError`、`CommandExecutionError`、`ShapeError` 和 `DocumentError`，均位于 `src/protocol/errors` 并继承 `ProtocolError`。
 - `CommandErrorCode` 是封闭枚举，字符串值与既有 CLI 错误码完全一致；枚举成员使用 PascalCase 命名。
 - `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。结果对象可以持有 `ProtocolError`，但跨边界只暴露 `CommandErrorDto`，保证错误结果可序列化。
-- `CommandLineParser` 内部失败抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
-- `Repl` 只输出 `error: <message>`，不暴露错误码；未知异常不属于协议错误时继续向上抛出。
+- 命令构造器和 Tokenizer 失败时抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`CommandLineParser.parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
+- `CommandSession` 只输出 `error: <message>`，不暴露错误码；未知异常不属于已建模的协议错误，因此继续向上抛出。
+- `main.ts` 是进程最外层边界：已知命令失败由结果模型表达；未知异常打印到标准错误、设置非零退出码并结束进程，不伪装成普通命令失败。
 - 拒绝方案：让结果 DTO 直接持有 `Error` 实例会破坏边界可序列化性；为每个错误码建立独立类会产生大量只有消息差异的类型。`CommandExecutor` 在真实执行边界捕获 `ProtocolError` 并转换为 `CommandErrorResult`，未知异常继续上抛。
 
 ## 图形模型
@@ -73,9 +114,11 @@ src/protocol -/-> src/core
 src/core -/-> src/cli
 ```
 
-- `Repl` 依赖 `CommandParser` 接口和 `Executor` 接口。
-- `Repl` 接受可选启动提示；组合根传入 `svg-editor 0.1 — type 'help' for commands`，UI 文案不进入命令解析器。
-- `CommandLineParser` 依赖协议层的具体命令类，不依赖 Core。
+- `CommandLoop` 依赖 `io` 的 `InputReader` / `OutputWriter` 端口和 `session` 内的 `CommandSession`，只负责提示符、逐行读取、会话状态和结束条件。
+- `CommandSession` 依赖 `parser` 的 `CommandParser` 接口、Protocol 的 `Executor` 接口和 `io` 的 `OutputWriter`；它把空输入、解析错误、命令结果和退出结果解释为终端反馈及继续/退出状态。
+- `CommandLoop` 接受可选启动提示；组合根传入 `svg-editor 0.1 — type 'help' for commands`，UI 文案不进入命令解析器。
+- `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
+- `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
 - `CommandExecutor` 位于 Core，实现 `Executor`，委托 `EditorContext.execute`，只依赖协议层 `Command`、`ProtocolError` 和结果类层次。
 - `EditorContext` 位于 Core，实现 `CommandContext`，持有可选 `Document`、`CommandHistory` 和历史锁；成功执行编辑命令后记录历史并解除锁定。
 - `EditorContext` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
@@ -85,16 +128,17 @@ src/core -/-> src/cli
 ## 当前执行链路
 
 ```text
-ConsoleInputReader -> Repl -> CommandLineParser -> 具体 Command
-                                                        |
-                                                        v
+ConsoleInputReader -> CommandLoop -> CommandSession -> CommandLineParser -> 具体 Command
+                                                               |
+                                                               v
 CommandExecutor -> EditorContext.execute -> command.execute(EditorContext)
-                                                        |
-                                                        v
-                                      Document / CommandHistory / Shape 多态行为
+                                                               |
+                                                               v
+                                             Document / CommandHistory / Shape 多态行为
 ```
 
-- 空行和首个非空字符为 `#` 的注释行不创建命令。
+- Parser 把空行和首个非空字符为 `#` 的注释行识别为 `empty`，把语法或参数失败识别为 `error`。
+- `CommandSession` 对 `empty` 不产生输出并继续会话，对 `error` 输出反馈并继续会话；这两类输入不会进入 Executor。
 - 解析错误输出 `error: <message>` 后继续循环。
 - `success` 输出其 `message`，`error` 输出 `error: <message>`，`exit` 结束循环。
 - 解析和命令执行结果在边界上转换为 `CommandParseResultDto` / `CommandResultDto`；运行时结果对象和错误对象不会直接进入输出层。

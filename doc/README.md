@@ -20,7 +20,9 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 | 模块 | 职责 | 允许依赖 |
 |---|---|---|
 | `src/main.ts` | 组合根，创建 CLI 适配器、Parser、EditorContext 与 CommandExecutor | `src/cli`、`src/core`、`src/protocol` |
-| `src/cli` | REPL 主循环、输入输出适配、文本到具体 Command 的解析、CLI 解析结果边界 | `src/protocol` |
+| `src/cli/io` | 交互输入输出端口与终端适配器 | 仅自身端口 |
+| `src/cli/parser` | 文本到具体 Command 的解析、CLI 解析结果与边界 DTO | `src/protocol` |
+| `src/cli/session` | 交互循环、单次命令编排、反馈与继续/退出策略 | `src/cli/io`、`src/cli/parser`、`src/protocol` |
 | `src/protocol` | CLI 与 Core 共享的命令模型、图形领域模型、`CommandContext` / `Executor` 端口、结果与错误模型、SVG 图形工厂 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
 | `src/core` | 应用编排、文档聚合、历史栈、显示格式化、SVG 解析与文件适配 | `src/protocol`；仅 `core/io/FileSvgStorage` 使用 Node `fs/promises` |
 | `scripts/e2e.mjs` | 黑盒端到端回归脚本，启动真实编译产物并检查输出与文件结果 | Node 标准库 |
@@ -37,9 +39,32 @@ package "src/main.ts" {
 }
 
 package "src/cli" {
-  [Repl] as Repl
-  [CommandLineParser] as Parser
-  [ConsoleInputReader / ConsoleOutputWriter] as Console
+  package "session" {
+    [CommandLoop] as Loop
+    [CommandSession] as Session
+  }
+  package "parser" {
+    [CommandLineParser] as Parser
+    package "tokenization" {
+      [CommandLineTokenizer] as Tokenizer
+    }
+    package "arguments" {
+      [CommandArguments] as Arguments
+    }
+    package "definition" {
+      [CommandDefinitionRegistry] as Registry
+    }
+    package "commands" {
+      [Command family parsers] as CommandParsers
+    }
+    package "results" {
+      [CommandParseResult hierarchy] as ParseResults
+    }
+  }
+  package "io" {
+    [InputReader / OutputWriter] as IOPorts
+    [ConsoleInputReader / ConsoleOutputWriter] as Console
+  }
 }
 
 package "src/protocol" {
@@ -63,13 +88,22 @@ package "外部适配" {
   [stdin / stdout] as Stdio
 }
 
-Main --> Repl
+Main --> Loop
+Main --> Session
 Main --> Parser
 Main --> Console
 Main --> Executor
 Main --> Context
-Repl --> Parser
-Repl --> Ports
+Loop --> Session
+Session --> IOPorts
+Session --> Parser
+Session --> Ports
+Parser --> Registry
+Parser --> Tokenizer
+Parser --> Arguments
+Parser --> ParseResults
+Registry --> CommandParsers
+CommandParsers --> Command
 Parser --> Command
 Parser --> Shapes
 Executor --> Ports
@@ -96,7 +130,8 @@ Console --> Stdio
 ```text
 stdin
   -> ConsoleInputReader
-  -> Repl
+  -> CommandLoop
+  -> CommandSession
   -> CommandLineParser
   -> 具体 Command
   -> CommandExecutor
@@ -108,6 +143,8 @@ stdin
 ```
 
 - Parser 只把文本转换为 Command，不执行文档编辑。
+- CommandSession 负责单次输入的交互策略：跳过空输入、反馈解析错误、执行命令、输出结果和决定是否退出。
+- CommandLoop 只负责提示符、逐行读取、会话生命周期与终止，不解释 Parser 或 Executor 的结果。
 - CommandExecutor 负责执行入口与 `ProtocolError -> CommandErrorResult` 转换。
 - EditorContext 负责文档生命周期、历史锁和历史记录。
 - 具体命令通过 `CommandContext` 操作文档，并通过局部快照实现逆操作。
@@ -122,11 +159,11 @@ stdin
 | Factory | `protocol/shapes/ShapeFactory.ts` | 集中处理“图形类型名 -> 具体 Shape”，统一参数校验 | Parser 内重复 `switch(type)` 会产生第二个类型分派点，不采用 |
 | Visitor | `protocol/shapes/ShapeVisitor.ts`、各 Shape 的 `accept`；Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示与序列化层按类型分支会增加分派点，不采用 |
 | Memento | `protocol/commands/ShapePlacement.ts`、`ShapeAttributeSnapshot.ts` | 命令保存局部结构与属性状态，实现精确撤销而不复制整份文档 | 整文档快照简单但内存和一致性成本高，也掩盖了命令的真实逆操作，不采用 |
-| Facade | `core/EditorContext.ts`、`core/document/Document.ts` | 对 CLI 隐藏文档、历史、错误转换和树/索引协作细节 | 让 Repl 直接持有 Document/History 会把应用编排推入 UI 层，不采用 |
+| Facade | `core/EditorContext.ts`、`core/document/Document.ts` | 对 CLI 隐藏文档、历史、错误转换和树/索引协作细节 | 让 CommandSession 直接持有 Document/History 会把应用编排推入 UI 层，不采用 |
 | Caretaker | `core/history/CommandHistory.ts` | 管理 undo/redo 两栈，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
 | Adapter / Port | `core/io/SvgStorage.ts` 与 `FileSvgStorage.ts` | 隔离文件系统，允许测试注入内存存储 | 在 Context 内直接调用 `fs` 会破坏可测试性和依赖边界，不采用 |
 
-按名字分派只集中在两个位置：`CommandLineParser` 的命令名分派和 `ShapeFactory` 的图形类型分派。其他业务流程依赖多态行为，不按 `type` 字段扩散分支。
+按名字分派只集中在两个位置：`CommandDefinitionRegistry` 的命令名分派和 `ShapeFactory` 的图形类型分派。其他业务流程依赖多态行为，不按 `type` 字段扩散分支。
 
 ## 4. 依赖方向与理由
 
@@ -172,6 +209,8 @@ src/core -/-> src/cli
 8. 收尾时发现 CLI 依赖 Core 中的 `Executor`，将其移到 `protocol`，恢复 `cli -> protocol` 的单向依赖。
 9. 调整移动反馈：叶子图形输出绝对位置，容器输出增量；容器没有单一坐标，绝对位置反馈不适用于复合节点。
 10. 增加 `scripts/e2e.mjs` 黑盒回归。脚本首次运行时发现提示符替换会误伤 `<file.svg>` 文本，以及 tree 行不是裸 id；据此改为只剥离行首提示符并使用前缀断言。
+11. 拆分 CLI 主循环：Parser 负责输入分类，CommandSession 负责单次输入的反馈和继续/退出策略，CommandLoop 只负责提示与读取。未知执行异常不再被循环吞掉，而是交给组合根终止进程。
+12. 拆分 Parser：Tokenizer 负责引号感知切词，CommandArguments 负责元数和类型校验，四类命令构造器负责具体对象创建，CommandDefinitionRegistry 集中命令名分派，CommandLineParser 收窄为统一入口。
 
 ## 7. 一致性自查
 

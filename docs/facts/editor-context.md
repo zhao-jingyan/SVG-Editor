@@ -5,7 +5,7 @@
 - `EditorContext` 位于 `src/core/EditorContext.ts`，实现 `CommandContext`，是 CLI 命令与 Core 领域对象之间的应用层接收者。
 - Context 私有持有可选 `Document`、当前文件路径、`CommandHistory`、历史锁、显示协作对象和可注入的 `SvgStorage`；文档不存在时只允许 `init`、`read`、`exit` 和 `help`；`save`、`canvas` 等其余命令仍要求文档存在。
 - `CommandExecutor` 位于 `src/core/CommandExecutor.ts`，实现 `Executor`，委托 `EditorContext.execute` 并把 `ProtocolError` 转成 `CommandErrorResult`。
-- `main.ts` 只负责组装 `ConsoleInputReader`、`Repl`、`CommandLineParser`、`EditorContext` 和 `CommandExecutor`。
+- `main.ts` 只负责组装 `ConsoleInputReader`、`CommandLoop`、`CommandSession`、`CommandLineParser`、`EditorContext` 和 `CommandExecutor`，并作为未知异常的进程边界。
 
 ## 生命周期与历史
 
@@ -37,7 +37,7 @@
 
 - 具体命令在 execute 前保存局部状态：`ShapePlacement` 保存图形、父节点和索引，`ShapeAttributeSnapshot` 保存属性名和子树叶子旧值。
 - Context 将捕获与恢复操作委托给 Document；命令不持有整份文档快照，也不直接修改树结构。
-- `CommandExecutor` 只转换 `ProtocolError`；未知异常继续上抛，由 Repl 输出通用错误。
+- `CommandExecutor` 只转换 `ProtocolError`；未知异常继续上抛，由 `main.ts` 打印并终止进程。
 
 ## 当前边界
 
