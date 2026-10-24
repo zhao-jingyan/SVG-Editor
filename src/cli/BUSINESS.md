@@ -11,6 +11,7 @@
 
 - 一行输入只有三种业务结果：空输入、已解析命令或解析错误。空行、纯空白行和首个非空字符为 `#` 的注释行不产生命令，也不产生输出。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `tokenize`。
 - 双引号用于保留参数中的空白；`""` 表示空字符串参数。引号未闭合属于解析错误。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `scan` 与 [CommandArguments](parser/syntax/CommandArguments.ts)。
+- 未注册的命令名属于解析错误，只产生 `error: unknown command: <name>`，不得进入 Executor。依据：[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts) 的 `find` 与 [CommandLineParser](parser/CommandLineParser.ts) 的 `parse`。
 - 解析错误和已建模的命令失败都输出一条 `error: <message>`，随后继续读取下一条输入；CLI 当前不向用户显示错误码。依据：[CommandSession](session/CommandSession.ts) 的 `handle` 与 `writeError`。
 - 命令成功后输出命令结果中的业务消息。成功的命令名分派只由 [CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts) 维护，CLI 其他对象不得再增加第二套命令名分派。
 - `exit` 或输入流 EOF 结束会话；结束前已经执行的命令不回滚。依据：[CommandLoop](session/CommandLoop.ts) 的 `run`。
@@ -38,12 +39,16 @@
 |---|---|---|
 | 将控制循环与单次输入策略分离 | `CommandLoop` 只管理提示、读取和终止；`CommandSession` 管理空输入、错误反馈、执行和退出，避免主循环同时解释业务结果 | commit `f45724f`，[CommandLoop](session/CommandLoop.ts)、[CommandSession](session/CommandSession.ts) |
 | 未知 Executor 异常终止进程 | 业务失败已经通过结果对象表达；未建模异常通常代表程序缺陷，继续循环会掩盖根因 | commit `f45724f`，[main.ts](../main.ts) |
-| 将 Parser 拆成切词、参数、命令构造与集中注册 | 原始入口同时承担词法、全部参数规则和 19 个命令构造，修改任一命令都会扩大审查范围；命令名分派仍保持唯一 | commit `9b6ef88`，[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts)、[CommandLineParser](parser/CommandLineParser.ts) |
+| 将 Parser 拆成切词、参数、命令构造与集中注册 | 原始入口同时承担词法、全部参数规则和 19 个命令构造，修改任一命令都会扩大审查范围；命令名分派仍保持唯一 | commits `9b6ef88`、`9f23c7b`、`0a53307`、`0691a34`，[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts)、[CommandLineParser](parser/CommandLineParser.ts) |
 
 ## 相关代码
 
 - 会话控制：[CommandLoop](session/CommandLoop.ts)、[CommandSession](session/CommandSession.ts)。
-- 解析入口与分派：[CommandLineParser](parser/CommandLineParser.ts)、[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts)。
+- 解析契约与入口：[CommandParser](parser/CommandParser.ts)、[CommandLineParser](parser/CommandLineParser.ts)。
+- 命令定义与分派：[CommandDefinition](parser/commands/definition/CommandDefinition.ts)、[CommandDefinitionRegistry](parser/commands/definition/CommandDefinitionRegistry.ts)。
+- 命令族解析：[DocumentCommandParser](parser/commands/CommandsParser/doc/DocumentCommandParser.ts)、[CreateCommandParser](parser/commands/CommandsParser/shape/CreateCommandParser.ts)、[ShapeCommandParser](parser/commands/CommandsParser/shape/ShapeCommandParser.ts)、[ViewCommandParser](parser/commands/CommandsParser/view/ViewCommandParser.ts)。
 - 切词与参数规则：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts)、[CommandArguments](parser/syntax/CommandArguments.ts)。
+- 解析结果：[CommandParseResult](parser/results/CommandParseResult.ts)。
+- 终端端口：[InputReader](io/InputReader.ts)、[OutputWriter](io/OutputWriter.ts)。
 - 进程边界：[main.ts](../main.ts)。
-- 业务回归：[CommandLineTokenizer.test.ts](../../tests/cli/parser/syntax/CommandLineTokenizer.test.ts)、[CommandSession.test.ts](../../tests/cli/session/CommandSession.test.ts)、[CommandLoop.test.ts](../../tests/cli/session/CommandLoop.test.ts)。
+- 业务回归：[CommandLineParser.test.ts](../../tests/cli/parser/CommandLineParser.test.ts)、[CommandLineTokenizer.test.ts](../../tests/cli/parser/syntax/CommandLineTokenizer.test.ts)、[CommandSession.test.ts](../../tests/cli/session/CommandSession.test.ts)、[CommandLoop.test.ts](../../tests/cli/session/CommandLoop.test.ts)。
