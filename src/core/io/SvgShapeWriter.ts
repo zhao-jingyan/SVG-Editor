@@ -1,11 +1,11 @@
-import type { CircleShape } from "../../protocol/shapes/CircleShape";
-import type { EllipseShape } from "../../protocol/shapes/EllipseShape";
-import type { GroupShape } from "../../protocol/shapes/GroupShape";
-import type { LineShape } from "../../protocol/shapes/LineShape";
-import type { RectShape } from "../../protocol/shapes/RectShape";
-import { StyledShape } from "../../protocol/shapes/StyledShape";
-import type { ShapeVisitor } from "../../protocol/shapes/ShapeVisitor";
-import type { TextShape } from "../../protocol/shapes/TextShape";
+import type { CircleShape } from "../../protocol/shapes/concrete/CircleShape";
+import type { EllipseShape } from "../../protocol/shapes/concrete/EllipseShape";
+import type { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
+import type { LineShape } from "../../protocol/shapes/concrete/LineShape";
+import type { RectShape } from "../../protocol/shapes/concrete/RectShape";
+import { StyledShape } from "../../protocol/shapes/model/StyledShape";
+import type { ShapeVisitor } from "../../protocol/shapes/visitor/ShapeVisitor";
+import type { TextShape } from "../../protocol/shapes/concrete/TextShape";
 import { XmlEscaper } from "./XmlEscaper";
 
 type Attribute = readonly [string, string | number];

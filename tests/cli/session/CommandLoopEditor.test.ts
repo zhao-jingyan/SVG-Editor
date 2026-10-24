@@ -6,7 +6,7 @@ import type { InputReader } from "../../../src/cli/io/InputReader";
 import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
 import { EditorContext } from "../../../src/core/EditorContext";
-import { ShapeFactory } from "../../../src/protocol/shapes/ShapeFactory";
+import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 
 class FakeInputReader implements InputReader {
   public constructor(private readonly inputs: Array<string | null>) {}

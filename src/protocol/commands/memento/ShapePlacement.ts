@@ -1,6 +1,6 @@
 import { CommandErrorCode } from "../../errors/CommandErrorCode";
 import { DocumentError } from "../../errors/domain/DocumentError";
-import type { Shape } from "../../shapes/Shape";
+import type { Shape } from "../../shapes/model/Shape";
 
 export class ShapePlacement {
   private readonly shape: Shape;

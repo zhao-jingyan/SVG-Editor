@@ -1,8 +1,8 @@
-import type { EditableAttribute } from "../EditableAttribute";
-import { StyledShape } from "./StyledShape";
-import { ShapeType } from "./ShapeType";
-import { ShapePosition } from "./ShapePosition";
-import type { ShapeVisitor } from "./ShapeVisitor";
+import type { EditableAttribute } from "../../EditableAttribute";
+import { StyledShape } from "../model/StyledShape";
+import { ShapeType } from "../model/ShapeType";
+import { ShapePosition } from "../model/ShapePosition";
+import type { ShapeVisitor } from "../visitor/ShapeVisitor";
 
 export class RectShape extends StyledShape {
   private x: number;

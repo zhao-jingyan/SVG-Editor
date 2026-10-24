@@ -23,10 +23,10 @@ import { UngroupCommand } from "../../src/protocol/commands/shape/UngroupCommand
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
-import { CircleShape } from "../../src/protocol/shapes/CircleShape";
-import { GroupShape } from "../../src/protocol/shapes/GroupShape";
-import { RectShape } from "../../src/protocol/shapes/RectShape";
-import { TextShape } from "../../src/protocol/shapes/TextShape";
+import { CircleShape } from "../../src/protocol/shapes/concrete/CircleShape";
+import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
+import { RectShape } from "../../src/protocol/shapes/concrete/RectShape";
+import { TextShape } from "../../src/protocol/shapes/concrete/TextShape";
 import { InMemorySvgStorage } from "../support/InMemorySvgStorage";
 
 function expectErrorMessage(

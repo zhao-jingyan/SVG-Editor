@@ -5,7 +5,7 @@ import { CommandLoop } from "./cli/session/CommandLoop";
 import { CommandSession } from "./cli/session/CommandSession";
 import { CommandExecutor } from "./core/CommandExecutor";
 import { EditorContext } from "./core/EditorContext";
-import { ShapeFactory } from "./protocol/shapes/ShapeFactory";
+import { ShapeFactory } from "./protocol/shapes/factory/ShapeFactory";
 
 async function main(): Promise<void> {
   const inputReader = new ConsoleInputReader();

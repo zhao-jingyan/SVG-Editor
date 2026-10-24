@@ -1,5 +1,5 @@
-import { GroupShape } from "../../protocol/shapes/GroupShape";
-import type { Shape } from "../../protocol/shapes/Shape";
+import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
+import type { Shape } from "../../protocol/shapes/model/Shape";
 import type { Document } from "../document/Document";
 import { SvgShapeWriter } from "./SvgShapeWriter";
 

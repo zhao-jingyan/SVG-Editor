@@ -1,12 +1,12 @@
-import { CommandErrorCode } from "../errors/CommandErrorCode";
-import { ShapeError } from "../errors/domain/ShapeError";
-import { CircleShape } from "./CircleShape";
-import { EllipseShape } from "./EllipseShape";
-import { GroupShape } from "./GroupShape";
-import { LineShape } from "./LineShape";
-import { RectShape } from "./RectShape";
-import type { Shape } from "./Shape";
-import { TextShape } from "./TextShape";
+import { CommandErrorCode } from "../../errors/CommandErrorCode";
+import { ShapeError } from "../../errors/domain/ShapeError";
+import { CircleShape } from "../concrete/CircleShape";
+import { EllipseShape } from "../concrete/EllipseShape";
+import { GroupShape } from "../concrete/GroupShape";
+import { LineShape } from "../concrete/LineShape";
+import { RectShape } from "../concrete/RectShape";
+import type { Shape } from "../model/Shape";
+import { TextShape } from "../concrete/TextShape";
 
 export class ShapeFactory {
   public create(typeName: string, id: string, args: readonly string[]): Shape {

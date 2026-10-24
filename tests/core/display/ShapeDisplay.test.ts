@@ -3,12 +3,12 @@ import { ShapeDetailVisitor } from "../../../src/core/display/ShapeDetailVisitor
 import { ShapeSummaryVisitor } from "../../../src/core/display/ShapeSummaryVisitor";
 import { TreeDisplay } from "../../../src/core/display/TreeDisplay";
 import { Document } from "../../../src/core/document/Document";
-import { CircleShape } from "../../../src/protocol/shapes/CircleShape";
-import { EllipseShape } from "../../../src/protocol/shapes/EllipseShape";
-import { GroupShape } from "../../../src/protocol/shapes/GroupShape";
-import { LineShape } from "../../../src/protocol/shapes/LineShape";
-import { RectShape } from "../../../src/protocol/shapes/RectShape";
-import { TextShape } from "../../../src/protocol/shapes/TextShape";
+import { CircleShape } from "../../../src/protocol/shapes/concrete/CircleShape";
+import { EllipseShape } from "../../../src/protocol/shapes/concrete/EllipseShape";
+import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
+import { LineShape } from "../../../src/protocol/shapes/concrete/LineShape";
+import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
+import { TextShape } from "../../../src/protocol/shapes/concrete/TextShape";
 
 describe("图形显示 Visitor", () => {
   const summary = new ShapeSummaryVisitor();

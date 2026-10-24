@@ -3,8 +3,8 @@ import { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAtt
 import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { DocumentError } from "../../protocol/errors/domain/DocumentError";
-import { GroupShape } from "../../protocol/shapes/GroupShape";
-import type { Shape } from "../../protocol/shapes/Shape";
+import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
+import type { Shape } from "../../protocol/shapes/model/Shape";
 import { ShapeHierarchy } from "./ShapeHierarchy";
 import { ShapeIndex } from "./ShapeIndex";
 

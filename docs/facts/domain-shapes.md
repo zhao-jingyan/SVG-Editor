@@ -13,7 +13,7 @@ Shape（抽象类：id、类型和统一行为）
 └── GroupShape（组合容器）
 ```
 
-- `Shape`、`StyledShape` 和各具体形状均位于 `src/protocol/shapes`，作为 CLI 与 Core 共享的领域模型。
+- `Shape`、`StyledShape`、`ShapeType` 和 `ShapePosition` 位于 `src/protocol/shapes/model`；六种具体图形位于 `src/protocol/shapes/concrete`，共同作为 CLI 与 Core 共享的领域模型。
 - 每个具体形状拥有私有几何状态，不通过公共字段或属性袋暴露。
 - `getAttribute` 是查询行为，`setAttribute` 由具体形状按自身白名单处理；未知属性抛出 `ShapeError(CommandErrorCode.UnknownAttribute)`。
 - `unsetAttribute` 用于撤销时恢复“属性原本不存在”的状态：叶子形状可清除 `fill`、`stroke`、`stroke-width`，容器递归清除公共样式，几何属性和文本内容拒绝清除。

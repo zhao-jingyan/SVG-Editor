@@ -49,7 +49,7 @@ src/cli
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形类与工厂放在 `protocol/shapes`，结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
+- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形模型和值对象放在 `protocol/shapes/model`，具体图形放在 `concrete`，工厂与 Visitor 分别放在 `factory`、`visitor`；结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 

@@ -20,7 +20,7 @@ import { TreeCommand } from "../../src/protocol/commands/view/TreeCommand";
 import { UndoCommand } from "../../src/protocol/commands/history/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/shape/UngroupCommand";
 import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
-import { GroupShape } from "../../src/protocol/shapes/GroupShape";
+import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
 import { RecordingCommandContext } from "../support/RecordingCommandContext";
 
 describe("Command 类层次", () => {

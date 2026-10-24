@@ -4,9 +4,9 @@ import { ShapeAttributeSnapshot } from "../../src/protocol/commands/memento/Shap
 import { ShapePlacement } from "../../src/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
-import { GroupShape } from "../../src/protocol/shapes/GroupShape";
-import type { Shape } from "../../src/protocol/shapes/Shape";
-import { ShapeType } from "../../src/protocol/shapes/ShapeType";
+import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "../../src/protocol/shapes/model/Shape";
+import { ShapeType } from "../../src/protocol/shapes/model/ShapeType";
 
 export interface ContextCall {
   readonly method: string;

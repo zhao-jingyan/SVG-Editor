@@ -1,29 +1,32 @@
-import type { EditableAttribute } from "../EditableAttribute";
-import { StyledShape } from "./StyledShape";
-import { ShapeType } from "./ShapeType";
-import { ShapePosition } from "./ShapePosition";
-import type { ShapeVisitor } from "./ShapeVisitor";
+import type { EditableAttribute } from "../../EditableAttribute";
+import { StyledShape } from "../model/StyledShape";
+import { ShapeType } from "../model/ShapeType";
+import { ShapePosition } from "../model/ShapePosition";
+import type { ShapeVisitor } from "../visitor/ShapeVisitor";
 
-export class CircleShape extends StyledShape {
+export class EllipseShape extends StyledShape {
   private cx: number;
   private cy: number;
-  private r: number;
+  private rx: number;
+  private ry: number;
 
   public constructor(
     id: string,
     cx: number,
     cy: number,
-    r: number,
+    rx: number,
+    ry: number,
     fill?: string,
   ) {
     super(id, fill);
     this.cx = this.requireFiniteNumber(cx, "cx");
     this.cy = this.requireFiniteNumber(cy, "cy");
-    this.r = this.requireFiniteNumber(r, "r");
+    this.rx = this.requireFiniteNumber(rx, "rx");
+    this.ry = this.requireFiniteNumber(ry, "ry");
   }
 
   public override getType(): ShapeType {
-    return ShapeType.Circle;
+    return ShapeType.Ellipse;
   }
 
   public override getPosition(): ShapePosition {
@@ -31,7 +34,7 @@ export class CircleShape extends StyledShape {
   }
 
   public override accept<T>(visitor: ShapeVisitor<T>): T {
-    return visitor.visitCircle(this);
+    return visitor.visitEllipse(this);
   }
 
   public override move(dx: number, dy: number): void {
@@ -45,7 +48,8 @@ export class CircleShape extends StyledShape {
     const nextFactor = this.requirePositiveScaleFactor(factor);
     this.cx *= nextFactor;
     this.cy *= nextFactor;
-    this.r *= nextFactor;
+    this.rx *= nextFactor;
+    this.ry *= nextFactor;
   }
 
   protected override setGeometryAttribute(
@@ -59,8 +63,11 @@ export class CircleShape extends StyledShape {
       case "cy":
         this.cy = this.requireNumericAttribute(value, attribute);
         return;
-      case "r":
-        this.r = this.requireNumericAttribute(value, attribute);
+      case "rx":
+        this.rx = this.requireNumericAttribute(value, attribute);
+        return;
+      case "ry":
+        this.ry = this.requireNumericAttribute(value, attribute);
         return;
       default:
         this.throwUnknownAttribute(attribute);
@@ -75,8 +82,10 @@ export class CircleShape extends StyledShape {
         return this.cx;
       case "cy":
         return this.cy;
-      case "r":
-        return this.r;
+      case "rx":
+        return this.rx;
+      case "ry":
+        return this.ry;
       default:
         return undefined;
     }

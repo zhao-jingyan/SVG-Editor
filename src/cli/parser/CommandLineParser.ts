@@ -1,7 +1,7 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { CommandParseError } from "../../protocol/errors/command/CommandParseError";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import type { ShapeFactory } from "../../protocol/shapes/ShapeFactory";
+import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
 import { CommandArguments } from "./syntax/CommandArguments";
 import { CommandDefinitionRegistry } from "./commands/definition/CommandDefinitionRegistry";
 import type { CommandParser } from "./CommandParser";

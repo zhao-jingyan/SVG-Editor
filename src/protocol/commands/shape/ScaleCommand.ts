@@ -1,7 +1,7 @@
 import type { CommandContext } from "../../CommandContext";
 import type { CommandResult } from "../../results/CommandResult";
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
-import type { ShapeType } from "../../shapes/ShapeType";
+import type { ShapeType } from "../../shapes/model/ShapeType";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class ScaleCommand extends UndoableCommand {

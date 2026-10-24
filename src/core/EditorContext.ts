@@ -8,8 +8,8 @@ import { CommandExecutionError } from "../protocol/errors/command/CommandExecuti
 import { DocumentError } from "../protocol/errors/domain/DocumentError";
 import type { CommandResult } from "../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../protocol/results/outcomes/CommandSuccessResult";
-import { GroupShape } from "../protocol/shapes/GroupShape";
-import type { Shape } from "../protocol/shapes/Shape";
+import { GroupShape } from "../protocol/shapes/concrete/GroupShape";
+import type { Shape } from "../protocol/shapes/model/Shape";
 import { UndoableCommand } from "../protocol/commands/UndoableCommand";
 import { HelpText } from "./display/HelpText";
 import { ShapeDetailVisitor } from "./display/ShapeDetailVisitor";

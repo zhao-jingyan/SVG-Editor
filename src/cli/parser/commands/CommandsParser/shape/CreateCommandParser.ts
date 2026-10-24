@@ -1,5 +1,5 @@
 import { CreateCommand } from "../../../../../protocol/commands/shape/CreateCommand";
-import type { ShapeFactory } from "../../../../../protocol/shapes/ShapeFactory";
+import type { ShapeFactory } from "../../../../../protocol/shapes/factory/ShapeFactory";
 import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**
