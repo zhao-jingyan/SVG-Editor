@@ -5,7 +5,7 @@ import { CommandSession } from "../../../src/cli/session/CommandSession";
 import type { InputReader } from "../../../src/cli/io/InputReader";
 import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
-import { EditorSession } from "../../../src/core/EditorSession";
+import { EditorReceiver } from "../../../src/core/receiver/EditorReceiver";
 import { CommandHistory } from "../../../src/core/history/CommandHistory";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 
@@ -39,10 +39,10 @@ describe("CommandLoop 真实编辑链路", () => {
     ]);
     const output = new FakeOutputWriter();
     const history = new CommandHistory();
-    const editor = new EditorSession(history);
+    const receiver = new EditorReceiver(history);
     const session = new CommandSession(
       new CommandLineParser(new ShapeFactory()),
-      new CommandExecutor(editor, history),
+      new CommandExecutor(receiver, history),
       output,
     );
     const commandLoop = new CommandLoop(
@@ -62,6 +62,6 @@ describe("CommandLoop 真实编辑链路", () => {
       "rect#r1 moved back to (0,0)",
       "rect#r1 moved to (5,5)",
     ]);
-    expect(editor.captureAttribute("r1", "x").getValue("r1")).toBe(5);
+    expect(receiver.captureAttribute("r1", "x").getValue("r1")).toBe(5);
   });
 });

@@ -19,7 +19,7 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 
 | 模块 | 职责 | 允许依赖 |
 |---|---|---|
-| `src/main.ts` | 组合根，创建 CLI 适配器、Parser、EditorSession 与 CommandExecutor | `src/cli`、`src/core`、`src/protocol` |
+| `src/main.ts` | 组合根，创建 CLI 适配器、Parser、EditorReceiver 与 CommandExecutor | `src/cli`、`src/core`、`src/protocol` |
 | `src/cli/io` | 交互输入输出端口与终端适配器 | 仅自身端口 |
 | `src/cli/parser` | 文本到具体 Command 的解析、CLI 解析结果与边界 DTO | `src/protocol` |
 | `src/cli/session` | 交互循环、单次命令编排、反馈与继续/退出策略 | `src/cli/io`、`src/cli/parser`、`src/protocol` |
@@ -76,7 +76,7 @@ package "src/protocol" {
 
 package "src/core" {
   [CommandExecutor] as Executor
-  [EditorSession] as Session
+  [EditorReceiver] as Receiver
   [Document / ShapeHierarchy / ShapeIndex] as Document
   [CommandHistory] as History
   [display] as Display
@@ -89,7 +89,7 @@ package "外部适配" {
 }
 
 Main --> Loop
-Main --> Session
+Main --> Receiver
 Main --> Parser
 Main --> Console
 Main --> Executor
@@ -107,13 +107,13 @@ CommandParsers --> Command
 Parser --> Command
 Parser --> Shapes
 Executor --> Ports
-Executor --> Session
-Session --> Ports
-Session --> Command
-Session --> Document
-Session --> History
-Session --> Display
-Session --> IO
+Executor --> Receiver
+Receiver --> Ports
+Receiver --> Command
+Receiver --> Document
+Receiver --> History
+Receiver --> Display
+Receiver --> IO
 Document --> Shapes
 History --> Command
 Display --> Shapes
@@ -146,7 +146,7 @@ stdin
 - CommandSession 负责单次输入的交互策略：跳过空输入、反馈解析错误、执行命令、输出结果和决定是否退出。
 - CommandLoop 只负责提示符、逐行读取、会话生命周期与终止，不解释 Parser 或 Executor 的结果。
 - CommandExecutor 负责调用命令、直接记录成功命令与 `ProtocolError -> CommandErrorResult` 转换。
-- EditorSession 是 Receiver 聚合点，把文档、图形、显示和历史能力委托给独立协作对象。
+- EditorReceiver 是 Receiver 聚合点，把文档、图形、显示和历史能力委托给独立协作对象。
 - 具体命令通过 `CommandReceiver` 操作文档，并通过局部快照实现逆操作。
 - `CommandHistory` 只保存成功执行过的 `UndoableCommand`，不保存整文档快照。
 
@@ -155,13 +155,13 @@ stdin
 | 模式 | 参与者与代码位置 | 解决的问题 | 替代方案与取舍 |
 |---|---|---|---|
 | Command | `protocol/commands/Command.ts`、`protocol/commands/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandReceiver` 聚合四类能力接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
-| Composite | `protocol/shapes/model/Shape.ts`、`protocol/shapes/concrete/GroupShape.ts` 与五种叶子图形 | 容器与叶子统一支持移动、缩放、公共样式设置和删除 | 在 EditorSession/命令层到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
+| Composite | `protocol/shapes/model/Shape.ts`、`protocol/shapes/concrete/GroupShape.ts` 与五种叶子图形 | 容器与叶子统一支持移动、缩放、公共样式设置和删除 | 在 EditorReceiver/命令层到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
 | Factory | `protocol/shapes/factory/ShapeFactory.ts` | 集中处理“图形类型名 -> 具体 Shape”，统一参数校验 | Parser 内重复 `switch(type)` 会产生第二个类型分派点，不采用 |
 | Visitor | `protocol/shapes/visitor/ShapeVisitor.ts`、各 Shape 的 `accept`；Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示与序列化层按类型分支会增加分派点，不采用 |
 | Memento | `protocol/commands/memento/ShapePlacement.ts`、`ShapeAttributeSnapshot.ts` | 命令保存局部结构与属性状态，实现精确撤销而不复制整份文档 | 整文档快照简单但内存和一致性成本高，也掩盖了命令的真实逆操作，不采用 |
-| Facade | `core/EditorSession.ts`、`core/document/Document.ts` | 对 CLI 隐藏文档、历史、错误转换和树/索引协作细节 | 让 CommandSession 直接持有 Document/History 会把应用编排推入 UI 层，不采用 |
+| Facade | `core/receiver/EditorReceiver.ts`、`core/document/Document.ts` | 对 CLI 隐藏文档、历史、错误转换和树/索引协作细节 | 让 CommandSession 直接持有 Document/History 会把应用编排推入 UI 层，不采用 |
 | Caretaker | `core/history/CommandHistory.ts` | 管理 undo/redo 两栈，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
-| Adapter / Port | `core/io/SvgStorage.ts` 与 `FileSvgStorage.ts` | 隔离文件系统，允许测试注入内存存储 | 在 EditorSession 内直接调用 `fs` 会破坏可测试性和依赖边界，不采用 |
+| Adapter / Port | `core/io/SvgStorage.ts` 与 `FileSvgStorage.ts` | 隔离文件系统，允许测试注入内存存储 | 在 DocumentCommands 内直接调用 `fs` 会破坏可测试性和依赖边界，不采用 |
 
 按名字分派只集中在两个位置：`CommandDefinitionRegistry` 的命令名分派和 `ShapeFactory` 的图形类型分派。其他业务流程依赖多态行为，不按 `type` 字段扩散分支。
 
@@ -202,7 +202,7 @@ src/core -/-> src/cli
 1. 最初以命令/图形数据联合类型搭建解析与输出骨架，随后重构为 `Command`、`UndoableCommand`、`Shape` 类层次，避免贫血模型和按类型到处分派。
 2. 将错误与结果从联合类型改为运行时类层次，在 CLI 边界统一转换为 DTO，保证错误码和消息结构稳定。
 3. 从单个文档类中抽出 `ShapeIndex` 与 `ShapeHierarchy`，分别负责身份/父子索引和有序树结构，降低聚合根膨胀风险。
-4. 将演示执行器替换为真实 `EditorSession + CommandHistory + Document` 链路，编辑命令开始真正修改文档。
+4. 将演示执行器替换为真实 `EditorReceiver + CommandHistory + Document` 链路，编辑命令开始真正修改文档。
 5. 撤销采用命令内局部状态：结构操作保存 `ShapePlacement`，属性操作保存 `ShapeAttributeSnapshot`；恢复时校验父级、索引、重复 id 与祖先冲突。
 6. tree/show 通过 Visitor 扩展，不把显示格式写进 Shape；save 复用 Visitor 生成 SVG 元素。
 7. SVG read/save 接入后增加 IO 历史锁：`init`/`read` 清空历史，`save`/`canvas` 修改后锁定 undo/redo，下一次成功编辑重新解锁。
@@ -217,7 +217,7 @@ src/core -/-> src/cli
 - 实际目录与架构方案一致：`main -> cli + core`，`cli -> protocol`，`core -> protocol`，Protocol 不反向依赖。
 - 抽样检查未发现 `src/cli` 或 `src/core` 被 Protocol 导入，也未发现 Core 导入 CLI。
 - Command 分发只在 Parser，图形类型创建只在 ShapeFactory；显示和序列化通过 Visitor 多态完成。
-- 图形编辑状态保存在命令对象中，Document 不持有历史栈，EditorSession 不保存整文档撤销快照。
+- 图形编辑状态保存在命令对象中，Document 不持有历史栈，EditorReceiver 不保存整文档撤销快照。
 - `docs/facts/` 记录实现事实，`docs/plans/` 记录阶段计划，本文件提供面向交付的整体架构说明。
 - 当前未打 `final` tag；后续若进行架构重构，应同步更新本文件、事实文档与 E2E 回归脚本。
 
@@ -236,8 +236,8 @@ npm run e2e
 
 - Protocol：命令类层次、图形多态行为、属性白名单、工厂校验、结果与错误转换。
 - Document：指定索引插入、跨父级恢复、group/ungroup 恢复、空/单子节点容器、非法索引、祖先冲突与失败原子性。
-- History 与 EditorSession：成功入栈、失败不入栈、undo/redo、空历史、no-document、历史锁和 `ProtocolError` 映射。
-- CLI：真实 Parser/EditorSession/CommandExecutor 的进程级测试，覆盖命令序列与输出。
+- History 与 EditorReceiver：成功入栈、失败不入栈、undo/redo、空历史、no-document、历史锁和 `ProtocolError` 映射。
+- CLI：真实 Parser/EditorReceiver/CommandExecutor 的进程级测试，覆盖命令序列与输出。
 - SVG IO：解析、元素计数、缺 id 补充、序列化 round-trip、文件错误与 IO 历史锁。
 - 黑盒 E2E：`npm run e2e` 构建真实产物后，通过 stdin 运行完整编辑闭环、显示、保存、读入、默认 save 与历史锁，并检查生成文件内容。
 

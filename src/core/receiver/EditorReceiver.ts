@@ -1,17 +1,17 @@
-import type { CommandReceiver } from "../protocol/CommandReceiver";
-import type { EditableAttribute } from "../protocol/EditableAttribute";
-import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
-import type { ShapePlacement } from "../protocol/commands/memento/ShapePlacement";
-import type { CommandResult } from "../protocol/results/CommandResult";
-import type { Shape } from "../protocol/shapes/model/Shape";
-import { CommandHistory } from "./history/CommandHistory";
-import { FileSvgStorage } from "./io/FileSvgStorage";
-import type { SvgStorage } from "./io/SvgStorage";
-import { DocumentCommands } from "./receiver/DocumentCommands";
-import { ShapeCommands } from "./receiver/ShapeCommands";
-import { ViewCommands } from "./receiver/ViewCommands";
+import type { CommandReceiver } from "../../protocol/CommandReceiver";
+import type { EditableAttribute } from "../../protocol/EditableAttribute";
+import type { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
+import type { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
+import type { CommandResult } from "../../protocol/results/CommandResult";
+import type { Shape } from "../../protocol/shapes/model/Shape";
+import { CommandHistory } from "../history/CommandHistory";
+import { FileSvgStorage } from "../io/FileSvgStorage";
+import type { SvgStorage } from "../io/SvgStorage";
+import { DocumentCommands } from "./DocumentCommands";
+import { ShapeCommands } from "./ShapeCommands";
+import { ViewCommands } from "./ViewCommands";
 
-export class EditorSession implements CommandReceiver {
+export class EditorReceiver implements CommandReceiver {
   private readonly documents: DocumentCommands;
   private readonly shapes: ShapeCommands;
   private readonly views: ViewCommands;

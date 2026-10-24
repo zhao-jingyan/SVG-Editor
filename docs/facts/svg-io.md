@@ -4,7 +4,7 @@
 
 - `src/core/io` 存放 SVG 文件适配、解析和序列化对象；`protocol` 不依赖 Node、文件系统或 `io`。
 - `SvgStorage` 是文件访问接口，`FileSvgStorage` 使用 Node `fs/promises` 实现，测试通过内存实现注入。
-- `EditorSession` 持有可注入的 `SvgStorage`、`SvgDocumentParser`、`SvgDocumentWriter` 和当前文件路径。
+- `DocumentCommands` 持有可注入的 `SvgStorage`、`SvgDocumentParser`、`SvgDocumentWriter` 和当前文件路径。
 - `SvgDocumentParser` 通过 `ShapeFactory` 创建具体图形；`SvgShapeWriter` 实现 `ShapeVisitor<string>`，按图形类型生成 SVG 元素。
 
 ## read
