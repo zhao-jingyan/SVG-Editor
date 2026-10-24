@@ -1,6 +1,6 @@
 import type { CommandContext } from "../../protocol/CommandContext";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../protocol/errors/CommandExecutionError";
+import { CommandExecutionError } from "../../protocol/errors/command/CommandExecutionError";
 import { CommandErrorResult } from "../../protocol/results/CommandErrorResult";
 import type { CommandResult } from "../../protocol/results/CommandResult";
 import type { UndoableCommand } from "../../protocol/commands/UndoableCommand";

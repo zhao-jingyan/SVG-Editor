@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { ShapeError } from "../../src/protocol/errors/ShapeError";
+import { ShapeError } from "../../src/protocol/errors/domain/ShapeError";
 import { CircleShape } from "../../src/protocol/shapes/CircleShape";
 import { EllipseShape } from "../../src/protocol/shapes/EllipseShape";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";

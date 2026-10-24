@@ -19,8 +19,8 @@ Shape（抽象类：id、类型和统一行为）
 - `unsetAttribute` 用于撤销时恢复“属性原本不存在”的状态：叶子形状可清除 `fill`、`stroke`、`stroke-width`，容器递归清除公共样式，几何属性和文本内容拒绝清除。
 - `accept` 是每个图形的 Visitor 分派入口；新增按类型输出的算法只需实现 `ShapeVisitor<T>`，不修改形状类。
 - `scale` 在修改状态前校验正整数因子；非法因子抛出 `ShapeError(CommandErrorCode.InvalidScale)`，不会产生部分修改。
-- `ShapeError` 位于 `src/protocol/errors`，继承 `ProtocolError`；形状只负责抛出领域错误，Parser 在顶层将其包装为 `CommandParseErrorResult`，再由 CLI 边界转换为 DTO。
-- `DocumentError` 位于 `src/protocol/errors`，用于 Core 中 Document 的领域错误；它同样继承 `ProtocolError`。
+- `ShapeError` 位于 `src/protocol/errors/domain`，继承 `ProtocolError`；形状只负责抛出领域错误，Parser 在顶层将其包装为 `CommandParseErrorResult`，再由 CLI 边界转换为 DTO。
+- `DocumentError` 位于 `src/protocol/errors/domain`，用于 Core 中 Document 的领域错误；它同样继承 `ProtocolError`。
 
 ## Composite 模式
 

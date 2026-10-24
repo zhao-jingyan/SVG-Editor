@@ -5,7 +5,7 @@ import { CommandParseResult } from "../../../src/cli/parser/results/CommandParse
 import { CommandParseSuccessResult } from "../../../src/cli/parser/results/CommandParseSuccessResult";
 import { HelpCommand } from "../../../src/protocol/commands/view/HelpCommand";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../src/protocol/errors/CommandParseError";
+import { CommandParseError } from "../../../src/protocol/errors/command/CommandParseError";
 
 describe("CommandParseResult 类层次", () => {
   it("具体解析结果共享基类并转换为边界 DTO", () => {

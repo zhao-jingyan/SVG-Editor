@@ -1,5 +1,5 @@
 import type { Command } from "../../../protocol/commands/Command";
-import type { CommandErrorDto } from "../../../protocol/errors/CommandErrorDto";
+import type { CommandErrorDto } from "../../../protocol/errors/dto/CommandErrorDto";
 
 export type CommandParseResultDto =
   | { readonly type: "command"; readonly command: Command }

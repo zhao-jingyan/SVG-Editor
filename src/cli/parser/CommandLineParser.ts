@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../protocol/errors/CommandParseError";
+import { CommandParseError } from "../../protocol/errors/command/CommandParseError";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import type { ShapeFactory } from "../../protocol/shapes/ShapeFactory";
 import { CommandArguments } from "./syntax/CommandArguments";

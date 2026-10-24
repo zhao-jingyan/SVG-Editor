@@ -2,7 +2,7 @@ import type { EditableAttribute } from "../../protocol/EditableAttribute";
 import { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
 import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/DocumentError";
+import { DocumentError } from "../../protocol/errors/domain/DocumentError";
 import { GroupShape } from "../../protocol/shapes/GroupShape";
 import type { Shape } from "../../protocol/shapes/Shape";
 import { ShapeHierarchy } from "./ShapeHierarchy";

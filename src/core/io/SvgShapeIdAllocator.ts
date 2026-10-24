@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/DocumentError";
+import { DocumentError } from "../../protocol/errors/domain/DocumentError";
 
 export class SvgShapeIdAllocator {
   private readonly reservedIds: ReadonlySet<string>;

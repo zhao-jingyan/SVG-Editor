@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../protocol/errors/CommandParseError";
+import { CommandParseError } from "../../../protocol/errors/command/CommandParseError";
 
 /**
  * 封装命令参数的元数校验和类型转换。

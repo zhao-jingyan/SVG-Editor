@@ -1,5 +1,5 @@
 import type { CommandErrorCode } from "./CommandErrorCode";
-import type { CommandErrorDto } from "./CommandErrorDto";
+import type { CommandErrorDto } from "./dto/CommandErrorDto";
 
 export abstract class ProtocolError extends Error {
   private readonly code: CommandErrorCode;

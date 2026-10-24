@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../src/protocol/errors/CommandExecutionError";
-import { CommandParseError } from "../../src/protocol/errors/CommandParseError";
-import { DocumentError } from "../../src/protocol/errors/DocumentError";
+import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
+import { CommandParseError } from "../../src/protocol/errors/command/CommandParseError";
+import { DocumentError } from "../../src/protocol/errors/domain/DocumentError";
 import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { ShapeError } from "../../src/protocol/errors/ShapeError";
+import { ShapeError } from "../../src/protocol/errors/domain/ShapeError";
 
 describe("ProtocolError 类层次", () => {
   it("按来源区分的错误共享基类行为", () => {

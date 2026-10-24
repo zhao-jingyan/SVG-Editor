@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../errors/CommandErrorCode";
-import { ShapeError } from "../errors/ShapeError";
+import { ShapeError } from "../errors/domain/ShapeError";
 import { CircleShape } from "./CircleShape";
 import { EllipseShape } from "./EllipseShape";
 import { GroupShape } from "./GroupShape";

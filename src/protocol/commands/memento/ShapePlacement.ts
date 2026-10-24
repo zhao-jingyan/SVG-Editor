@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { DocumentError } from "../../errors/DocumentError";
+import { DocumentError } from "../../errors/domain/DocumentError";
 import type { Shape } from "../../shapes/Shape";
 
 export class ShapePlacement {

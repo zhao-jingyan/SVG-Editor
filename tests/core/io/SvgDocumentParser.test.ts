@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SvgDocumentParser } from "../../../src/core/io/SvgDocumentParser";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../../src/protocol/errors/DocumentError";
+import { DocumentError } from "../../../src/protocol/errors/domain/DocumentError";
 import { GroupShape } from "../../../src/protocol/shapes/GroupShape";
 
 function expectDocumentError(

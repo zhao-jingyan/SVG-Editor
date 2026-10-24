@@ -49,7 +49,7 @@ src/cli
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形类与工厂放在 `protocol/shapes`，结果类放在 `protocol/results`，共享错误类型放在 `protocol/errors`。
+- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形类与工厂放在 `protocol/shapes`，结果类放在 `protocol/results`，错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
@@ -84,7 +84,7 @@ export abstract class Command {
 ## 错误模型
 
 - `ProtocolError` 是继承 `Error` 的抽象基类，封装私有 `CommandErrorCode`，提供 `getCode()` 和 `toCommandErrorDto()`；构造器负责建立错误码与消息不变量。
-- 具体错误按来源分为 `CommandParseError`、`CommandExecutionError`、`ShapeError` 和 `DocumentError`，均位于 `src/protocol/errors` 并继承 `ProtocolError`。
+- 具体错误按来源分为命令侧的 `CommandParseError`、`CommandExecutionError` 和领域侧的 `ShapeError`、`DocumentError`，分别位于 `src/protocol/errors/command` 与 `src/protocol/errors/domain`，均继承根目录的 `ProtocolError`。
 - `CommandErrorCode` 是封闭枚举，字符串值与既有 CLI 错误码完全一致；枚举成员使用 PascalCase 命名。
 - `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。结果对象可以持有 `ProtocolError`，但跨边界只暴露 `CommandErrorDto`，保证错误结果可序列化。
 - 命令构造器和 Tokenizer 失败时抛出 `CommandParseError`；`ShapeFactory` 失败抛出 `ShapeError`；`CommandLineParser.parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。

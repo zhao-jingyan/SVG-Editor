@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandArguments } from "../../../../src/cli/parser/syntax/CommandArguments";
 import { CommandErrorCode } from "../../../../src/protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../../src/protocol/errors/CommandParseError";
+import { CommandParseError } from "../../../../src/protocol/errors/command/CommandParseError";
 
 function createArguments(tokens: readonly string[]): CommandArguments {
   return new CommandArguments(tokens, "move <id> <dx> <dy>");

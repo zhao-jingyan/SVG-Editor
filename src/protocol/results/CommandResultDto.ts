@@ -1,4 +1,4 @@
-import type { CommandErrorDto } from "../errors/CommandErrorDto";
+import type { CommandErrorDto } from "../errors/dto/CommandErrorDto";
 
 export type CommandResultDto =
   | { readonly type: "success"; readonly message: string }

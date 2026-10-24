@@ -1,5 +1,5 @@
 import { CommandErrorCode } from "../../../protocol/errors/CommandErrorCode";
-import { CommandParseError } from "../../../protocol/errors/CommandParseError";
+import { CommandParseError } from "../../../protocol/errors/command/CommandParseError";
 
 /**
  * 把一行 CLI 文本切分为带引号感知的参数。

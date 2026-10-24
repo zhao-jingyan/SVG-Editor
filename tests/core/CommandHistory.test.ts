@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandHistory } from "../../src/core/history/CommandHistory";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../src/protocol/errors/CommandExecutionError";
+import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
 import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
 import { CommandExitResult } from "../../src/protocol/results/CommandExitResult";
 import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandLineTokenizer } from "../../../../src/cli/parser/syntax/CommandLineTokenizer";
-import { CommandParseError } from "../../../../src/protocol/errors/CommandParseError";
+import { CommandParseError } from "../../../../src/protocol/errors/command/CommandParseError";
 
 const tokenizer = new CommandLineTokenizer();
 

@@ -1,6 +1,6 @@
 import type { EditableAttribute } from "../EditableAttribute";
 import { CommandErrorCode } from "../errors/CommandErrorCode";
-import { ShapeError } from "../errors/ShapeError";
+import { ShapeError } from "../errors/domain/ShapeError";
 import type { ShapeType } from "./ShapeType";
 import type { ShapeVisitor } from "./ShapeVisitor";
 import type { ShapePosition } from "./ShapePosition";

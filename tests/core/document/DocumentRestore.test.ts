@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Document } from "../../../src/core/document/Document";
 import { ShapePlacement } from "../../../src/protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../../src/protocol/errors/DocumentError";
+import { DocumentError } from "../../../src/protocol/errors/domain/DocumentError";
 import { CircleShape } from "../../../src/protocol/shapes/CircleShape";
 import { GroupShape } from "../../../src/protocol/shapes/GroupShape";
 import { RectShape } from "../../../src/protocol/shapes/RectShape";

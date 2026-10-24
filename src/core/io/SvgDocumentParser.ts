@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import type { EditableAttribute } from "../../protocol/EditableAttribute";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { DocumentError } from "../../protocol/errors/DocumentError";
+import { DocumentError } from "../../protocol/errors/domain/DocumentError";
 import { GroupShape } from "../../protocol/shapes/GroupShape";
 import type { Shape } from "../../protocol/shapes/Shape";
 import { ShapeFactory } from "../../protocol/shapes/ShapeFactory";

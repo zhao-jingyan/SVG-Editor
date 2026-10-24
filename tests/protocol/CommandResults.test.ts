@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { CommandExecutionError } from "../../src/protocol/errors/CommandExecutionError";
+import { CommandExecutionError } from "../../src/protocol/errors/command/CommandExecutionError";
 import { CommandErrorResult } from "../../src/protocol/results/CommandErrorResult";
 import { CommandExitResult } from "../../src/protocol/results/CommandExitResult";
 import { CommandResult } from "../../src/protocol/results/CommandResult";
