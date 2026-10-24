@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { CommandLineParser } from "../../src/cli/CommandLineParser";
-import type { InputReader } from "../../src/cli/InputReader";
-import type { OutputWriter } from "../../src/cli/OutputWriter";
-import { Repl } from "../../src/cli/Repl";
-import { CommandExecutor } from "../../src/core/CommandExecutor";
-import { EditorContext } from "../../src/core/EditorContext";
-import { ShapeFactory } from "../../src/protocol/shapes/ShapeFactory";
+import { CommandLineParser } from "../../../src/cli/parser/CommandLineParser";
+import { CommandLoop } from "../../../src/cli/session/CommandLoop";
+import { CommandSession } from "../../../src/cli/session/CommandSession";
+import type { InputReader } from "../../../src/cli/io/InputReader";
+import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
+import { CommandExecutor } from "../../../src/core/CommandExecutor";
+import { EditorContext } from "../../../src/core/EditorContext";
+import { ShapeFactory } from "../../../src/protocol/shapes/ShapeFactory";
 
 class FakeInputReader implements InputReader {
   public constructor(private readonly inputs: Array<string | null>) {}
@@ -25,7 +26,7 @@ class FakeOutputWriter implements OutputWriter {
   }
 }
 
-describe("Repl 真实编辑链路", () => {
+describe("CommandLoop 真实编辑链路", () => {
   it("完成 init、create、move、undo、redo 和 exit", async () => {
     const input = new FakeInputReader([
       "init 800 600",
@@ -37,15 +38,19 @@ describe("Repl 真实编辑链路", () => {
     ]);
     const output = new FakeOutputWriter();
     const context = new EditorContext();
-    const repl = new Repl(
-      input,
-      output,
+    const session = new CommandSession(
       new CommandLineParser(new ShapeFactory()),
       new CommandExecutor(context),
+      output,
+    );
+    const commandLoop = new CommandLoop(
+      input,
+      output,
+      session,
       "svg-editor 0.1 — type 'help' for commands",
     );
 
-    await repl.run();
+    await commandLoop.run();
 
     expect(output.lines).toEqual([
       "svg-editor 0.1 — type 'help' for commands",
