@@ -1,5 +1,5 @@
-import type { CommandReceiver } from "../../protocol/CommandReceiver";
-import type { EditableAttribute } from "../../protocol/EditableAttribute";
+import type { CommandReceiver } from "../../protocol/receivers/CommandReceiver";
+import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "../../protocol/results/CommandResult";

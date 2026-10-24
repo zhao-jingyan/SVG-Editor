@@ -1,3 +1,4 @@
+/** 可通过命令修改的图形属性。 */
 export type EditableAttribute =
   | "fill"
   | "stroke"

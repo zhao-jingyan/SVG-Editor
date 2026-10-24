@@ -1,4 +1,4 @@
-import type { Executor } from "../../protocol/Executor";
+import type { Executor } from "../../protocol/execution/Executor";
 import type { CommandParser } from "../parser/CommandParser";
 import type { OutputWriter } from "../io/OutputWriter";
 import { CommandSessionStatus } from "./CommandSessionStatus";

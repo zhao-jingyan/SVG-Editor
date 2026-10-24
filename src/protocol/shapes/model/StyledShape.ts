@@ -1,4 +1,4 @@
-import type { EditableAttribute } from "../../EditableAttribute";
+import type { EditableAttribute } from "./EditableAttribute";
 import { CommandErrorCode } from "../../errors/CommandErrorCode";
 import { ProtocolError } from "../../errors/ProtocolError";
 import { Shape } from "./Shape";

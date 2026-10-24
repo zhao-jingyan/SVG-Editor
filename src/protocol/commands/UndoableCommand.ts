@@ -1,5 +1,5 @@
 import { Command } from "./Command";
-import type { CommandReceiver } from "../CommandReceiver";
+import type { CommandReceiver } from "../receivers/CommandReceiver";
 import { CommandErrorCode } from "../errors/CommandErrorCode";
 import { ProtocolError } from "../errors/ProtocolError";
 import { CommandErrorResult } from "../results/outcomes/CommandErrorResult";

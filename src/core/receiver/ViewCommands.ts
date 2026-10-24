@@ -1,4 +1,4 @@
-import type { ViewCommandReceiver } from "../../protocol/ViewCommandReceiver";
+import type { ViewCommandReceiver } from "../../protocol/receivers/ViewCommandReceiver";
 import type { CommandResult } from "../../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
 import { HelpText } from "../display/HelpText";

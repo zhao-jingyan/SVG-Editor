@@ -1,4 +1,4 @@
-import type { CommandReceiver } from "../../CommandReceiver";
+import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapeType } from "../../shapes/model/ShapeType";

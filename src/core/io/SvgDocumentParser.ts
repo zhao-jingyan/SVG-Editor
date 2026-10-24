@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import type { EditableAttribute } from "../../protocol/EditableAttribute";
+import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";

@@ -1,8 +1,8 @@
-import type { EditableAttribute } from "./EditableAttribute";
-import type { ShapeAttributeSnapshot } from "./commands/memento/ShapeAttributeSnapshot";
-import type { ShapePlacement } from "./commands/memento/ShapePlacement";
-import type { CommandResult } from "./results/CommandResult";
-import type { Shape } from "./shapes/model/Shape";
+import type { ShapeAttributeSnapshot } from "../commands/memento/ShapeAttributeSnapshot";
+import type { ShapePlacement } from "../commands/memento/ShapePlacement";
+import type { CommandResult } from "../results/CommandResult";
+import type { EditableAttribute } from "../shapes/model/EditableAttribute";
+import type { Shape } from "../shapes/model/Shape";
 
 export interface ShapeCommandReceiver {
   createShape(shape: Shape, parentId?: string): Promise<CommandResult>;

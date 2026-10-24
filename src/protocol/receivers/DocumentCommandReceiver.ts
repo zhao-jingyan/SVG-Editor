@@ -1,4 +1,4 @@
-import type { CommandResult } from "./results/CommandResult";
+import type { CommandResult } from "../results/CommandResult";
 
 export interface DocumentCommandReceiver {
   init(width?: number, height?: number): Promise<CommandResult>;

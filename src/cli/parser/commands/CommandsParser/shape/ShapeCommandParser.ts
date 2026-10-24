@@ -8,7 +8,7 @@ import { SetCommand } from "../../../../../protocol/commands/shape/SetCommand";
 import { UngroupCommand } from "../../../../../protocol/commands/shape/UngroupCommand";
 import { CommandErrorCode } from "../../../../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../../../../protocol/errors/ProtocolError";
-import type { EditableAttribute } from "../../../../../protocol/EditableAttribute";
+import type { EditableAttribute } from "../../../../../protocol/shapes/model/EditableAttribute";
 import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**

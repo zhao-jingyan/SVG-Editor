@@ -1,4 +1,4 @@
-import type { CommandReceiver } from "../../CommandReceiver";
+import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 import type { Shape } from "../../shapes/model/Shape";

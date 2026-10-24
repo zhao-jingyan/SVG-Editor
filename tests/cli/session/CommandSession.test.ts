@@ -12,7 +12,7 @@ import { ExitCommand } from "../../../src/protocol/commands/session/ExitCommand"
 import { HelpCommand } from "../../../src/protocol/commands/view/HelpCommand";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
-import type { Executor } from "../../../src/protocol/Executor";
+import type { Executor } from "../../../src/protocol/execution/Executor";
 import { CommandErrorResult } from "../../../src/protocol/results/outcomes/CommandErrorResult";
 import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";

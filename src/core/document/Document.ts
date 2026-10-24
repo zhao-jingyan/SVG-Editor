@@ -1,4 +1,4 @@
-import type { EditableAttribute } from "../../protocol/EditableAttribute";
+import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
 import { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
 import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";

@@ -1,4 +1,4 @@
-import type { CommandResult } from "./results/CommandResult";
+import type { CommandResult } from "../results/CommandResult";
 
 export interface ViewCommandReceiver {
   tree(shapeId?: string): Promise<CommandResult>;

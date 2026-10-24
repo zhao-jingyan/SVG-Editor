@@ -1,8 +1,8 @@
-import type { CommandReceiver } from "../protocol/CommandReceiver";
+import type { CommandReceiver } from "../protocol/receivers/CommandReceiver";
 import type { Command } from "../protocol/commands/Command";
 import { UndoableCommand } from "../protocol/commands/UndoableCommand";
 import { ProtocolError } from "../protocol/errors/ProtocolError";
-import type { Executor } from "../protocol/Executor";
+import type { Executor } from "../protocol/execution/Executor";
 import { CommandErrorResult } from "../protocol/results/outcomes/CommandErrorResult";
 import type { CommandResult } from "../protocol/results/CommandResult";
 import type { CommandHistory } from "./history/CommandHistory";

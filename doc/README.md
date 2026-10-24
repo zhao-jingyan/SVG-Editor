@@ -23,7 +23,7 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 | `src/cli/io` | 交互输入输出端口与终端适配器 | 仅自身端口 |
 | `src/cli/parser` | 文本到具体 Command 的解析、CLI 解析结果与边界 DTO | `src/protocol` |
 | `src/cli/session` | 交互循环、单次命令编排、反馈与继续/退出策略 | `src/cli/io`、`src/cli/parser`、`src/protocol` |
-| `src/protocol` | CLI 与 Core 共享的命令模型、图形领域模型、`CommandReceiver` 能力聚合 / `Executor` 端口、结果与错误模型、SVG 图形工厂 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
+| `src/protocol` | CLI 与 Core 共享的命令、接收者能力、执行入口、图形模型、结果、错误与 SVG 图形工厂；根目录仅保留语义子目录 | 仅标准 TypeScript/JavaScript 能力，不依赖 `cli`、`core`、Node 或 DOM |
 | `src/core` | 应用编排、文档聚合、历史栈、显示格式化、SVG 解析与文件适配 | `src/protocol`；仅 `core/io/FileSvgStorage` 使用 Node `fs/promises` |
 | `scripts/e2e.mjs` | 黑盒端到端回归脚本，启动真实编译产物并检查输出与文件结果 | Node 标准库 |
 | `tests` | 单元测试、协议测试、Core 协作测试与进程级 E2E 测试 | 按测试对象使用相应模块 |

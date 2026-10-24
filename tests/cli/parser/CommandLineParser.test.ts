@@ -4,7 +4,7 @@ import type { CommandParseResultDto } from "../../../src/cli/parser/results/Comm
 import { CommandParseEmptyResult } from "../../../src/cli/parser/results/CommandParseEmptyResult";
 import { CommandParseErrorResult } from "../../../src/cli/parser/results/CommandParseErrorResult";
 import type { Command } from "../../../src/protocol/commands/Command";
-import type { EditableAttribute } from "../../../src/protocol/EditableAttribute";
+import type { EditableAttribute } from "../../../src/protocol/shapes/model/EditableAttribute";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
 import { AddToCommand } from "../../../src/protocol/commands/shape/AddToCommand";
 import { CanvasCommand } from "../../../src/protocol/commands/doc/CanvasCommand";

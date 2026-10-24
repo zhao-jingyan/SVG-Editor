@@ -1,4 +1,4 @@
-import type { CommandReceiver } from "../../protocol/CommandReceiver";
+import type { CommandReceiver } from "../../protocol/receivers/CommandReceiver";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import { CommandErrorResult } from "../../protocol/results/outcomes/CommandErrorResult";

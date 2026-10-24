@@ -1,4 +1,4 @@
-import type { EditableAttribute } from "../../EditableAttribute";
+import type { EditableAttribute } from "../model/EditableAttribute";
 import { StyledShape } from "../model/StyledShape";
 import { ShapeType } from "../model/ShapeType";
 import { ShapePosition } from "../model/ShapePosition";

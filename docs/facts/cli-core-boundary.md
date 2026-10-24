@@ -2,13 +2,34 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 根目录持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；Protocol 根持有文档、图形、显示、历史四个能力接收者接口及聚合 `CommandReceiver`、`Executor` 入口端口、`Shape` 类层次、`ShapeFactory`、`results` 和 `errors` 子系统。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`tokenization`、`arguments`、`commands`、`definition`、`results` 分别承载切词、参数校验、命令构造、命令注册和解析结果。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
 - `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display` 和 `io` 子系统。`EditorReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandReceiver。
 - `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorReceiver 协作测试，`tests/core` 存放 Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
+
+```text
+src/protocol
+├── commands
+├── errors
+├── execution
+│   └── Executor.ts
+├── receivers
+│   ├── CommandReceiver.ts
+│   ├── DocumentCommandReceiver.ts
+│   ├── HistoryCommandReceiver.ts
+│   ├── ShapeCommandReceiver.ts
+│   └── ViewCommandReceiver.ts
+├── results
+└── shapes
+    ├── concrete
+    ├── factory
+    ├── model
+    │   └── EditableAttribute.ts
+    └── visitor
+```
 
 ```text
 src/cli

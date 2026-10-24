@@ -1,4 +1,4 @@
-import type { EditableAttribute } from "../../EditableAttribute";
+import type { EditableAttribute } from "../../shapes/model/EditableAttribute";
 import type { ShapeType } from "../../shapes/model/ShapeType";
 
 export class ShapeAttributeSnapshot {

@@ -1,5 +1,5 @@
 import { Command } from "../Command";
-import type { CommandReceiver } from "../../CommandReceiver";
+import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class TreeCommand extends Command {
