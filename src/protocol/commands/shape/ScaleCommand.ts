@@ -1,8 +1,8 @@
-import type { CommandContext } from "../CommandContext";
-import type { CommandResult } from "../results/CommandResult";
-import { CommandSuccessResult } from "../results/CommandSuccessResult";
-import type { ShapeType } from "../shapes/ShapeType";
-import { UndoableCommand } from "../UndoableCommand";
+import type { CommandContext } from "../../CommandContext";
+import type { CommandResult } from "../../results/CommandResult";
+import { CommandSuccessResult } from "../../results/CommandSuccessResult";
+import type { ShapeType } from "../../shapes/ShapeType";
+import { UndoableCommand } from "../../UndoableCommand";
 
 export class ScaleCommand extends UndoableCommand {
   public readonly type = "scale";

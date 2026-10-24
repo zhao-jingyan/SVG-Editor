@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Document } from "../../../src/core/document/Document";
-import { ShapePlacement } from "../../../src/protocol/commands/ShapePlacement";
+import { ShapePlacement } from "../../../src/protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
 import { DocumentError } from "../../../src/protocol/errors/DocumentError";
 import { CircleShape } from "../../../src/protocol/shapes/CircleShape";

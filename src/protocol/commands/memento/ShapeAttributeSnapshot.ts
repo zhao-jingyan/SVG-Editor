@@ -1,5 +1,5 @@
-import type { EditableAttribute } from "../EditableAttribute";
-import type { ShapeType } from "../shapes/ShapeType";
+import type { EditableAttribute } from "../../EditableAttribute";
+import type { ShapeType } from "../../shapes/ShapeType";
 
 export class ShapeAttributeSnapshot {
   private readonly shapeId: string;

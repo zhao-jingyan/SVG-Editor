@@ -1,7 +1,7 @@
-import { CanvasCommand } from "../../../../../protocol/commands/CanvasCommand";
-import { InitCommand } from "../../../../../protocol/commands/InitCommand";
-import { ReadCommand } from "../../../../../protocol/commands/ReadCommand";
-import { SaveCommand } from "../../../../../protocol/commands/SaveCommand";
+import { CanvasCommand } from "../../../../../protocol/commands/doc/CanvasCommand";
+import { InitCommand } from "../../../../../protocol/commands/doc/InitCommand";
+import { ReadCommand } from "../../../../../protocol/commands/doc/ReadCommand";
+import { SaveCommand } from "../../../../../protocol/commands/doc/SaveCommand";
 import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**

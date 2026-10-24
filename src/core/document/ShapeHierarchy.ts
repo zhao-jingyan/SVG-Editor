@@ -1,6 +1,6 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { DocumentError } from "../../protocol/errors/DocumentError";
-import { ShapePlacement } from "../../protocol/commands/ShapePlacement";
+import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { GroupShape } from "../../protocol/shapes/GroupShape";
 import type { Shape } from "../../protocol/shapes/Shape";
 import { ShapeIndex } from "./ShapeIndex";

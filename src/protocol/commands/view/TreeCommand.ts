@@ -1,6 +1,6 @@
-import { Command } from "../Command";
-import type { CommandContext } from "../CommandContext";
-import type { CommandResult } from "../results/CommandResult";
+import { Command } from "../../Command";
+import type { CommandContext } from "../../CommandContext";
+import type { CommandResult } from "../../results/CommandResult";
 
 export class TreeCommand extends Command {
   public readonly type = "tree";

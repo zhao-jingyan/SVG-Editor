@@ -1,9 +1,9 @@
-import { ExitCommand } from "../../../../../protocol/commands/ExitCommand";
-import { HelpCommand } from "../../../../../protocol/commands/HelpCommand";
-import { RedoCommand } from "../../../../../protocol/commands/RedoCommand";
-import { ShowCommand } from "../../../../../protocol/commands/ShowCommand";
-import { TreeCommand } from "../../../../../protocol/commands/TreeCommand";
-import { UndoCommand } from "../../../../../protocol/commands/UndoCommand";
+import { ExitCommand } from "../../../../../protocol/commands/session/ExitCommand";
+import { HelpCommand } from "../../../../../protocol/commands/view/HelpCommand";
+import { RedoCommand } from "../../../../../protocol/commands/history/RedoCommand";
+import { ShowCommand } from "../../../../../protocol/commands/view/ShowCommand";
+import { TreeCommand } from "../../../../../protocol/commands/view/TreeCommand";
+import { UndoCommand } from "../../../../../protocol/commands/history/UndoCommand";
 import type { CommandArguments } from "../../../syntax/CommandArguments";
 
 /**

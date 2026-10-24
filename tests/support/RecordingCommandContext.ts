@@ -1,7 +1,7 @@
 import type { CommandContext } from "../../src/protocol/CommandContext";
 import type { EditableAttribute } from "../../src/protocol/EditableAttribute";
-import { ShapeAttributeSnapshot } from "../../src/protocol/commands/ShapeAttributeSnapshot";
-import { ShapePlacement } from "../../src/protocol/commands/ShapePlacement";
+import { ShapeAttributeSnapshot } from "../../src/protocol/commands/memento/ShapeAttributeSnapshot";
+import { ShapePlacement } from "../../src/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/CommandSuccessResult";
 import { GroupShape } from "../../src/protocol/shapes/GroupShape";

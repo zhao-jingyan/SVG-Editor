@@ -1,8 +1,8 @@
 import type { Command } from "../protocol/Command";
 import type { CommandContext } from "../protocol/CommandContext";
 import type { EditableAttribute } from "../protocol/EditableAttribute";
-import type { ShapeAttributeSnapshot } from "../protocol/commands/ShapeAttributeSnapshot";
-import type { ShapePlacement } from "../protocol/commands/ShapePlacement";
+import type { ShapeAttributeSnapshot } from "../protocol/commands/memento/ShapeAttributeSnapshot";
+import type { ShapePlacement } from "../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../protocol/errors/CommandErrorCode";
 import { CommandExecutionError } from "../protocol/errors/CommandExecutionError";
 import { DocumentError } from "../protocol/errors/DocumentError";

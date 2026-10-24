@@ -1,7 +1,7 @@
 import type { CommandResult } from "./results/CommandResult";
 import type { EditableAttribute } from "./EditableAttribute";
-import type { ShapeAttributeSnapshot } from "./commands/ShapeAttributeSnapshot";
-import type { ShapePlacement } from "./commands/ShapePlacement";
+import type { ShapeAttributeSnapshot } from "./commands/memento/ShapeAttributeSnapshot";
+import type { ShapePlacement } from "./commands/memento/ShapePlacement";
 import type { Shape } from "./shapes/Shape";
 
 export interface CommandContext {

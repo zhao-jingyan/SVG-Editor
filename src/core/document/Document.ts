@@ -1,6 +1,6 @@
 import type { EditableAttribute } from "../../protocol/EditableAttribute";
-import { ShapeAttributeSnapshot } from "../../protocol/commands/ShapeAttributeSnapshot";
-import { ShapePlacement } from "../../protocol/commands/ShapePlacement";
+import { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
+import { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { DocumentError } from "../../protocol/errors/DocumentError";
 import { GroupShape } from "../../protocol/shapes/GroupShape";

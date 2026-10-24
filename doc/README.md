@@ -154,11 +154,11 @@ stdin
 
 | 模式 | 参与者与代码位置 | 解决的问题 | 替代方案与取舍 |
 |---|---|---|---|
-| Command | `protocol/Command.ts`、`protocol/UndoableCommand.ts`、`protocol/commands/*`；`CommandContext` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
+| Command | `protocol/Command.ts`、`protocol/UndoableCommand.ts`、`protocol/commands/{doc,shape,view,history,session}/*`；`CommandContext` 是接收者接口 | 把每条 CLI 命令封装为具有身份和行为的对象，编辑命令自带逆操作 | 命令联合类型 + 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
 | Composite | `protocol/shapes/Shape.ts`、`GroupShape.ts` 与五种叶子图形 | 容器与叶子统一支持移动、缩放、公共样式设置和删除 | 在 Context/命令层到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
 | Factory | `protocol/shapes/ShapeFactory.ts` | 集中处理“图形类型名 -> 具体 Shape”，统一参数校验 | Parser 内重复 `switch(type)` 会产生第二个类型分派点，不采用 |
 | Visitor | `protocol/shapes/ShapeVisitor.ts`、各 Shape 的 `accept`；Core 的 `ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示与序列化层按类型分支会增加分派点，不采用 |
-| Memento | `protocol/commands/ShapePlacement.ts`、`ShapeAttributeSnapshot.ts` | 命令保存局部结构与属性状态，实现精确撤销而不复制整份文档 | 整文档快照简单但内存和一致性成本高，也掩盖了命令的真实逆操作，不采用 |
+| Memento | `protocol/commands/memento/ShapePlacement.ts`、`ShapeAttributeSnapshot.ts` | 命令保存局部结构与属性状态，实现精确撤销而不复制整份文档 | 整文档快照简单但内存和一致性成本高，也掩盖了命令的真实逆操作，不采用 |
 | Facade | `core/EditorContext.ts`、`core/document/Document.ts` | 对 CLI 隐藏文档、历史、错误转换和树/索引协作细节 | 让 CommandSession 直接持有 Document/History 会把应用编排推入 UI 层，不采用 |
 | Caretaker | `core/history/CommandHistory.ts` | 管理 undo/redo 两栈，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
 | Adapter / Port | `core/io/SvgStorage.ts` 与 `FileSvgStorage.ts` | 隔离文件系统，允许测试注入内存存储 | 在 Context 内直接调用 `fs` 会破坏可测试性和依赖边界，不采用 |

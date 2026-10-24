@@ -1,6 +1,6 @@
-import { Command } from "../Command";
-import type { CommandContext } from "../CommandContext";
-import type { CommandResult } from "../results/CommandResult";
+import { Command } from "../../Command";
+import type { CommandContext } from "../../CommandContext";
+import type { CommandResult } from "../../results/CommandResult";
 
 export class CanvasCommand extends Command {
   public readonly type = "canvas";
