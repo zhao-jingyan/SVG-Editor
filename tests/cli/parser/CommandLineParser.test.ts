@@ -110,7 +110,7 @@ async function expectCreateCommand(
 }
 
 describe("CommandLineParser", () => {
-  it("解析文档命令并调用对应 Context 方法", async () => {
+  it("解析文档命令并调用对应 Receiver 方法", async () => {
     await expectCommand("init", InitCommand, "init", [undefined, undefined]);
     await expectCommand("init 800 600", InitCommand, "init", [800, 600]);
     await expectCommand(
@@ -208,7 +208,7 @@ describe("CommandLineParser", () => {
     });
   });
 
-  it("解析图形编辑命令并调用对应 Context 方法", async () => {
+  it("解析图形编辑命令并调用对应 Receiver 方法", async () => {
     await expectCommand("delete r1", DeleteCommand, "deleteShape", ["r1"]);
     await expectCommand("move r1 -10 20.5", MoveCommand, "moveShape", ["r1", -10, 20.5]);
     await expectCommand("scale r1 2", ScaleCommand, "scaleShape", ["r1", 2]);

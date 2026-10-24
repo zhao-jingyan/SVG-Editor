@@ -4,7 +4,7 @@ import { CommandLineParser } from "./cli/parser/CommandLineParser";
 import { CommandLoop } from "./cli/session/CommandLoop";
 import { CommandSession } from "./cli/session/CommandSession";
 import { CommandExecutor } from "./core/CommandExecutor";
-import { EditorContext } from "./core/EditorContext";
+import { EditorSession } from "./core/EditorSession";
 import { ShapeFactory } from "./protocol/shapes/factory/ShapeFactory";
 
 async function main(): Promise<void> {
@@ -12,7 +12,7 @@ async function main(): Promise<void> {
   const outputWriter = new ConsoleOutputWriter();
   const session = new CommandSession(
     new CommandLineParser(new ShapeFactory()),
-    new CommandExecutor(new EditorContext()),
+    new CommandExecutor(new EditorSession()),
     outputWriter,
   );
   const commandLoop = new CommandLoop(

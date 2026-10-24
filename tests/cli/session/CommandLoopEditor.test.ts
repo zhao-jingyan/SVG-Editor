@@ -5,7 +5,7 @@ import { CommandSession } from "../../../src/cli/session/CommandSession";
 import type { InputReader } from "../../../src/cli/io/InputReader";
 import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
-import { EditorContext } from "../../../src/core/EditorContext";
+import { EditorSession } from "../../../src/core/EditorSession";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 
 class FakeInputReader implements InputReader {
@@ -37,10 +37,10 @@ describe("CommandLoop 真实编辑链路", () => {
       "exit",
     ]);
     const output = new FakeOutputWriter();
-    const context = new EditorContext();
+    const editor = new EditorSession();
     const session = new CommandSession(
       new CommandLineParser(new ShapeFactory()),
-      new CommandExecutor(context),
+      new CommandExecutor(editor),
       output,
     );
     const commandLoop = new CommandLoop(
@@ -60,6 +60,6 @@ describe("CommandLoop 真实编辑链路", () => {
       "rect#r1 moved back to (0,0)",
       "rect#r1 moved to (5,5)",
     ]);
-    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
+    expect(editor.captureAttribute("r1", "x").getValue("r1")).toBe(5);
   });
 });

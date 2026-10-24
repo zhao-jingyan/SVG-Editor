@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandExecutor } from "../../src/core/CommandExecutor";
-import { EditorContext } from "../../src/core/EditorContext";
+import { EditorSession } from "../../src/core/EditorSession";
 import { Command } from "../../src/protocol/commands/Command";
 import { AddToCommand } from "../../src/protocol/commands/shape/AddToCommand";
 import { CanvasCommand } from "../../src/protocol/commands/doc/CanvasCommand";
@@ -42,11 +42,11 @@ function expectErrorMessage(
 }
 
 function createEditor(storage?: InMemorySvgStorage): {
-  context: EditorContext;
+  session: EditorSession;
   executor: CommandExecutor;
 } {
-  const context = new EditorContext(storage);
-  return { context, executor: new CommandExecutor(context) };
+  const session = new EditorSession(storage);
+  return { session, executor: new CommandExecutor(session) };
 }
 
 async function initialize(
@@ -61,7 +61,7 @@ async function initialize(
   });
 }
 
-describe("EditorContext", () => {
+describe("EditorSession", () => {
   it("管理文档生命周期、画布查询和历史锁", async () => {
     const { executor } = createEditor();
 
@@ -88,57 +88,57 @@ describe("EditorContext", () => {
   });
 
   it("执行 move 后撤销和重做", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10)));
 
     expect(
       (await executor.execute(new MoveCommand("r1", 5, 5))).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 moved to (5,5)" });
-    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
+    expect(session.captureAttribute("r1", "x").getValue("r1")).toBe(5);
 
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 moved back to (0,0)" });
-    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(0);
+    expect(session.captureAttribute("r1", "x").getValue("r1")).toBe(0);
 
     expect(
       (await executor.execute(new RedoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 moved to (5,5)" });
-    expect(context.captureAttribute("r1", "x").getValue("r1")).toBe(5);
+    expect(session.captureAttribute("r1", "x").getValue("r1")).toBe(5);
   });
 
   it("执行 scale 后撤销，并支持创建命令的撤销与重做", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10)));
 
     expect(
       (await executor.execute(new ScaleCommand("r1", 2))).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 scaled by 2" });
-    expect(context.captureAttribute("r1", "width").getValue("r1")).toBe(20);
+    expect(session.captureAttribute("r1", "width").getValue("r1")).toBe(20);
 
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 scaled back by 0.5" });
-    expect(context.captureAttribute("r1", "width").getValue("r1")).toBe(10);
+    expect(session.captureAttribute("r1", "width").getValue("r1")).toBe(10);
 
     await executor.execute(new RedoCommand());
-    expect(context.captureAttribute("r1", "width").getValue("r1")).toBe(20);
+    expect(session.captureAttribute("r1", "width").getValue("r1")).toBe(20);
     await executor.execute(new UndoCommand());
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 deleted" });
-    expect(() => context.capturePlacement("r1")).toThrow("no such shape: r1");
+    expect(() => session.capturePlacement("r1")).toThrow("no such shape: r1");
 
     expect(
       (await executor.execute(new RedoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 created" });
-    expect(context.capturePlacement("r1").getIndex()).toBe(0);
+    expect(session.capturePlacement("r1").getIndex()).toBe(0);
   });
 
   it("删除后精确恢复原父级和索引", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("first", 0, 0, 1, 1)));
     await executor.execute(new CreateCommand(new RectShape("second", 0, 0, 1, 1)));
@@ -150,16 +150,16 @@ describe("EditorContext", () => {
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#second restored" });
-    expect(context.capturePlacement("second").getIndex()).toBe(1);
+    expect(session.capturePlacement("second").getIndex()).toBe(1);
 
     await executor.execute(new RedoCommand());
-    expect(() => context.capturePlacement("second")).toThrow(
+    expect(() => session.capturePlacement("second")).toThrow(
       "no such shape: second",
     );
   });
 
   it("group 撤销恢复成员顺序，redo 重建容器", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
     await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1)));
@@ -168,23 +168,23 @@ describe("EditorContext", () => {
     expect(
       (await executor.execute(new GroupCommand("g1", ["r3", "r1"]))).toCommandResultDto(),
     ).toEqual({ type: "success", message: "g#g1 created with 2 children" });
-    expect(context.capturePlacement("r1").getParentId()).toBe("g1");
+    expect(session.capturePlacement("r1").getParentId()).toBe("g1");
 
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "g#g1 removed" });
-    expect(() => context.capturePlacement("g1")).toThrow("no such shape: g1");
-    expect(context.capturePlacement("r1").getIndex()).toBe(0);
-    expect(context.capturePlacement("r2").getIndex()).toBe(1);
-    expect(context.capturePlacement("r3").getIndex()).toBe(2);
+    expect(() => session.capturePlacement("g1")).toThrow("no such shape: g1");
+    expect(session.capturePlacement("r1").getIndex()).toBe(0);
+    expect(session.capturePlacement("r2").getIndex()).toBe(1);
+    expect(session.capturePlacement("r3").getIndex()).toBe(2);
 
     await executor.execute(new RedoCommand());
-    expect(context.capturePlacement("r1").getParentId()).toBe("g1");
-    expect(context.capturePlacement("r3").getParentId()).toBe("g1");
+    expect(session.capturePlacement("r1").getParentId()).toBe("g1");
+    expect(session.capturePlacement("r3").getParentId()).toBe("g1");
   });
 
   it("ungroup 撤销恢复容器结构", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new GroupShape("outer")));
     await executor.execute(new CreateCommand(new GroupShape("inner"), "outer"));
@@ -194,41 +194,41 @@ describe("EditorContext", () => {
     expect(
       (await executor.execute(new UngroupCommand("inner"))).toCommandResultDto(),
     ).toEqual({ type: "success", message: "g#inner ungrouped into 2 children" });
-    expect(context.capturePlacement("r1").getParentId()).toBe("outer");
+    expect(session.capturePlacement("r1").getParentId()).toBe("outer");
 
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "g#inner restored" });
-    const placement = context.capturePlacement("inner");
+    const placement = session.capturePlacement("inner");
     expect(placement.getParentId()).toBe("outer");
     expect(placement.getIndex()).toBe(0);
-    expect(context.capturePlacement("r1").getParentId()).toBe("inner");
+    expect(session.capturePlacement("r1").getParentId()).toBe("inner");
 
     await executor.execute(new RedoCommand());
-    expect(context.capturePlacement("r1").getParentId()).toBe("outer");
+    expect(session.capturePlacement("r1").getParentId()).toBe("outer");
   });
 
   it("addto 和 reorder 撤销恢复原索引", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new GroupShape("g1")));
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
     await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1)));
 
     await executor.execute(new AddToCommand("g1", "r1"));
-    expect(context.capturePlacement("r1").getParentId()).toBe("g1");
+    expect(session.capturePlacement("r1").getParentId()).toBe("g1");
     await executor.execute(new UndoCommand());
-    expect(context.capturePlacement("r1").getParentId()).toBeUndefined();
-    expect(context.capturePlacement("r1").getIndex()).toBe(1);
+    expect(session.capturePlacement("r1").getParentId()).toBeUndefined();
+    expect(session.capturePlacement("r1").getIndex()).toBe(1);
 
     await executor.execute(new ReorderCommand("r2", "front"));
-    expect(context.capturePlacement("r2").getIndex()).toBe(0);
+    expect(session.capturePlacement("r2").getIndex()).toBe(0);
     await executor.execute(new UndoCommand());
-    expect(context.capturePlacement("r2").getIndex()).toBe(2);
+    expect(session.capturePlacement("r2").getIndex()).toBe(2);
   });
 
   it("set 撤销恢复叶子旧值，并按叶子恢复容器的不同旧值", async () => {
-    const { context, executor } = createEditor();
+    const { session, executor } = createEditor();
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1, "red")));
     await executor.execute(new CreateCommand(new CircleShape("r2", 0, 0, 1)));
@@ -236,13 +236,13 @@ describe("EditorContext", () => {
     await executor.execute(new GroupCommand("g1", ["r1", "r2"]));
 
     await executor.execute(new SetCommand("g1", "fill", "blue"));
-    expect(context.captureAttribute("r1", "fill").getValue("r1")).toBe("blue");
-    expect(context.captureAttribute("r2", "fill").getValue("r2")).toBe("blue");
+    expect(session.captureAttribute("r1", "fill").getValue("r1")).toBe("blue");
+    expect(session.captureAttribute("r2", "fill").getValue("r2")).toBe("blue");
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "g#g1 updated: fill unset" });
-    expect(context.captureAttribute("r1", "fill").getValue("r1")).toBe("red");
-    expect(context.captureAttribute("r2", "fill").getValue("r2")).toBeUndefined();
+    expect(session.captureAttribute("r1", "fill").getValue("r1")).toBe("red");
+    expect(session.captureAttribute("r2", "fill").getValue("r2")).toBeUndefined();
 
     await executor.execute(new SetCommand("t1", "text", "new"));
     expect(
@@ -272,7 +272,7 @@ describe("EditorContext", () => {
   });
 
   it("未执行的状态型命令不能直接撤销", async () => {
-    const { context } = createEditor();
+    const { session } = createEditor();
     const commands = [
       new DeleteCommand("r1"),
       new GroupCommand("g1", ["r1", "r2"]),
@@ -283,7 +283,7 @@ describe("EditorContext", () => {
     ];
 
     for (const command of commands) {
-      const result = await command.undo(context);
+      const result = await command.undo(session);
       expectErrorMessage(
         result,
         CommandErrorCode.InvalidArgument,
@@ -326,7 +326,7 @@ describe("EditorContext", () => {
   it("read 失败返回 IoRead 并保留原文档", async () => {
     const storage = new InMemorySvgStorage();
     storage.readError = new Error("missing file");
-    const { context, executor } = createEditor(storage);
+    const { session, executor } = createEditor(storage);
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
 
@@ -335,13 +335,13 @@ describe("EditorContext", () => {
       CommandErrorCode.IoRead,
       "cannot read file: missing.svg",
     );
-    expect(context.capturePlacement("r1").getParentId()).toBeUndefined();
+    expect(session.capturePlacement("r1").getParentId()).toBeUndefined();
   });
 
   it("read 解析失败不替换文档，也不清空历史", async () => {
     const storage = new InMemorySvgStorage();
     storage.files.set("broken.svg", "<svg");
-    const { context, executor } = createEditor(storage);
+    const { session, executor } = createEditor(storage);
     await initialize(executor);
     await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
 
@@ -350,7 +350,7 @@ describe("EditorContext", () => {
       CommandErrorCode.InvalidArgument,
       "invalid SVG: invalid XML",
     );
-    expect(context.capturePlacement("r1").getParentId()).toBeUndefined();
+    expect(session.capturePlacement("r1").getParentId()).toBeUndefined();
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
     ).toEqual({ type: "success", message: "rect#r1 deleted" });

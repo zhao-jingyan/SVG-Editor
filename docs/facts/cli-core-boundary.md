@@ -6,9 +6,9 @@
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`tokenization`、`arguments`、`commands`、`definition`、`results` 分别承载切词、参数校验、命令构造、命令注册和解析结果。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
-- `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorContext`、`CommandHistory`、`document`、`display` 和 `io` 子系统。`EditorContext` 实现命令接收者并持有当前文档与历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
+- `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorSession`、`CommandHistory`、`document`、`display` 和 `io` 子系统。`EditorSession` 实现命令接收者并持有当前文档与历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandReceiver。
-- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core` 存放 EditorContext、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
+- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core` 存放 EditorSession、Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
 
 ```text
 src/cli
@@ -119,10 +119,10 @@ src/core -/-> src/cli
 - `CommandLoop` 接受可选启动提示；组合根传入 `svg-editor 0.1 — type 'help' for commands`，UI 文案不进入命令解析器。
 - `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
-- `CommandExecutor` 位于 Core，实现 `Executor`，调用 `command.execute(EditorContext)`，成功记录 `UndoableCommand`，并转换 `ProtocolError`。
-- `EditorContext` 位于 Core，实现 `CommandReceiver`，持有可选 `Document`、`CommandHistory` 和历史锁；通过 `recordSuccessfulCommand` 接收成功命令入栈事件并解除锁定。
-- `EditorContext` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
-- `CommandHistory` 由 `EditorContext` 持有，是真正的 Caretaker；undo/redo 命令通过 Context 委托历史栈。
+- `CommandExecutor` 位于 Core，实现 `Executor`，调用 `command.execute(EditorSession)`，成功记录 `UndoableCommand`，并转换 `ProtocolError`。
+- `EditorSession` 位于 Core，实现 `CommandReceiver`，持有可选 `Document`、`CommandHistory` 和历史锁；通过 `recordSuccessfulCommand` 接收成功命令入栈事件并解除锁定。
+- `EditorSession` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
+- `CommandHistory` 由 `EditorSession` 持有，是真正的 Caretaker；undo/redo 命令通过 EditorSession 委托历史栈。
 - `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。
 
 ## 当前执行链路
@@ -131,9 +131,9 @@ src/core -/-> src/cli
 ConsoleInputReader -> CommandLoop -> CommandSession -> CommandLineParser -> 具体 Command
                                                                |
                                                                v
-CommandExecutor -> command.execute(EditorContext) -> Document / Shape 多态行为
+CommandExecutor -> command.execute(EditorSession) -> Document / Shape 多态行为
        |
-       +-> EditorContext.recordSuccessfulCommand -> CommandHistory
+       +-> EditorSession.recordSuccessfulCommand -> CommandHistory
 ```
 
 - Parser 把空行和首个非空字符为 `#` 的注释行识别为 `empty`，把语法或参数失败识别为 `error`。
@@ -141,7 +141,7 @@ CommandExecutor -> command.execute(EditorContext) -> Document / Shape 多态行�
 - 解析错误输出 `error: <message>` 后继续循环。
 - `success` 输出其 `message`，`error` 输出 `error: <message>`，`exit` 结束循环。
 - 解析和命令执行结果在边界上转换为 `CommandParseResultDto` / `CommandResultDto`；运行时结果对象和错误对象不会直接进入输出层。
-- `ExitCommand.execute` 不调用 Context，直接返回退出结果。
+- `ExitCommand.execute` 不调用命令接收者，直接返回退出结果。
 - `ConsoleInputReader` 使用常驻事件监听和内部队列，能够处理管道一次写入的多行输入。
 - 编辑命令成功后进入历史栈；`init` 清空历史并锁定 undo/redo，`canvas` 修改尺寸只锁定历史，下一次成功编辑重新解禁。
 - `read` 成功替换文档、清空历史并锁定；`save` 成功只锁定历史，不主动清空历史；失败的 IO 操作不改变历史锁。
@@ -150,7 +150,7 @@ CommandExecutor -> command.execute(EditorContext) -> Document / Shape 多态行�
 
 ## 后续设计事实
 
-- `EditorContext` 已接入 CLI 编辑链路，命令类本身保持与文档存储细节解耦。
+- `EditorSession` 已接入 CLI 编辑链路，命令类本身保持与文档存储细节解耦。
 - undo/redo 采用命令自身逆操作和局部状态，不使用整文档快照。
 - `read/save` 已接入 SVG 子集与 IO 历史锁；插件注册表、复杂 SVG 特性和无损保留未知元素进入后续阶段。
 - `Document`、`ShapeHierarchy` 与 `ShapeIndex` 已支持精确位置恢复和属性快照恢复，为命令撤销提供基础能力。
