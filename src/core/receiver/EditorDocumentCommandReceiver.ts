@@ -3,6 +3,7 @@ import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
 import type { CommandResult } from "../../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
+import type { Shape } from "../../protocol/shapes/model/Shape";
 import { Document } from "../document/Document";
 import type { CommandHistory } from "../history/CommandHistory";
 import { FileSvgStorage } from "../io/FileSvgStorage";
@@ -105,6 +106,10 @@ export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
     return new CommandSuccessResult(
       `canvas ${document.getWidth()}x${document.getHeight()} resized`,
     );
+  }
+
+  public getRootShapes(): readonly Shape[] {
+    return this.requireDocument().getRootShapes();
   }
 
   public requireDocument(): Document {

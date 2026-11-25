@@ -36,6 +36,11 @@ export class RecordingCommandReceiver implements CommandReceiver {
     return this.record("canvas", [width, height]);
   }
 
+  public getRootShapes(): readonly Shape[] {
+    this.calls.push({ method: "getRootShapes", args: [] });
+    return [];
+  }
+
   public createShape(shape: Shape, parentId?: string): Promise<CommandResult> {
     return this.record("createShape", [shape, parentId]);
   }

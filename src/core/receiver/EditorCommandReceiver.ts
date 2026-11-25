@@ -47,6 +47,10 @@ export class EditorCommandReceiver implements CommandReceiver {
     return this.documentReceiver.canvas(width, height);
   }
 
+  public getRootShapes(): readonly Shape[] {
+    return this.documentReceiver.getRootShapes();
+  }
+
   public createShape(
     shape: Shape,
     parentId?: string,

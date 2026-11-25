@@ -67,6 +67,26 @@ async function initialize(
 }
 
 describe("EditorCommandReceiver", () => {
+  it("getRootShapes 在无文档时失败，空画布为空，有子节点时保持顺序", async () => {
+    const { receiver, executor } = createReceiver();
+
+    expect(() => receiver.getRootShapes()).toThrow(
+      expect.objectContaining({
+        message: "no document. use 'init' or 'read' first",
+      }),
+    );
+
+    await initialize(executor);
+    expect(receiver.getRootShapes()).toEqual([]);
+
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 10, 10)));
+    await executor.execute(new CreateCommand(new CircleShape("c1", 1, 2, 3)));
+    expect(receiver.getRootShapes().map((shape) => shape.getId())).toEqual([
+      "r1",
+      "c1",
+    ]);
+  });
+
   it("管理文档生命周期、画布查询和历史锁", async () => {
     const { executor } = createReceiver();
 

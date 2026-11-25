@@ -10,13 +10,15 @@
 ## 架构与依赖
 
 - `src/cli`：只负责输入输出、终端适配和文本到命令对象的解析，不承载业务规则。
-- `src/protocol`：只存放契约——命令基类与贡献 API、图形领域模型、接收者接口、结果/错误模型与边界 DTO；不含具体内置命令实现。
+- `src/protocol`：只存放契约——命令基类与贡献 API、图形领域模型、接收者接口、IO 端口（如 `DirectoryListing`）、结果/错误模型与边界 DTO；不含具体内置/插件命令实现。
 - `src/builtin`：内置命令包（具体 `XxxCommand` 与对应 `*CommandContribution`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
-- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `builtin`。
-- `src/main.ts`：只作为组合根，负责组装 CLI、Core、builtin 贡献注册与依赖实例。
-- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`builtin -> protocol`、`main -> cli + core + builtin`。
-- `protocol` 不得依赖 `cli`、`core`、`builtin`、Node 或 DOM。
+- `src/plugin`：可选命令等插件包，依赖 `protocol`；不得依赖 `builtin` / `core` 内部；由组合根注册。
+- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `builtin` / `plugin`。
+- `src/main.ts`：只作为组合根，负责组装 CLI、Core、builtin/plugin 贡献注册与依赖实例。
+- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`builtin -> protocol`、`plugin -> protocol`、`main -> cli + core + builtin + plugin`。
+- `protocol` 不得依赖 `cli`、`core`、`builtin`、`plugin`、Node 或 DOM。
 - 禁止跨层直接访问、循环依赖，以及在 CLI 中实现编辑规则或文档状态。
+- 命令专用 API 不上 `CommandReceiver`；文档结构只读查询可用 `getRootShapes()`；文件系统经独立 `DirectoryListing` 端口，不经 Receiver。
 - 路径别名：`@/*` → `src/*`（`tsconfig` paths + vitest alias；构建经 `resolve-tspaths` 回写相对路径）。跨层导入可用 `@/builtin`、`@/protocol` 等，不是 npm package。
 
 ## 面向对象规则

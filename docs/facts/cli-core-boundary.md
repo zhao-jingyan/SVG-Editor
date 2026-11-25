@@ -2,8 +2,9 @@
 
 ## 目录职责
 
-- `src/protocol` 只存放契约：命令基类与贡献 API、图形领域模型、结果模型和错误模型。`commands` 仅持有 `_common`（基类、`contribution/`、`memento/`）；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、`src/builtin`、Node 或 DOM。
+- `src/protocol` 只存放契约：命令基类与贡献 API、图形领域模型、结果模型和错误模型。`commands` 仅持有 `_common`（基类、`contribution/`、`memento/`）；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`（文档侧含通用只读 `getRootShapes()`，不含命令专用 API）；`execution` 持有 `Executor` 入口端口；`io` 持有与文档编辑解耦的端口（如 `DirectoryListing` / `DirectoryEntry`）；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、`src/builtin`、`src/plugin`、Node 或 DOM。
 - `src/builtin` 是内置命令包：按 `commands/XxxCommand/` 组织具体 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。只导出贡献，不统一注册；依赖方向为 `builtin -> protocol`。
+- `src/plugin` 是可选插件命令包（Phase 2：`stats` / `dir` 等），依赖 `protocol`；目录列举经 `DirectoryListing` 适配器，不经 `CommandReceiver`。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`syntax` 负责切词，`results` 负责解析结果包装。命令目录查询与 Command 创建由注入的 `CommandCatalog` 完成。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
@@ -22,6 +23,10 @@ src/protocol
 ├── errors
 ├── execution
 │   └── Executor.ts
+├── io
+│   ├── DirectoryEntry.ts
+│   ├── DirectoryEntryKind.ts
+│   └── DirectoryListing.ts
 ├── receivers
 │   ├── CommandReceiver.ts
 │   ├── DocumentCommandReceiver.ts
