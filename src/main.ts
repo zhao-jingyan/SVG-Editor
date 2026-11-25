@@ -33,6 +33,8 @@ import { DirCommandContribution } from "@/_plugin/commands/DirCommand/DirCommand
 import { StatsCommandContribution } from "@/_plugin/commands/StatsCommand/StatsCommandContribution";
 import { BoxAttributeHandler } from "@/_plugin/shapes/BoxShape/BoxAttributeHandler";
 import { BoxShapeContribution } from "@/_plugin/shapes/BoxShape/BoxShapeContribution";
+import { BoxTypeLabelDecorator } from "@/_plugin/tree/BoxTypeLabelDecorator";
+import { ModifiedStarDecorator } from "@/_plugin/tree/ModifiedStarDecorator";
 import { AttributeRegistry } from "@/core/attributes/AttributeRegistry";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { CommandExecutor } from "@/core/CommandExecutor";
@@ -41,6 +43,7 @@ import { CommandHistory } from "@/core/history/CommandHistory";
 import { FileSvgStorage } from "@/core/io/FileSvgStorage";
 import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
 import { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
+import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
 
 async function main(): Promise<void> {
   const inputReader = new ConsoleInputReader();
@@ -85,6 +88,12 @@ async function main(): Promise<void> {
   ]);
   const attributeCatalog = new AttributeRegistry();
   attributeCatalog.register(new BoxAttributeHandler());
+  const treeDecorators = new TreeDecoratorRegistry();
+  // 顺序：(box) 在前，* 在后 → `g#n1 (box) *`
+  treeDecorators.registerAll([
+    new BoxTypeLabelDecorator(),
+    new ModifiedStarDecorator(),
+  ]);
   const helpText = new HelpText(registry);
   const editorCommandReceiver = new EditorCommandReceiver(
     history,
@@ -92,6 +101,7 @@ async function main(): Promise<void> {
     helpText,
     shapeCatalog,
     attributeCatalog,
+    treeDecorators,
   );
   const session = new CommandSession(
     new CommandLineParser(registry),

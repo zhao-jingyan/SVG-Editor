@@ -143,8 +143,8 @@ describe("CLI 进程级端到端", () => {
     expect(run.status).toBe(0);
     expect(lines[0]).toBe(startupMessage);
     expect(lines[1]).toBe("Commands:");
-    expect(lines).toContain("svg (800x600)");
-    expect(lines).toContain("└── g#markers");
+    expect(lines).toContain("svg (800x600) *");
+    expect(lines).toContain("└── g#markers *");
     expect(lines).toContain("circle#c1  parent=g#markers");
     expect(lines).toContain("  cx=100 cy=100 r=20");
   });
