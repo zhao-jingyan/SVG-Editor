@@ -2,7 +2,7 @@ import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
 import type { ShapeType } from "../../shapes/model/ShapeType";
-import { UndoableCommand } from "../UndoableCommand";
+import { UndoableCommand } from "../_common/UndoableCommand";
 
 export class ScaleCommand extends UndoableCommand {
   private shapeType?: ShapeType;

@@ -1,4 +1,4 @@
-import type { Command } from "../../../protocol/commands/Command";
+import type { Command } from "../../../protocol/commands/_common/Command";
 import {
   CommandParseResult,
   type CommandParseResultDto,

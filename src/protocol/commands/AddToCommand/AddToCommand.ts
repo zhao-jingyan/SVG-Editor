@@ -1,8 +1,8 @@
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
-import type { ShapePlacement } from "../memento/ShapePlacement";
+import type { ShapePlacement } from "../_common/memento/ShapePlacement";
 import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
-import { UndoableCommand } from "../UndoableCommand";
+import { UndoableCommand } from "../_common/UndoableCommand";
 
 export class AddToCommand extends UndoableCommand {
   private placement?: ShapePlacement;

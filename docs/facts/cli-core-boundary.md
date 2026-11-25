@@ -2,7 +2,7 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 持有 `Command` / `UndoableCommand` 基类和按语义族组织的具体命令；`contribution` 持有 `CommandContribution`、`CommandHelp`、`CommandParameters` 与只读 `CommandCatalog`；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 持有 `_common`（基类、`contribution/`、`memento/`）与各 `XxxCommand/`；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`syntax` 负责切词，`results` 负责解析结果包装。命令目录查询与 Command 创建由注入的 `CommandCatalog` 完成。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
@@ -13,9 +13,11 @@
 ```text
 src/protocol
 ├── commands
-│   ├── Command.ts
-│   ├── UndoableCommand.ts
-│   ├── memento/
+│   ├── _common/
+│   │   ├── Command.ts
+│   │   ├── UndoableCommand.ts
+│   │   ├── contribution/
+│   │   └── memento/
 │   ├── MoveCommand/
 │   │   ├── MoveCommand.ts
 │   │   └── MoveCommandContribution.ts
@@ -24,7 +26,6 @@ src/protocol
 │   │   ├── FrontCommandContribution.ts
 │   │   └── BackCommandContribution.ts
 │   └── ...（其余 XxxCommand/）
-├── contribution
 ├── errors
 ├── execution
 │   └── Executor.ts

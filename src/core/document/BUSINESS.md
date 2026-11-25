@@ -48,5 +48,5 @@
 
 - 聚合根：[Document](Document.ts)。
 - 内部协作：[ShapeHierarchy](ShapeHierarchy.ts)、[ShapeIndex](ShapeIndex.ts)。
-- 撤销快照：[ShapePlacement](../../protocol/commands/memento/ShapePlacement.ts)、[ShapeAttributeSnapshot](../../protocol/commands/memento/ShapeAttributeSnapshot.ts)。
+- 撤销快照：[ShapePlacement](../../protocol/commands/_common/memento/ShapePlacement.ts)、[ShapeAttributeSnapshot](../../protocol/commands/_common/memento/ShapeAttributeSnapshot.ts)。
 - 业务回归：[Document.test.ts](../../../tests/core/document/Document.test.ts)、[DocumentRestore.test.ts](../../../tests/core/document/DocumentRestore.test.ts)、[ShapeIndex.test.ts](../../../tests/core/document/ShapeIndex.test.ts)。

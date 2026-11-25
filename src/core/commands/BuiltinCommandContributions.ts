@@ -1,4 +1,4 @@
-import { CommandContribution } from "../../protocol/contribution/CommandContribution";
+import { CommandContribution } from "../../protocol/commands/_common/contribution/CommandContribution";
 import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
 import { AddToCommandContribution } from "../../protocol/commands/AddToCommand/AddToCommandContribution";
 import { BackCommandContribution } from "../../protocol/commands/ReorderCommand/BackCommandContribution";

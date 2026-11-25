@@ -1,7 +1,7 @@
 import type { CommandReceiver } from "../../src/protocol/receivers/CommandReceiver";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
-import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
+import { UndoableCommand } from "../../src/protocol/commands/_common/UndoableCommand";
 
 type ScriptedOutcome = CommandResult | Error;
 

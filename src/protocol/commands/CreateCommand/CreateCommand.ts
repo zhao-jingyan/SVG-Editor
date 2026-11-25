@@ -1,6 +1,6 @@
 import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
-import { UndoableCommand } from "../UndoableCommand";
+import { UndoableCommand } from "../_common/UndoableCommand";
 import type { Shape } from "../../shapes/model/Shape";
 
 export class CreateCommand extends UndoableCommand {

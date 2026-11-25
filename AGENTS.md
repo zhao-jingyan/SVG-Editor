@@ -52,6 +52,7 @@
 - 容器形状通过 `GroupShape` 维护子节点，并递归实现统一操作。
 - `Command` 抽象类、`UndoableCommand` 和具体命令类继续作为命令模型；禁止退回命令联合类型。
 - 具体命令按 `protocol/commands/XxxCommand/` 目录组织，同目录放置 Command 与内置 `*CommandContribution`；`front`/`back` 同属 `ReorderCommand/`。
+- 命令共享基类、贡献契约与撤销快照放在 `protocol/commands/_common/`（`Command`、`UndoableCommand`、`contribution/`、`memento/`）。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 
 ## 现有偏差与整改

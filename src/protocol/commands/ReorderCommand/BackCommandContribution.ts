@@ -1,5 +1,5 @@
 import { ReorderCommand } from "./ReorderCommand";
-import { CommandContribution } from "../../contribution/CommandContribution";
+import { CommandContribution } from "../_common/contribution/CommandContribution";
 
 export class BackCommandContribution {
   public static create(): CommandContribution {

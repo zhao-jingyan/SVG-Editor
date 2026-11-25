@@ -1,7 +1,7 @@
 import { CreateCommand } from "./CreateCommand";
-import { CommandContribution } from "../../contribution/CommandContribution";
-import { CommandHelp } from "../../contribution/CommandHelp";
-import type { CommandParameters } from "../../contribution/CommandParameters";
+import { CommandContribution } from "../_common/contribution/CommandContribution";
+import { CommandHelp } from "../_common/contribution/CommandHelp";
+import type { CommandParameters } from "../_common/contribution/CommandParameters";
 import type { ShapeFactory } from "../../shapes/factory/ShapeFactory";
 
 export class CreateCommandContribution {

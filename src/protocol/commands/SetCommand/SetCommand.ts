@@ -1,9 +1,9 @@
 import { CommandSuccessResult } from "../../results/outcomes/CommandSuccessResult";
-import type { ShapeAttributeSnapshot } from "../memento/ShapeAttributeSnapshot";
+import type { ShapeAttributeSnapshot } from "../_common/memento/ShapeAttributeSnapshot";
 import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 import type { EditableAttribute } from "../../shapes/model/EditableAttribute";
-import { UndoableCommand } from "../UndoableCommand";
+import { UndoableCommand } from "../_common/UndoableCommand";
 
 export class SetCommand extends UndoableCommand {
   private snapshot?: ShapeAttributeSnapshot;

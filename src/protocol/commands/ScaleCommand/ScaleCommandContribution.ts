@@ -1,6 +1,6 @@
 import { ScaleCommand } from "./ScaleCommand";
-import { CommandContribution } from "../../contribution/CommandContribution";
-import { CommandHelp } from "../../contribution/CommandHelp";
+import { CommandContribution } from "../_common/contribution/CommandContribution";
+import { CommandHelp } from "../_common/contribution/CommandHelp";
 
 export class ScaleCommandContribution {
   public static create(): CommandContribution {

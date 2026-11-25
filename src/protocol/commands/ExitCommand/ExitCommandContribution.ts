@@ -1,6 +1,6 @@
 import { ExitCommand } from "./ExitCommand";
-import { CommandContribution } from "../../contribution/CommandContribution";
-import { CommandHelp } from "../../contribution/CommandHelp";
+import { CommandContribution } from "../_common/contribution/CommandContribution";
+import { CommandHelp } from "../_common/contribution/CommandHelp";
 
 export class ExitCommandContribution {
   public static create(): CommandContribution {

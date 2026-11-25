@@ -1,9 +1,9 @@
 import { Command } from "./Command";
-import type { CommandReceiver } from "../receivers/CommandReceiver";
-import { CommandErrorCode } from "../errors/CommandErrorCode";
-import { ProtocolError } from "../errors/ProtocolError";
-import { CommandErrorResult } from "../results/outcomes/CommandErrorResult";
-import type { CommandResult } from "../results/CommandResult";
+import type { CommandReceiver } from "../../receivers/CommandReceiver";
+import { CommandErrorCode } from "../../errors/CommandErrorCode";
+import { ProtocolError } from "../../errors/ProtocolError";
+import { CommandErrorResult } from "../../results/outcomes/CommandErrorResult";
+import type { CommandResult } from "../../results/CommandResult";
 
 export abstract class UndoableCommand extends Command {
   public async undo(_receiver: CommandReceiver): Promise<CommandResult> {

@@ -1,4 +1,4 @@
-import type { Command } from "../commands/Command";
+import type { Command } from "../commands/_common/Command";
 import type { CommandResult } from "../results/CommandResult";
 
 export interface Executor {

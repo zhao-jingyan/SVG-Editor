@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
 import { EditorCommandReceiver } from "../../../src/core/receiver/EditorCommandReceiver";
 import { CommandHistory } from "../../../src/core/history/CommandHistory";
-import { Command } from "../../../src/protocol/commands/Command";
+import { Command } from "../../../src/protocol/commands/_common/Command";
 import { AddToCommand } from "../../../src/protocol/commands/AddToCommand/AddToCommand";
 import { CanvasCommand } from "../../../src/protocol/commands/CanvasCommand/CanvasCommand";
 import { CreateCommand } from "../../../src/protocol/commands/CreateCommand/CreateCommand";

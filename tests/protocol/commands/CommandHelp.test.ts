@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CommandHelp } from "../../../src/protocol/contribution/CommandHelp";
+import { CommandHelp } from "../../../src/protocol/commands/_common/contribution/CommandHelp";
 
 describe("CommandHelp", () => {
   it("校验 usage 与描述非空", () => {
