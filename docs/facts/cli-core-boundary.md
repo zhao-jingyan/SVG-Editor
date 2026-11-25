@@ -59,7 +59,8 @@ src/cli
 src/core/commands
 ├── BuiltinCommandContributions.ts
 ├── CommandRegistry.ts
-└── EditableAttributeParser.ts
+├── EditableAttributeParser.ts
+└── contributions/          # 按贡献名：MoveCommandContribution 等
 ```
 
 ## 文件命名
@@ -83,7 +84,7 @@ export abstract class Command {
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandReceiver`，不再按命令名字段分派。
 - 命令身份由 `CommandContribution.getName()` 表达；`CommandCatalog` 是只读目录契约，`CommandRegistry` 是 Core 运行时实现。
-- `BuiltinCommandContributions` 集中创建 20 个内置贡献；每个贡献工厂直接解释参数并返回具体 `Command`。
+- 每条内置命令由独立的 `*CommandContribution`（按贡献名）提供参数解释与 help；`BuiltinCommandContributions` 只按 Phase 1 顺序组装。
 - `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、目录查找、`CommandParameters` 创建和解析结果包装。
 - `CommandParameters` 统一处理元数、必填文本、数字转换和参数切片（参数列表不含命令名）。
 - `HelpText` 从同一 `CommandCatalog` 读取帮助行；`front/back` 与 `undo/redo` 通过可选 help 合并输出。

@@ -62,7 +62,7 @@ src/
 │   └── errors/                      # 错误模型与 dto
 └── core/
     ├── CommandExecutor.ts
-    ├── commands/                    # Registry、Builtin 贡献、属性校验
+    ├── commands/                    # Registry、Builtin 组装、contributions/、属性校验
     ├── receiver/                    # 聚合门面与三个能力实现
     ├── document/                    # Document、ShapeHierarchy、ShapeIndex
     ├── history/                     # CommandHistory
