@@ -6,13 +6,24 @@
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`syntax` 负责切词，`results` 负责解析结果包装。命令目录查询与 Command 创建由注入的 `CommandCatalog` 完成。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
-- `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及 `commands` 运行时注册表。`CommandRegistry` 实现 `CommandCatalog`；`BuiltinCommandContributions` 在各贡献工厂内解释参数并创建命令，`EditableAttributeParser` 仅服务 `set`。`EditorCommandReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
+- `src/protocol` 还存放应用入口端口 `Executor`；具体命令按 `XxxCommand/` 目录组织，同目录放置 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。`src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry` / `BuiltinCommandContributions` 组装入口。`EditorCommandReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、命令目录、解析器、HelpText、Executor 与 CommandReceiver。
 - `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor、History 与命令目录测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、树形格式和 help 测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次、贡献契约与图形测试。
 
 ```text
 src/protocol
 ├── commands
+│   ├── Command.ts
+│   ├── UndoableCommand.ts
+│   ├── memento/
+│   ├── MoveCommand/
+│   │   ├── MoveCommand.ts
+│   │   └── MoveCommandContribution.ts
+│   ├── ReorderCommand/
+│   │   ├── ReorderCommand.ts
+│   │   ├── FrontCommandContribution.ts
+│   │   └── BackCommandContribution.ts
+│   └── ...（其余 XxxCommand/）
 ├── contribution
 ├── errors
 ├── execution
@@ -57,10 +68,8 @@ src/cli
 
 ```text
 src/core/commands
-├── BuiltinCommandContributions.ts
-├── CommandRegistry.ts
-├── EditableAttributeParser.ts
-└── contributions/          # 按贡献名：MoveCommandContribution 等
+├── BuiltinCommandContributions.ts  # 仅按 Phase 1 顺序组装 Protocol 贡献
+└── CommandRegistry.ts
 ```
 
 ## 文件命名
@@ -84,7 +93,7 @@ export abstract class Command {
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandReceiver`，不再按命令名字段分派。
 - 命令身份由 `CommandContribution.getName()` 表达；`CommandCatalog` 是只读目录契约，`CommandRegistry` 是 Core 运行时实现。
-- 每条内置命令由独立的 `*CommandContribution`（按贡献名）提供参数解释与 help；`BuiltinCommandContributions` 只按 Phase 1 顺序组装。
+- 每条内置命令的 `Command` 与 `*CommandContribution` 同目录；`BuiltinCommandContributions` 只按 Phase 1 顺序组装。
 - `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、目录查找、`CommandParameters` 创建和解析结果包装。
 - `CommandParameters` 统一处理元数、必填文本、数字转换和参数切片（参数列表不含命令名）。
 - `HelpText` 从同一 `CommandCatalog` 读取帮助行；`front/back` 与 `undo/redo` 通过可选 help 合并输出。

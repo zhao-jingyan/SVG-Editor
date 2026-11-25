@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BuiltinCommandContributions } from "../../../src/core/commands/BuiltinCommandContributions";
 import { CommandRegistry } from "../../../src/core/commands/CommandRegistry";
 import { CommandContribution } from "../../../src/protocol/contribution/CommandContribution";
-import { HelpCommand } from "../../../src/protocol/commands/view/HelpCommand";
+import { HelpCommand } from "../../../src/protocol/commands/HelpCommand/HelpCommand";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 
 describe("CommandRegistry", () => {

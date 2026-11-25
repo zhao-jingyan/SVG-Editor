@@ -53,7 +53,7 @@ src/
 │   │   └── results/                 # 解析结果类层次
 │   └── session/                     # CommandLoop、CommandSession
 ├── protocol/
-│   ├── commands/                    # 基类、具体命令、Memento
+│   ├── commands/                    # 基类、memento、XxxCommand/{Command,Contribution}
 │   ├── contribution/                # CommandContribution、Catalog、Parameters
 │   ├── receivers/                   # 四类能力接口与聚合接口
 │   ├── execution/                   # Executor 端口
@@ -62,7 +62,7 @@ src/
 │   └── errors/                      # 错误模型与 dto
 └── core/
     ├── CommandExecutor.ts
-    ├── commands/                    # Registry、Builtin 组装、contributions/、属性校验
+    ├── commands/                    # Registry、Builtin 组装入口
     ├── receiver/                    # 聚合门面与三个能力实现
     ├── document/                    # Document、ShapeHierarchy、ShapeIndex
     ├── history/                     # CommandHistory
