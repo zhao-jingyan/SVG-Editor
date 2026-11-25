@@ -10,7 +10,7 @@
 |---|---|---|---|
 | CLI 会话、命令文本解析与反馈 | `src/cli` | [`src/cli/BUSINESS.md`](src/cli/BUSINESS.md) | `CommandLineParser`、`CommandSession` |
 | CLI 与 Core 之间的命令交换、编辑单元与撤销语义 | `src/protocol` | [`src/protocol/BUSINESS.md`](src/protocol/BUSINESS.md) | CLI Parser → Core Executor / Receiver |
-| 图形模型、属性规则与 Composite 行为 | `src/protocol/shapes` | [`src/protocol/shapes/BUSINESS.md`](src/protocol/shapes/BUSINESS.md) | `Shape`、`ShapeFactory`、`GroupShape` |
+| 图形模型、属性规则与 Composite 行为 | `src/protocol/shapes` | [`src/protocol/shapes/BUSINESS.md`](src/protocol/shapes/BUSINESS.md) | `Shape`、`ShapeContribution`、`GroupShape` |
 | 执行端口、Receiver 契约、结果与错误边界 | `src/protocol` | [`src/protocol/BUSINESS.md`](src/protocol/BUSINESS.md) | `Executor`、`CommandReceiver`、`CommandResult`、`ProtocolError` |
 | 文档状态、图形层级与精确恢复 | `src/core/document` | [`src/core/document/BUSINESS.md`](src/core/document/BUSINESS.md) | `Document`、`ShapeHierarchy`、`ShapeIndex` |
 | 命令编排与文档生命周期 | `src/core/receiver` | [`src/core/receiver/BUSINESS.md`](src/core/receiver/BUSINESS.md) | `EditorCommandReceiver` 及三个能力 Receiver |

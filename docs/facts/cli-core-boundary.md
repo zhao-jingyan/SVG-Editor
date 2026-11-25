@@ -2,15 +2,15 @@
 
 ## 目录职责
 
-- `src/protocol` 只存放契约：命令基类与贡献 API、图形领域模型、结果模型和错误模型。`commands` 持有基类、`contribution/`、`memento/`；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`（文档侧含通用只读 `getRootShapes()`，不含命令专用 API）；`execution` 持有 `Executor` 入口端口；`io` 持有与文档编辑解耦的端口（如 `DirectoryListing` / `DirectoryEntry`）；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、`src/_builtin`、`src/_plugin`、Node 或 DOM。
-- `src/_builtin` 是内置命令包：按 `commands/XxxCommand/` 组织具体 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。只导出贡献，不统一注册；依赖方向为 `_builtin -> protocol`。
+- `src/protocol` 只存放契约：命令基类与贡献 API、图形领域模型、结果模型和错误模型。`commands` 持有基类、`contribution/`、`memento/`；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`（文档侧含通用只读 `getRootShapes()`，不含命令专用 API）；`execution` 持有 `Executor` 入口端口；`io` 持有与文档编辑解耦的端口（如 `DirectoryListing` / `DirectoryEntry`）；`shapes` 持有图形类层次、`EditableAttribute`、`shapes/contribution/`（`ShapeContribution` / `ShapeCatalog`）和 Visitor；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、`src/_builtin`、`src/_plugin`、Node 或 DOM。
+- `src/_builtin` 是内置命令与图形贡献包：按 `commands/XxxCommand/` 组织具体 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；按 `shapes/XxxShape/` 组织 `*ShapeContribution`；`EditableAttributeParser` 仅服务 `set`。只导出贡献，不统一注册；依赖方向为 `_builtin -> protocol`。
 - `src/_plugin` 是可选插件命令包（Phase 2：`stats` / `dir` 等），依赖 `protocol`；`stats` 经 `getRootShapes()` 只读统计；`dir` 经 `DirectoryListing`（Node 适配器 `NodeDirectoryListing`）列举 cwd，不经 `CommandReceiver`。符号链接等非目录项一律按 `[FILE]` 显示，不跟随链接目标。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`syntax` 负责切词，`results` 负责解析结果包装。命令目录查询与 Command 创建由注入的 `CommandCatalog` 完成。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
-- `src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry`。`EditorCommandReceiver` 聚合文档、图形和显示能力，并通过构造器注入 `HelpText`（默认空目录，由组合根注入 builtin 目录）；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。Core 不得依赖 `_builtin`。
-- `src/main.ts` 是组合根，负责按 Phase 1 help 顺序将 builtin 贡献注册进 `CommandRegistry`，并组装 CLI 适配器、解析器、HelpText、Executor 与 CommandReceiver。
-- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor、History 与命令目录测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、树形格式和 help 测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/_builtin` 存放内置命令辅助逻辑测试，`tests/protocol` 存放贡献契约与图形测试；`tests/support/createBuiltinCatalog` 是测试侧注册夹具，镜像 `main` 的注册清单。
+- `src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry` / `ShapeRegistry`。`EditorCommandReceiver` 聚合文档、图形和显示能力，并通过构造器注入 `HelpText` 与 `ShapeCatalog`（默认空目录，由组合根注入）；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。Core 不得依赖 `_builtin`。
+- `src/main.ts` 是组合根，负责注册 builtin/plugin 的 `CommandContribution` 与 `ShapeContribution`，并组装 CLI 适配器、解析器、HelpText、Executor 与 CommandReceiver。
+- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor、History 与命令目录测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、树形格式和 help 测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/_builtin` 存放内置命令辅助逻辑测试，`tests/protocol` 存放贡献契约与图形测试；`tests/support/createBuiltinCatalog` / `createBuiltinShapeCatalog` 是测试侧注册夹具，镜像 `main` 的注册清单。
 
 ```text
 src/protocol
@@ -35,7 +35,7 @@ src/protocol
 ├── results
 └── shapes
     ├── concrete
-    ├── factory
+    ├── contribution
     ├── model
     │   └── EditableAttribute.ts
     └── visitor
@@ -43,10 +43,14 @@ src/protocol
 
 ```text
 src/_builtin
-└── commands
-    ├── MoveCommand/
-    ├── ReorderCommand/
-    └── ...（其余内置 XxxCommand/）
+├── commands
+│   ├── MoveCommand/
+│   ├── ReorderCommand/
+│   └── ...（其余内置 XxxCommand/）
+└── shapes
+    ├── RectShape/
+    ├── CircleShape/
+    └── ...（其余内置 XxxShape/）
 ```
 
 ```text
@@ -88,7 +92,7 @@ src/core/commands
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和枚举单独成文件；命令契约放在 `protocol/commands`，具体内置命令放在 `builtin/commands`；命令撤销快照放在 `protocol/commands/memento`；图形模型和值对象放在 `protocol/shapes/model`，具体图形放在 `concrete`，工厂与 Visitor 分别放在 `factory`、`visitor`；结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
+- 每个主要类、接口和枚举单独成文件；命令契约放在 `protocol/commands`，具体内置命令放在 `_builtin/commands`；命令撤销快照放在 `protocol/commands/memento`；图形模型和值对象放在 `protocol/shapes/model`，具体图形放在 `concrete`，贡献契约与 Visitor 分别放在 `contribution`、`visitor`；内置图形贡献放在 `_builtin/shapes/XxxShape/`；结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
@@ -106,7 +110,7 @@ export abstract class Command {
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandReceiver`，不再按命令名字段分派。
 - 命令身份由 `CommandContribution.getName()` 表达；`CommandCatalog` 是只读目录契约，`CommandRegistry` 是 Core 运行时实现。
-- 每条内置命令的 `Command` 与 `*CommandContribution` 同目录于 `src/_builtin/commands/`；注册清单由组合根 `main`（测试侧为 `createBuiltinCatalog`）按 Phase 1 顺序写入 `CommandRegistry`。
+- 每条内置命令的 `Command` 与 `*CommandContribution` 同目录于 `src/_builtin/commands/`；每种内置图形的 `*ShapeContribution` 同目录于 `src/_builtin/shapes/XxxShape/`；注册清单由组合根 `main`（测试侧为 `createBuiltinCatalog` / `createBuiltinShapeCatalog`）写入 `CommandRegistry` / `ShapeRegistry`。
 - `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、目录查找、`CommandParameters` 创建和解析结果包装。
 - `CommandParameters` 统一处理元数、必填文本、数字转换和参数切片（参数列表不含命令名）。
 - `HelpText` 从同一 `CommandCatalog` 读取帮助行；`front/back` 与 `undo/redo` 通过可选 help 合并输出。
@@ -127,7 +131,7 @@ export abstract class Command {
 - `ErrorSource` 以枚举区分 `command-parse`、`command-execution`、`document` 和 `shape` 来源，不再为每种来源建立没有差异化行为的错误子类。
 - `CommandErrorCode` 是封闭枚举，字符串值与既有 CLI 错误码完全一致；枚举成员使用 PascalCase 命名。
 - `CommandErrorDto` 是边界 DTO，只包含 `code` 和 `message`。结果对象可以持有 `ProtocolError`，但跨边界只暴露 `CommandErrorDto`，保证错误结果可序列化。
-- 命令构造器和 Tokenizer 失败时创建 `command-parse` 来源的 `ProtocolError`；`ShapeFactory` 失败创建 `shape` 来源；`CommandLineParser.parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
+- 命令构造器和 Tokenizer 失败时创建 `command-parse` 来源的 `ProtocolError`；`ShapeContribution` 创建/参数校验失败创建 `shape` 来源；`CommandLineParser.parse()` 顶层捕获 `ProtocolError` 并统一生成 `CommandParseErrorResult`。
 - `CommandSession` 只输出 `error: <message>`，不暴露错误码；未知异常不属于已建模的协议错误，因此继续向上抛出。
 - `main.ts` 是进程最外层边界：已知命令失败由结果模型表达；未知异常打印到标准错误、设置非零退出码并结束进程，不伪装成普通命令失败。
 - 拒绝方案：让结果 DTO 直接持有 `Error` 实例会破坏边界可序列化性；为每个错误码建立独立类会产生大量只有消息差异的类型。`CommandExecutor` 在真实执行边界捕获 `ProtocolError` 并转换为 `CommandErrorResult`，未知异常继续上抛。
@@ -136,9 +140,10 @@ export abstract class Command {
 
 - `Shape` 是抽象根类，具体类为 `RectShape`、`CircleShape`、`EllipseShape`、`LineShape`、`TextShape`、`GroupShape`。
 - `GroupShape` 使用 Composite 语义，`move`、`scale` 和公共样式 `set` 递归作用于子节点。
-- `ShapeFactory` 是唯一的“图形类型名 → 具体类”分派点；Parser 不直接构造领域对象。
+- `ShapeRegistry`（实现 `ShapeCatalog`）是唯一的“图形类型名 / SVG tag → ShapeContribution”分派点；Parser 与 `create` 不直接 `switch` 构造领域对象。
+- Phase 2 扩展点角色名 `ShapeProvider` 对应代码类型 `ShapeContribution`。
 - `ShapeVisitor` 是图形显示扩展点：`Shape.accept` 由各具体类分派到 Visitor，`ShapeSummaryVisitor` 和 `ShapeDetailVisitor` 位于 Core 的 `display` 子系统。
-- SVG 解析通过 `ShapeFactory` 创建具体图形；写出通过 `SvgShapeWriter` Visitor 生成元素，不新增按图形类型分派的业务流程。
+- SVG 解析通过 `findForSvg` 选 Contribution 再 `readFromSvg`；写出通过 `SvgShapeWriter` Visitor 生成元素，不新增按图形类型分派的业务流程。
 - `CreateCommand` 与 `CommandReceiver.createShape` 直接携带 `Shape`，不再使用 `ShapeSpec` 或图形 DTO。
 - 图形模型的设计模式角色、替代方案和当前边界见 `docs/facts/domain-shapes.md`。
 

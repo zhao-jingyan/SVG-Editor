@@ -6,6 +6,7 @@ import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
 import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "@/protocol/shapes/concrete/RectShape";
 import { TextShape } from "@/protocol/shapes/concrete/TextShape";
+import { createBuiltinShapeCatalog } from "../../support/createBuiltinShapeCatalog";
 
 describe("SvgDocumentWriter", () => {
   it("输出标准 SVG、递归 group、样式与转义文本", () => {
@@ -43,7 +44,7 @@ describe("SvgDocumentWriter", () => {
     document.addShape(new TextShape("t1", 8, 9, "round trip"));
 
     const content = new SvgDocumentWriter().render(document);
-    const result = new SvgDocumentParser().parse(content);
+    const result = new SvgDocumentParser(createBuiltinShapeCatalog()).parse(content);
     const restored = result.getDocument();
     const scene = restored.getShape("scene");
 

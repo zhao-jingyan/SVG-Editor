@@ -19,11 +19,12 @@ import { TreeCommandContribution } from "@/_builtin/commands/TreeCommand/TreeCom
 import { UndoCommandContribution } from "@/_builtin/commands/UndoCommand/UndoCommandContribution";
 import { UngroupCommandContribution } from "@/_builtin/commands/UngroupCommand/UngroupCommandContribution";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
-import { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
+import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
+import { createBuiltinShapeCatalog } from "./createBuiltinShapeCatalog";
 
 /** 测试夹具：按 Phase 1 help 顺序注册全部内置贡献。 */
 export function createBuiltinCatalog(
-  shapeFactory: ShapeFactory = new ShapeFactory(),
+  shapeCatalog: ShapeCatalog = createBuiltinShapeCatalog(),
 ): CommandRegistry {
   const registry = new CommandRegistry();
   registry.registerAll([
@@ -31,7 +32,7 @@ export function createBuiltinCatalog(
     ReadCommandContribution.create(),
     SaveCommandContribution.create(),
     CanvasCommandContribution.create(),
-    CreateCommandContribution.create(shapeFactory),
+    CreateCommandContribution.create(shapeCatalog),
     DeleteCommandContribution.create(),
     MoveCommandContribution.create(),
     ScaleCommandContribution.create(),

@@ -2,10 +2,12 @@ import { CreateCommand } from "./CreateCommand";
 import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
 import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 import type { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
-import type { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 
 export class CreateCommandContribution {
-  public static create(shapeFactory: ShapeFactory): CommandContribution {
+  public static create(shapeCatalog: ShapeCatalog): CommandContribution {
     return new CommandContribution(
       "create",
       "create <type> <id> [params...] [in <containerId>]",
@@ -14,12 +16,12 @@ export class CreateCommandContribution {
         "create a shape",
       ),
       (parameters) =>
-        CreateCommandContribution.parseCreate(shapeFactory, parameters),
+        CreateCommandContribution.parseCreate(shapeCatalog, parameters),
     );
   }
 
   private static parseCreate(
-    shapeFactory: ShapeFactory,
+    shapeCatalog: ShapeCatalog,
     parameters: CommandParameters,
   ): CreateCommand {
     parameters.expectMinimumLength(2);
@@ -28,12 +30,16 @@ export class CreateCommandContribution {
     const shapeId = parameters.text(1, "shape id");
     const parsedArguments =
       CreateCommandContribution.parseCreateArguments(parameters);
-    const shape = shapeFactory.create(
-      shapeType,
-      shapeId,
-      parsedArguments.values,
-    );
+    const contribution = shapeCatalog.find(shapeType);
 
+    if (contribution === undefined) {
+      throw ProtocolError.shape(
+        CommandErrorCode.UnknownShapeType,
+        `unknown shape type: ${shapeType} (is the plugin loaded?)`,
+      );
+    }
+
+    const shape = contribution.create(shapeId, parsedArguments.values);
     return new CreateCommand(shape, parsedArguments.parentId);
   }
 

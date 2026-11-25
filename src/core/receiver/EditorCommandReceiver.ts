@@ -3,12 +3,14 @@ import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribut
 import type { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "@/protocol/results/CommandResult";
+import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import type { Shape } from "@/protocol/shapes/model/Shape";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { HelpText } from "@/core/display/HelpText";
 import { CommandHistory } from "@/core/history/CommandHistory";
 import { FileSvgStorage } from "@/core/io/FileSvgStorage";
 import type { SvgStorage } from "@/core/io/SvgStorage";
+import { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
 import { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 import { EditorShapeCommandReceiver } from "./EditorShapeCommandReceiver";
 import { EditorViewCommandReceiver } from "./EditorViewCommandReceiver";
@@ -22,8 +24,13 @@ export class EditorCommandReceiver implements CommandReceiver {
     private readonly history: CommandHistory = new CommandHistory(),
     svgStorage: SvgStorage = new FileSvgStorage(),
     helpText: HelpText = new HelpText(new CommandRegistry()),
+    shapeCatalog: ShapeCatalog = new ShapeRegistry(),
   ) {
-    this.documentReceiver = new EditorDocumentCommandReceiver(history, svgStorage);
+    this.documentReceiver = new EditorDocumentCommandReceiver(
+      history,
+      shapeCatalog,
+      svgStorage,
+    );
     this.shapeReceiver = new EditorShapeCommandReceiver(this.documentReceiver);
     this.viewReceiver = new EditorViewCommandReceiver(
       this.documentReceiver,

@@ -25,7 +25,7 @@ export class LineShape extends StyledShape {
     this.y2 = this.requireFiniteNumber(y2, "y2");
   }
 
-  public override getType(): ShapeType {
+  public override getType(): string {
     return ShapeType.Line;
   }
 

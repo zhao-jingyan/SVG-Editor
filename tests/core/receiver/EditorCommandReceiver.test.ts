@@ -30,6 +30,7 @@ import { RectShape } from "@/protocol/shapes/concrete/RectShape";
 import { TextShape } from "@/protocol/shapes/concrete/TextShape";
 import { HelpText } from "@/core/display/HelpText";
 import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
+import { createBuiltinShapeCatalog } from "../../support/createBuiltinShapeCatalog";
 import { InMemorySvgStorage } from "../../support/InMemorySvgStorage";
 
 function expectErrorMessage(
@@ -49,8 +50,14 @@ function createReceiver(storage?: InMemorySvgStorage): {
   executor: CommandExecutor;
 } {
   const history = new CommandHistory();
-  const helpText = new HelpText(createBuiltinCatalog());
-  const receiver = new EditorCommandReceiver(history, storage, helpText);
+  const shapeCatalog = createBuiltinShapeCatalog();
+  const helpText = new HelpText(createBuiltinCatalog(shapeCatalog));
+  const receiver = new EditorCommandReceiver(
+    history,
+    storage,
+    helpText,
+    shapeCatalog,
+  );
   return { receiver, executor: new CommandExecutor(receiver, history) };
 }
 

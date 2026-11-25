@@ -25,7 +25,7 @@ export class RectShape extends StyledShape {
     this.height = this.requireFiniteNumber(height, "height");
   }
 
-  public override getType(): ShapeType {
+  public override getType(): string {
     return ShapeType.Rect;
   }
 

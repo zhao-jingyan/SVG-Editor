@@ -39,7 +39,7 @@
 | 决策 | 原因与证据 | 来源 |
 |---|---|---|
 | 使用 SvgStorage 端口 | 隔离 Node 文件系统并支持内存测试 | [SvgStorage](SvgStorage.ts)、[FileSvgStorage](FileSvgStorage.ts) |
-| 读取复用 ShapeFactory、写出使用 Visitor | 保持类型创建和类型输出各自只有一个扩展点 | [SvgDocumentParser](SvgDocumentParser.ts)、[SvgShapeWriter](SvgShapeWriter.ts) |
+| 读取经 ShapeCatalog、写出使用 Visitor | 保持类型创建和类型输出各自只有一个扩展点 | [SvgDocumentParser](SvgDocumentParser.ts)、[SvgShapeWriter](SvgShapeWriter.ts) |
 | 预扫描显式 id 后再分配缺失 id | 防止自动补全占用文件中稍后出现的显式 id | [SvgShapeIdAllocator](SvgShapeIdAllocator.ts) |
 
 ## 相关代码

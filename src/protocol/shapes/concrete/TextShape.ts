@@ -22,7 +22,7 @@ export class TextShape extends StyledShape {
     this.content = content;
   }
 
-  public override getType(): ShapeType {
+  public override getType(): string {
     return ShapeType.Text;
   }
 

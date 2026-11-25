@@ -4,6 +4,11 @@ import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ErrorSource } from "@/protocol/errors/ErrorSource";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import { createBuiltinShapeCatalog } from "../../support/createBuiltinShapeCatalog";
+
+function createParser(): SvgDocumentParser {
+  return new SvgDocumentParser(createBuiltinShapeCatalog());
+}
 
 function expectDocumentProtocolError(
   action: () => void,
@@ -29,7 +34,7 @@ function expectDocumentProtocolError(
 
 describe("SvgDocumentParser", () => {
   it("解析六类图形、嵌套顺序、样式与缺 id 警告", () => {
-    const parser = new SvgDocumentParser();
+    const parser = createParser();
     const result = parser.parse(`<?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
   <rect x="0" y="0" width="400" height="300" fill="#ffffff" stroke="black" stroke-width="2"/>
@@ -71,7 +76,7 @@ describe("SvgDocumentParser", () => {
   });
 
   it("自动 id 避开后续显式 id", () => {
-    const parser = new SvgDocumentParser();
+    const parser = createParser();
     const result = parser.parse(`<svg width="10" height="10">
   <rect x="0" y="0" width="1" height="1"/>
   <rect id="rect1" x="0" y="0" width="2" height="2"/>
@@ -87,7 +92,7 @@ describe("SvgDocumentParser", () => {
   });
 
   it("支持 viewBox 回退，并拒绝重复 id 与损坏输入", () => {
-    const parser = new SvgDocumentParser();
+    const parser = createParser();
     const result = parser.parse(
       '<svg viewBox="0 0 320 240"><rect id="r1" x="0" y="0" width="1" height="1"/></svg>',
     );

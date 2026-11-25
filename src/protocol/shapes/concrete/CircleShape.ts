@@ -22,7 +22,7 @@ export class CircleShape extends StyledShape {
     this.r = this.requireFiniteNumber(r, "r");
   }
 
-  public override getType(): ShapeType {
+  public override getType(): string {
     return ShapeType.Circle;
   }
 

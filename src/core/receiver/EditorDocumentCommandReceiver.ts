@@ -3,6 +3,7 @@ import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import type { CommandResult } from "@/protocol/results/CommandResult";
 import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import type { Shape } from "@/protocol/shapes/model/Shape";
 import { Document } from "@/core/document/Document";
 import type { CommandHistory } from "@/core/history/CommandHistory";
@@ -14,13 +15,16 @@ import type { SvgStorage } from "@/core/io/SvgStorage";
 export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
   private document?: Document;
   private currentPath?: string;
-  private readonly svgDocumentParser: SvgDocumentParser = new SvgDocumentParser();
+  private readonly svgDocumentParser: SvgDocumentParser;
   private readonly svgDocumentWriter: SvgDocumentWriter = new SvgDocumentWriter();
 
   public constructor(
     private readonly history: CommandHistory,
+    shapeCatalog: ShapeCatalog,
     private readonly svgStorage: SvgStorage = new FileSvgStorage(),
-  ) {}
+  ) {
+    this.svgDocumentParser = new SvgDocumentParser(shapeCatalog);
+  }
 
   public async init(width?: number, height?: number): Promise<CommandResult> {
     const document = new Document(width ?? 800, height ?? 600);

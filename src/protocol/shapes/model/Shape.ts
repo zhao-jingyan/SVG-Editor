@@ -1,7 +1,6 @@
 import type { EditableAttribute } from "./EditableAttribute";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
-import type { ShapeType } from "./ShapeType";
 import type { ShapeVisitor } from "@/protocol/shapes/visitor/ShapeVisitor";
 import type { ShapePosition } from "./ShapePosition";
 
@@ -23,7 +22,8 @@ export abstract class Shape {
     return this.id;
   }
 
-  public abstract getType(): ShapeType;
+  /** 类型名字符串；内置取值见 ShapeType 常量。 */
+  public abstract getType(): string;
 
   public abstract getPosition(): ShapePosition | undefined;
 

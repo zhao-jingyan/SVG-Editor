@@ -1,15 +1,14 @@
 import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
-import type { ShapeType } from "@/protocol/shapes/model/ShapeType";
 
 export class ShapeAttributeSnapshot {
   private readonly shapeId: string;
-  private readonly shapeType: ShapeType;
+  private readonly shapeType: string;
   private readonly attribute: EditableAttribute;
   private readonly values: ReadonlyMap<string, string | number | undefined>;
 
   public constructor(
     shapeId: string,
-    shapeType: ShapeType,
+    shapeType: string,
     attribute: EditableAttribute,
     values: ReadonlyMap<string, string | number | undefined>,
   ) {
@@ -23,7 +22,7 @@ export class ShapeAttributeSnapshot {
     return this.shapeId;
   }
 
-  public getShapeType(): ShapeType {
+  public getShapeType(): string {
     return this.shapeType;
   }
 

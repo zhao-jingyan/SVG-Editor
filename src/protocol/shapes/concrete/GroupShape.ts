@@ -18,7 +18,7 @@ export class GroupShape extends Shape {
     }
   }
 
-  public override getType(): ShapeType {
+  public override getType(): string {
     return ShapeType.Group;
   }
 

@@ -3,8 +3,9 @@ import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribut
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
+import { ShapeSvgReadInput } from "@/protocol/shapes/contribution/ShapeSvgReadInput";
 import type { Shape } from "@/protocol/shapes/model/Shape";
-import { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
 import { Document } from "@/core/document/Document";
 import { ParsedSvgDocument } from "./ParsedSvgDocument";
 import { SvgShapeIdAllocator } from "./SvgShapeIdAllocator";
@@ -38,9 +39,7 @@ export class SvgDocumentParser {
     isArray: (tagName: string) => SvgDocumentParser.shapeTags.has(tagName),
   });
 
-  public constructor(
-    private readonly shapeFactory: ShapeFactory = new ShapeFactory(),
-  ) {}
+  public constructor(private readonly shapeCatalog: ShapeCatalog) {}
 
   public parse(source: string): ParsedSvgDocument {
     let parsed: unknown;
@@ -128,62 +127,41 @@ export class SvgDocumentParser {
     allocator: SvgShapeIdAllocator,
     warnings: string[],
   ): Shape {
-    switch (tag) {
-      case "rect":
-        return this.shapeFactory.create(tag, id, [
-          this.requireNumber(node, "x", tag).toString(),
-          this.requireNumber(node, "y", tag).toString(),
-          this.requireNumber(node, "width", tag).toString(),
-          this.requireNumber(node, "height", tag).toString(),
-        ]);
-      case "circle":
-        return this.shapeFactory.create(tag, id, [
-          this.requireNumber(node, "cx", tag).toString(),
-          this.requireNumber(node, "cy", tag).toString(),
-          this.requireNumber(node, "r", tag).toString(),
-        ]);
-      case "ellipse":
-        return this.shapeFactory.create(tag, id, [
-          this.requireNumber(node, "cx", tag).toString(),
-          this.requireNumber(node, "cy", tag).toString(),
-          this.requireNumber(node, "rx", tag).toString(),
-          this.requireNumber(node, "ry", tag).toString(),
-        ]);
-      case "line":
-        return this.shapeFactory.create(tag, id, [
-          this.requireNumber(node, "x1", tag).toString(),
-          this.requireNumber(node, "y1", tag).toString(),
-          this.requireNumber(node, "x2", tag).toString(),
-          this.requireNumber(node, "y2", tag).toString(),
-        ]);
-      case "text":
-        return this.shapeFactory.create(tag, id, [
-          this.requireNumber(node, "x", tag).toString(),
-          this.requireNumber(node, "y", tag).toString(),
-          this.readText(node),
-        ]);
-      case "g": {
-        const group = this.shapeFactory.create(tag, id, []);
+    const attributes = this.readAttributes(node);
+    const dataKind = attributes.get("data-kind");
+    const contribution = this.shapeCatalog.findForSvg(tag, dataKind);
 
-        if (!(group instanceof GroupShape)) {
-          throw ProtocolError.document(
-            CommandErrorCode.InvalidArgument,
-            `invalid SVG: <g> did not create a group`,
-          );
-        }
-
-        for (const child of this.parseChildren(node, allocator, warnings)) {
-          group.addChild(child);
-        }
-
-        return group;
-      }
-      default:
-        throw ProtocolError.document(
-          CommandErrorCode.InvalidArgument,
-          `invalid SVG: unsupported element <${tag}>`,
-        );
+    if (contribution === undefined) {
+      throw ProtocolError.document(
+        CommandErrorCode.InvalidArgument,
+        `invalid SVG: unsupported element <${tag}>`,
+      );
     }
+
+    const children = this.parseChildren(node, allocator, warnings);
+    const input = new ShapeSvgReadInput(
+      id,
+      attributes,
+      children,
+      this.readText(node),
+    );
+    return contribution.readFromSvg(input);
+  }
+
+  private readAttributes(node: XmlNode): ReadonlyMap<string, string> {
+    const attributes = new Map<string, string>();
+
+    for (const [key, value] of Object.entries(node)) {
+      if (SvgDocumentParser.shapeTags.has(key) || key === "#text") {
+        continue;
+      }
+
+      if (typeof value === "string" || typeof value === "number") {
+        attributes.set(key, `${value}`);
+      }
+    }
+
+    return attributes;
   }
 
   private applyStyles(shape: Shape, node: XmlNode): void {
@@ -266,19 +244,6 @@ export class SvgDocumentParser {
     }
 
     return values[viewBoxIndex];
-  }
-
-  private requireNumber(node: XmlNode, attribute: string, tag: string): number {
-    const value = node[attribute];
-
-    if (value === undefined) {
-      throw ProtocolError.document(
-        CommandErrorCode.InvalidArgument,
-        `invalid <${tag}>: missing attribute ${attribute}`,
-      );
-    }
-
-    return this.toNumber(value);
   }
 
   private toNumber(value: unknown): number {

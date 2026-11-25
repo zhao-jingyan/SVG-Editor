@@ -9,7 +9,8 @@
 
 ## 核心规则
 
-- 内置类型为 `rect`、`circle`、`ellipse`、`line`、`text` 和 `g`；`ShapeFactory` 只接受这六种类型名。
+- 内置类型为 `rect`、`circle`、`ellipse`、`line`、`text` 和 `g`；类型名分派由 `ShapeCatalog` / `ShapeContribution` 承担，内置贡献在 `_builtin/shapes/`。
+- `Shape.getType()` 返回 `string`；`ShapeType` 保留为内置常量。
 - 所有图形必须有非空 id。Shape 自身保证 id 非空；整个文档中的唯一性由 Document 的索引保证。
 - 坐标遵循 SVG：原点在左上，x 向右，y 向下；几何属性和位移必须是有限数字。
 - `move(dx, dy)` 永远表示增量移动，不改尺寸和内容；容器递归移动全部子孙。
@@ -31,7 +32,7 @@
 
 - `scale` 小于等于 0 或非有限值时整体失败，不留下部分缩放。
 - 容器没有单一坐标，`getPosition()` 返回 `undefined`。
-- 禁止在命令、显示或 IO 层按图形类型重复构造图形；按类型名创建必须经过 `ShapeFactory`。
+- 禁止在命令、显示或 IO 层按图形类型重复构造图形；按类型名创建必须经过 `ShapeCatalog.find` → `ShapeContribution.create`。
 - 禁止让图形类读取文件、输出 CLI 文本或依赖 Node/DOM。
 
 ## 历史决策
@@ -41,10 +42,12 @@
 | 用多态 Shape 层次替代 ShapeSpec 联合类型 | 让编辑行为进入领域对象，避免贫血模型和到处按类型分派 | commit `a7126ee`、[Shape](model/Shape.ts) |
 | 容器使用 Composite 递归语义 | `move`、`scale`、公共样式对叶子和容器保持一致 | [GroupShape](concrete/GroupShape.ts)、[Shapes.test.ts](../../../tests/protocol/Shapes.test.ts) |
 | 显示和 SVG 输出使用 Visitor | 类型相关格式不污染领域模型，也不新增业务流程分派 | [ShapeVisitor](visitor/ShapeVisitor.ts) |
+| 用 ShapeContribution/Registry 替代 ShapeFactory switch | 与 CommandContribution 对称，为 box 等插件注册铺路 | [ShapeContribution](contribution/ShapeContribution.ts)、[ShapeRegistry](../../core/shapes/ShapeRegistry.ts) |
 
 ## 相关代码
 
 - 模型：[Shape](model/Shape.ts)、[StyledShape](model/StyledShape.ts)、[ShapeType](model/ShapeType.ts)、[EditableAttribute](model/EditableAttribute.ts)。
 - 具体图形：[RectShape](concrete/RectShape.ts)、[CircleShape](concrete/CircleShape.ts)、[EllipseShape](concrete/EllipseShape.ts)、[LineShape](concrete/LineShape.ts)、[TextShape](concrete/TextShape.ts)、[GroupShape](concrete/GroupShape.ts)。
-- 创建与扩展点：[ShapeFactory](factory/ShapeFactory.ts)、[ShapeVisitor](visitor/ShapeVisitor.ts)。
+- 贡献契约：[ShapeContribution](contribution/ShapeContribution.ts)、[ShapeCatalog](contribution/ShapeCatalog.ts)、[ShapeSvgReadInput](contribution/ShapeSvgReadInput.ts)、[ShapeArgumentParser](contribution/ShapeArgumentParser.ts)。
+- 扩展点：[ShapeVisitor](visitor/ShapeVisitor.ts)。
 - 业务回归：[Shapes.test.ts](../../../tests/protocol/Shapes.test.ts)、[Document.test.ts](../../../tests/core/document/Document.test.ts)。

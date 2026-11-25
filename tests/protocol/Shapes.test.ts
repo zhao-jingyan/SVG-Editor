@@ -8,9 +8,26 @@ import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
 import { LineShape } from "@/protocol/shapes/concrete/LineShape";
 import { RectShape } from "@/protocol/shapes/concrete/RectShape";
 import { Shape } from "@/protocol/shapes/model/Shape";
-import { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
+import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import { ShapeType } from "@/protocol/shapes/model/ShapeType";
 import { TextShape } from "@/protocol/shapes/concrete/TextShape";
+import { createBuiltinShapeCatalog } from "../support/createBuiltinShapeCatalog";
+
+function createShape(
+  catalog: ShapeCatalog,
+  typeName: string,
+  id: string,
+  args: readonly string[],
+) {
+  const contribution = catalog.find(typeName);
+  if (contribution === undefined) {
+    throw ProtocolError.shape(
+      CommandErrorCode.UnknownShapeType,
+      `unknown shape type: ${typeName} (is the plugin loaded?)`,
+    );
+  }
+  return contribution.create(id, args);
+}
 
 function expectShapeProtocolError(
   action: () => void,
@@ -38,15 +55,15 @@ function expectShapeProtocolError(
 }
 
 describe("Shape 多态模型", () => {
-  const factory = new ShapeFactory();
+  const catalog = createBuiltinShapeCatalog();
 
-  it("工厂创建六种具体形状", () => {
-    const rect = factory.create("rect", "r1", ["10", "20", "100", "50", "#fff"]);
-    const circle = factory.create("circle", "c1", ["100", "100", "20", "red"]);
-    const ellipse = factory.create("ellipse", "e1", ["1", "2", "3", "4", "blue"]);
-    const line = factory.create("line", "l1", ["0", "0", "10", "10", "black"]);
-    const text = factory.create("text", "t1", ["20", "40", "My Diagram"]);
-    const group = factory.create("g", "g1", []);
+  it("贡献目录创建六种具体形状", () => {
+    const rect = createShape(catalog, "rect", "r1", ["10", "20", "100", "50", "#fff"]);
+    const circle = createShape(catalog, "circle", "c1", ["100", "100", "20", "red"]);
+    const ellipse = createShape(catalog, "ellipse", "e1", ["1", "2", "3", "4", "blue"]);
+    const line = createShape(catalog, "line", "l1", ["0", "0", "10", "10", "black"]);
+    const text = createShape(catalog, "text", "t1", ["20", "40", "My Diagram"]);
+    const group = createShape(catalog, "g", "g1", []);
 
     expect(rect).toBeInstanceOf(RectShape);
     expect(circle).toBeInstanceOf(CircleShape);
@@ -315,22 +332,22 @@ describe("Shape 多态模型", () => {
     );
   });
 
-  it("ShapeFactory 报告未知类型和非法参数", () => {
+  it("ShapeCatalog 报告未知类型和非法参数", () => {
     expectShapeProtocolError(
-      () => factory.create("hexagon", "h1", []),
+      () => createShape(catalog, "hexagon", "h1", []),
       CommandErrorCode.UnknownShapeType,
       "unknown shape type: hexagon (is the plugin loaded?)",
     );
     expectShapeProtocolError(
-      () => factory.create("rect", "r1", ["x", "0", "10", "10"]),
+      () => createShape(catalog, "rect", "r1", ["x", "0", "10", "10"]),
       CommandErrorCode.InvalidNumber,
     );
     expectShapeProtocolError(
-      () => factory.create("circle", "c1", ["0", "0"]),
+      () => createShape(catalog, "circle", "c1", ["0", "0"]),
       CommandErrorCode.InvalidArgument,
     );
     expectShapeProtocolError(
-      () => factory.create("line", "l1", ["0", "0", "1", "1", ""]),
+      () => createShape(catalog, "line", "l1", ["0", "0", "1", "1", ""]),
       CommandErrorCode.InvalidArgument,
     );
   });

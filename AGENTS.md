@@ -11,8 +11,8 @@
 
 - `src/cli`：只负责输入输出、终端适配和文本到命令对象的解析，不承载业务规则。
 - `src/protocol`：只存放契约——命令基类与贡献 API、图形领域模型、接收者接口、IO 端口（如 `DirectoryListing`）、结果/错误模型与边界 DTO；不含具体内置/插件命令实现。
-- `src/_builtin`：内置命令包（具体 `XxxCommand` 与对应 `*CommandContribution`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
-- `src/_plugin`：可选命令等插件包，依赖 `protocol`；不得依赖 `_builtin` / `core` 内部；由组合根注册。
+- `src/_builtin`：内置命令与图形贡献包（`commands/XxxCommand/`、`shapes/XxxShape/`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
+- `src/_plugin`：可选命令/图形等插件包，依赖 `protocol`；不得依赖 `_builtin` / `core` 内部；由组合根注册。
 - `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `_builtin` / `_plugin`。
 - `src/main.ts`：只作为组合根，负责组装 CLI、Core、`_builtin` / `_plugin` 贡献注册与依赖实例。
 - 固定依赖方向：`cli -> protocol`、`core -> protocol`、`_builtin -> protocol`、`_plugin -> protocol`、`main -> cli + core + _builtin + _plugin`。
@@ -30,7 +30,7 @@
 - 不要用公共 `readonly` 字段代替封装，也不要制造只有字段和 getter/setter 的“类形状贫血模型”。
 - 一个主要类、接口或枚举一个文件，文件名与类型名一致并使用 PascalCase；显式标注访问修饰符和返回类型。
 - 领域层禁止散落的自由函数、静态工具大杂烩和按 `type` 字段到处分派。
-- 按名字分派只允许两个集中点：命令贡献目录（命令名 → `CommandContribution`）和图形工厂（类型名 → 具体图形类）。分派逻辑必须集中、可追踪，不能扩散到业务流程中。
+- 按名字分派只允许两个集中点：命令贡献目录（命令名 → `CommandContribution`）和图形贡献目录（类型名 → `ShapeContribution`）。分派逻辑必须集中、可追踪，不能扩散到业务流程中。
 - 封闭的领域类型集合优先使用 `enum` 或等价常量；字符串字面量联合类型仅允许用于边界协议和序列化。
 - 风格接近 Java：显式类层次、构造器注入、对象方法和接口隔离；重点是对象边界与多态，不要求机械模仿 Java 语法。
 
@@ -38,7 +38,7 @@
 
 - `Command` 模式为强制模式：具体命令类封装参数并实现 `execute`；可撤销命令继承 `UndoableCommand`；历史栈只保存可撤销命令对象。
 - 容器使用 Composite 语义：`move` / `scale` / `set` / `delete` 对容器和叶子对象统一处理，容器递归委托给子对象。
-- 图形创建使用 Factory：`ShapeFactory` 集中处理“类型名 → 具体类”，Parser 不再直接构造领域对象。
+- 图形创建使用 Contribution / Registry：`ShapeContribution` 封装创建与 SVG 读回；`ShapeRegistry` 按类型名与 SVG tag/`data-kind` 查找；Parser / `create` 不内置类型 switch。
 - SVG 读写、序列化或其他可替换算法出现多个变体时，使用 Strategy 或合适的接口抽象；不得为了堆模式而增加没有变化点的抽象。
 - 每个使用的模式必须在架构文档中写清角色、参与者、解决的问题和替代方案，禁止只写模式名称。
 
@@ -57,7 +57,9 @@
 - 容器形状通过 `GroupShape` 维护子节点，并递归实现统一操作。
 - `Command` 抽象类、`UndoableCommand` 和具体命令类继续作为命令模型；禁止退回命令联合类型。
 - 具体内置命令在 `src/_builtin/commands/XxxCommand/`，同目录放置 Command 与 `*CommandContribution`；`front`/`back` 同属 `ReorderCommand/`；由 `main`（及测试夹具）按 Phase 1 顺序注册进 `CommandRegistry`。
+- 具体内置图形贡献在 `src/_builtin/shapes/XxxShape/`（如 `RectShape/RectShapeContribution.ts`）；领域 Shape 类仍在 `protocol/shapes/concrete/`；由 `main`（及 `createBuiltinShapeCatalog`）注册进 `ShapeRegistry`。
 - 命令共享基类、贡献契约与撤销快照放在 `protocol/commands/`（`Command`、`UndoableCommand`、`contribution/`、`memento/`）。
+- 图形贡献契约放在 `protocol/shapes/contribution/`（`ShapeContribution`、`ShapeCatalog`、`ShapeSvgReadInput`、`ShapeArgumentParser`）；运行时注册表为 `core/shapes/ShapeRegistry`。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 
 ## 现有偏差与整改

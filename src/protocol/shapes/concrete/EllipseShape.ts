@@ -25,7 +25,7 @@ export class EllipseShape extends StyledShape {
     this.ry = this.requireFiniteNumber(ry, "ry");
   }
 
-  public override getType(): ShapeType {
+  public override getType(): string {
     return ShapeType.Ellipse;
   }
 

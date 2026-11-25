@@ -23,6 +23,12 @@ import { ShowCommandContribution } from "@/_builtin/commands/ShowCommand/ShowCom
 import { TreeCommandContribution } from "@/_builtin/commands/TreeCommand/TreeCommandContribution";
 import { UndoCommandContribution } from "@/_builtin/commands/UndoCommand/UndoCommandContribution";
 import { UngroupCommandContribution } from "@/_builtin/commands/UngroupCommand/UngroupCommandContribution";
+import { CircleShapeContribution } from "@/_builtin/shapes/CircleShape/CircleShapeContribution";
+import { EllipseShapeContribution } from "@/_builtin/shapes/EllipseShape/EllipseShapeContribution";
+import { GroupShapeContribution } from "@/_builtin/shapes/GroupShape/GroupShapeContribution";
+import { LineShapeContribution } from "@/_builtin/shapes/LineShape/LineShapeContribution";
+import { RectShapeContribution } from "@/_builtin/shapes/RectShape/RectShapeContribution";
+import { TextShapeContribution } from "@/_builtin/shapes/TextShape/TextShapeContribution";
 import { DirCommandContribution } from "@/_plugin/commands/DirCommand/DirCommandContribution";
 import { StatsCommandContribution } from "@/_plugin/commands/StatsCommand/StatsCommandContribution";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
@@ -31,13 +37,21 @@ import { HelpText } from "@/core/display/HelpText";
 import { CommandHistory } from "@/core/history/CommandHistory";
 import { FileSvgStorage } from "@/core/io/FileSvgStorage";
 import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
-import { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
+import { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
 
 async function main(): Promise<void> {
   const inputReader = new ConsoleInputReader();
   const outputWriter = new ConsoleOutputWriter();
   const history = new CommandHistory();
-  const shapeFactory = new ShapeFactory();
+  const shapeCatalog = new ShapeRegistry();
+  shapeCatalog.registerAll([
+    RectShapeContribution.create(),
+    CircleShapeContribution.create(),
+    EllipseShapeContribution.create(),
+    LineShapeContribution.create(),
+    TextShapeContribution.create(),
+    GroupShapeContribution.create(),
+  ]);
   const registry = new CommandRegistry();
   // Phase 1 help 顺序，其后追加插件命令
   registry.registerAll([
@@ -45,7 +59,7 @@ async function main(): Promise<void> {
     ReadCommandContribution.create(),
     SaveCommandContribution.create(),
     CanvasCommandContribution.create(),
-    CreateCommandContribution.create(shapeFactory),
+    CreateCommandContribution.create(shapeCatalog),
     DeleteCommandContribution.create(),
     MoveCommandContribution.create(),
     ScaleCommandContribution.create(),
@@ -69,6 +83,7 @@ async function main(): Promise<void> {
     history,
     new FileSvgStorage(),
     helpText,
+    shapeCatalog,
   );
   const session = new CommandSession(
     new CommandLineParser(registry),
