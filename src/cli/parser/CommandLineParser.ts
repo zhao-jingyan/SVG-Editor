@@ -1,8 +1,6 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
-import { CommandArguments } from "./syntax/CommandArguments";
-import { CommandDefinitionRegistry } from "./commands/definition/CommandDefinitionRegistry";
+import type { CommandCatalog } from "../../protocol/plugins/CommandCatalog";
 import type { CommandParser } from "./CommandParser";
 import { CommandLineTokenizer } from "./syntax/CommandLineTokenizer";
 import { CommandParseEmptyResult } from "./results/CommandParseEmptyResult";
@@ -14,15 +12,11 @@ import { CommandParseSuccessResult } from "./results/CommandParseSuccessResult";
  * CLI 命令解析入口，只负责词法、命令查找和结果包装。
  */
 export class CommandLineParser implements CommandParser {
-  private readonly definitions: CommandDefinitionRegistry;
-
   public constructor(
-    shapeFactory: ShapeFactory,
+    private readonly definitions: CommandCatalog,
     private readonly tokenizer: CommandLineTokenizer =
       new CommandLineTokenizer(),
-  ) {
-    this.definitions = new CommandDefinitionRegistry(shapeFactory);
-  }
+  ) {}
 
   public parse(line: string): CommandParseResult {
     try {
@@ -42,9 +36,7 @@ export class CommandLineParser implements CommandParser {
         );
       }
 
-      const command = definition.parse(
-        new CommandArguments(tokens, definition.usage),
-      );
+      const command = definition.parse(tokens);
       return new CommandParseSuccessResult(command);
     } catch (error: unknown) {
       if (error instanceof ProtocolError) {

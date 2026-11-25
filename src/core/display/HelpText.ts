@@ -1,25 +1,30 @@
-export class HelpText {
+import type { CommandCatalog } from "../../protocol/plugins/CommandCatalog";
+import type { HelpTextProvider } from "../../protocol/plugins/HelpTextProvider";
+
+export class HelpText implements HelpTextProvider {
+  public constructor(private readonly commands: CommandCatalog) {}
+
   public render(): string {
+    const entries = this.commands
+      .getRegistrations()
+      .flatMap((registration) => {
+        const help = registration.getHelp();
+        return help === undefined
+          ? []
+          : [{ usage: help.getUsage(), description: help.getDescription() }];
+      });
+    const usageWidth = entries.reduce(
+      (width, entry) => Math.max(width, entry.usage.length),
+      0,
+    );
+    const descriptionColumnWidth = usageWidth + 6;
+
     return [
       "Commands:",
-      "  init [width height]                 create a new canvas (default 800x600)",
-      "  read <file.svg>                     read an SVG file",
-      "  save [file.svg]                     save the current document",
-      "  canvas [width height]               show or resize the canvas",
-      "  create <type> <id> [params...]      create a shape",
-      "  delete <id>                         delete a shape and its subtree",
-      "  move <id> <dx> <dy>                 move a shape",
-      "  scale <id> <factor>                 scale a shape",
-      "  set <id> <attribute> <value>        set a shape attribute",
-      "  group <newGid> <id1> <id2>...       group existing shapes",
-      "  ungroup <gid>                       ungroup a container",
-      "  addto <gid> <id>                    move a shape into a container",
-      "  front <id> | back <id>              change z-order",
-      "  tree [id]                           show the shape tree",
-      "  show <id>                           show shape attributes",
-      "  undo | redo                         undo or redo an edit",
-      "  help                                show this help",
-      "  exit                                leave the editor",
+      ...entries.map(
+        (entry) =>
+          `  ${entry.usage.padEnd(descriptionColumnWidth)}${entry.description}`,
+      ),
     ].join("\n");
   }
 }

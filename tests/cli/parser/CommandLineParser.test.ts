@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import { BuiltinCommandPlugin } from "../../../src/cli/plugins/BuiltinCommandPlugin";
+import { CommandDefinitionRegistry } from "../../../src/cli/parser/commands/definition/CommandDefinitionRegistry";
 import { CommandLineParser } from "../../../src/cli/parser/CommandLineParser";
 import type { CommandParseResultDto } from "../../../src/cli/parser/results/CommandParseResult";
 import { CommandParseEmptyResult } from "../../../src/cli/parser/results/CommandParseEmptyResult";
@@ -33,6 +35,7 @@ import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
 import { Shape } from "../../../src/protocol/shapes/model/Shape";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 import { TextShape } from "../../../src/protocol/shapes/concrete/TextShape";
+import { PluginHost } from "../../../src/plugins/PluginHost";
 import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";
 import {
@@ -43,7 +46,14 @@ import {
 type CommandConstructor = new (...args: any[]) => Command;
 type ShapeConstructor = new (...args: any[]) => Shape;
 
-const parser = new CommandLineParser(new ShapeFactory());
+let parser: CommandLineParser;
+
+beforeAll(async () => {
+  const commands = new CommandDefinitionRegistry();
+  const pluginHost = new PluginHost({ commands });
+  await pluginHost.activate(new BuiltinCommandPlugin(new ShapeFactory()));
+  parser = new CommandLineParser(commands);
+});
 
 function parseCommand(input: string): Command {
   const result = parseDto(input);

@@ -1,18 +1,18 @@
 import type { ViewCommandReceiver } from "../../protocol/receivers/ViewCommandReceiver";
+import type { HelpTextProvider } from "../../protocol/plugins/HelpTextProvider";
 import type { CommandResult } from "../../protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
-import { HelpText } from "../display/HelpText";
 import { ShapeDetailVisitor } from "../display/ShapeDetailVisitor";
 import { TreeDisplay } from "../display/TreeDisplay";
 import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
 export class EditorViewCommandReceiver implements ViewCommandReceiver {
-  private readonly helpText: HelpText = new HelpText();
   private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
   private readonly treeDisplay: TreeDisplay = new TreeDisplay();
 
   public constructor(
     private readonly documentReceiver: EditorDocumentCommandReceiver,
+    private readonly helpText: HelpTextProvider,
   ) {}
 
   public async tree(shapeId?: string): Promise<CommandResult> {

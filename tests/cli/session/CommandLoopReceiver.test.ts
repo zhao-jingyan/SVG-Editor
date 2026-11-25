@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CommandLineParser } from "../../../src/cli/parser/CommandLineParser";
+import { CommandDefinitionRegistry } from "../../../src/cli/parser/commands/definition/CommandDefinitionRegistry";
+import { BuiltinCommandPlugin } from "../../../src/cli/plugins/BuiltinCommandPlugin";
 import { CommandLoop } from "../../../src/cli/session/CommandLoop";
 import { CommandSession } from "../../../src/cli/session/CommandSession";
 import type { InputReader } from "../../../src/cli/io/InputReader";
@@ -7,7 +9,9 @@ import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
 import { CommandExecutor } from "../../../src/core/CommandExecutor";
 import { EditorCommandReceiver } from "../../../src/core/receiver/EditorCommandReceiver";
 import { CommandHistory } from "../../../src/core/history/CommandHistory";
+import { PluginHost } from "../../../src/plugins/PluginHost";
 import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
+import { StaticHelpTextProvider } from "../../support/StaticHelpTextProvider";
 
 class FakeInputReader implements InputReader {
   public constructor(private readonly inputs: Array<string | null>) {}
@@ -39,9 +43,16 @@ describe("CommandLoop 真实编辑链路", () => {
     ]);
     const output = new FakeOutputWriter();
     const history = new CommandHistory();
-    const receiver = new EditorCommandReceiver(history);
+    const commands = new CommandDefinitionRegistry();
+    await new PluginHost({ commands }).activate(
+      new BuiltinCommandPlugin(new ShapeFactory()),
+    );
+    const receiver = new EditorCommandReceiver(
+      history,
+      new StaticHelpTextProvider("Commands:"),
+    );
     const session = new CommandSession(
-      new CommandLineParser(new ShapeFactory()),
+      new CommandLineParser(commands),
       new CommandExecutor(receiver, history),
       output,
     );
