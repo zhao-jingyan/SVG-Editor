@@ -31,6 +31,7 @@ import { RectShapeContribution } from "@/_builtin/shapes/RectShape/RectShapeCont
 import { TextShapeContribution } from "@/_builtin/shapes/TextShape/TextShapeContribution";
 import { DirCommandContribution } from "@/_plugin/commands/DirCommand/DirCommandContribution";
 import { StatsCommandContribution } from "@/_plugin/commands/StatsCommand/StatsCommandContribution";
+import { BoxShapeContribution } from "@/_plugin/shapes/BoxShape/BoxShapeContribution";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { CommandExecutor } from "@/core/CommandExecutor";
 import { HelpText } from "@/core/display/HelpText";
@@ -50,6 +51,8 @@ async function main(): Promise<void> {
     EllipseShapeContribution.create(),
     LineShapeContribution.create(),
     TextShapeContribution.create(),
+    // box 须先于普通 g，才能认领 data-kind="box"
+    BoxShapeContribution.create(),
     GroupShapeContribution.create(),
   ]);
   const registry = new CommandRegistry();

@@ -52,5 +52,5 @@ Shape（抽象类：id、类型和统一行为）
 - `Document` 位于 `src/core/document`，通过 `ShapeHierarchy` 和 `ShapeIndex` 实现全局 id 唯一性、父子归属、顺序、容器操作、删除子树和精确位置恢复；已通过 `EditorShapeCommandReceiver` 接入命令执行；SVG 读写实现受控子集，尚未覆盖复杂转换与无损保留。
 - 属性撤销使用 `ShapeAttributeSnapshot` 捕获叶子旧值，不依赖整文档快照；容器公共样式恢复由各叶子分别执行。
 - 空组设置公共样式是合法空操作；未来 Document 若采用组样式继承，需要重新评估该语义。
-- `box` 与 `AttributeHandler` 见 plan39 / plan40；写出仍复用 `SvgShapeWriter` Visitor，文件逻辑不进入 Shape 领域对象。
+- `box` 具体类与贡献在 `_plugin/shapes/BoxShape/`（不进 `protocol/concrete`）；写出经 `getDataKind()`；`AttributeHandler` / 树标签见 plan40 与后续 TreeDecorator。
 - 图形错误不直接进入结果 DTO；所有边界错误均由 `ProtocolError.toCommandErrorDto()` 转换。
