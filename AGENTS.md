@@ -47,7 +47,7 @@
 - 每次实现先给出计划，再小步提交；禁止一次性大提交。
 - 修改架构或依赖方向时，同步更新 `docs/facts/`、`docs/plans/` 和相关说明。
 - 验证命令固定为 `npm test`、`npm run build` 和 `npm run lint`。
-- `npm run lint` 检查分层导入：`src/builtin` 仅可依赖 `protocol` 与自身。
+- `npm run lint` 检查分层导入：`src/builtin` / `src/plugin` 仅可依赖 `protocol` 与自身（`plugin` 允许 `node:` 适配器）。
 - 新增领域类层次时，测试必须覆盖多态行为、`instanceof` 关系和关键错误分支。
 - 提交只暂存本任务文件，禁止使用 `git add -A`；commit hook 已覆盖的检查不重复执行。
 

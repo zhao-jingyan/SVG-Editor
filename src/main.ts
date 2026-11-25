@@ -23,6 +23,8 @@ import { ShowCommandContribution } from "@/builtin/commands/ShowCommand/ShowComm
 import { TreeCommandContribution } from "@/builtin/commands/TreeCommand/TreeCommandContribution";
 import { UndoCommandContribution } from "@/builtin/commands/UndoCommand/UndoCommandContribution";
 import { UngroupCommandContribution } from "@/builtin/commands/UngroupCommand/UngroupCommandContribution";
+import { DirCommandContribution } from "@/plugin/commands/DirCommand/DirCommandContribution";
+import { StatsCommandContribution } from "@/plugin/commands/StatsCommand/StatsCommandContribution";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { CommandExecutor } from "@/core/CommandExecutor";
 import { HelpText } from "@/core/display/HelpText";
@@ -37,7 +39,7 @@ async function main(): Promise<void> {
   const history = new CommandHistory();
   const shapeFactory = new ShapeFactory();
   const registry = new CommandRegistry();
-  // Phase 1 help 顺序
+  // Phase 1 help 顺序，其后追加插件命令
   registry.registerAll([
     InitCommandContribution.create(),
     ReadCommandContribution.create(),
@@ -59,6 +61,8 @@ async function main(): Promise<void> {
     RedoCommandContribution.create(),
     HelpCommandContribution.create(),
     ExitCommandContribution.create(),
+    StatsCommandContribution.create(),
+    DirCommandContribution.create(),
   ]);
   const helpText = new HelpText(registry);
   const editorCommandReceiver = new EditorCommandReceiver(

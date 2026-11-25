@@ -5,7 +5,16 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const srcRoot = path.join(repositoryRoot, "src");
 
-/** @type {readonly { name: string; root: string; allow: readonly string[] }[]} */
+/**
+ * @typedef {{
+ *   name: string;
+ *   root: string;
+ *   allow: readonly string[];
+ *   allowExternalPrefixes?: readonly string[];
+ * }} LayerRule
+ */
+
+/** @type {readonly LayerRule[]} */
 const layers = [
   {
     name: "builtin",
@@ -14,6 +23,15 @@ const layers = [
       path.join(srcRoot, "builtin"),
       path.join(srcRoot, "protocol"),
     ],
+  },
+  {
+    name: "plugin",
+    root: path.join(srcRoot, "plugin"),
+    allow: [
+      path.join(srcRoot, "plugin"),
+      path.join(srcRoot, "protocol"),
+    ],
+    allowExternalPrefixes: ["node:"],
   },
 ];
 
@@ -132,9 +150,15 @@ async function main() {
         const resolved = resolveSpecifier(filePath, specifier);
 
         if (resolved.kind === "external") {
-          violations.push(
-            `${relativeFile}: 禁止外部依赖 "${specifier}"（${layer.name} 仅可依赖 protocol 与自身）`,
+          const allowedPrefixes = layer.allowExternalPrefixes ?? [];
+          const externalAllowed = allowedPrefixes.some((prefix) =>
+            specifier.startsWith(prefix),
           );
+          if (!externalAllowed) {
+            violations.push(
+              `${relativeFile}: 禁止外部依赖 "${specifier}"（${layer.name} 仅可依赖 protocol 与自身）`,
+            );
+          }
           continue;
         }
 
