@@ -31,7 +31,9 @@ import { RectShapeContribution } from "@/_builtin/shapes/RectShape/RectShapeCont
 import { TextShapeContribution } from "@/_builtin/shapes/TextShape/TextShapeContribution";
 import { DirCommandContribution } from "@/_plugin/commands/DirCommand/DirCommandContribution";
 import { StatsCommandContribution } from "@/_plugin/commands/StatsCommand/StatsCommandContribution";
+import { BoxAttributeHandler } from "@/_plugin/shapes/BoxShape/BoxAttributeHandler";
 import { BoxShapeContribution } from "@/_plugin/shapes/BoxShape/BoxShapeContribution";
+import { AttributeRegistry } from "@/core/attributes/AttributeRegistry";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { CommandExecutor } from "@/core/CommandExecutor";
 import { HelpText } from "@/core/display/HelpText";
@@ -81,12 +83,15 @@ async function main(): Promise<void> {
     StatsCommandContribution.create(),
     DirCommandContribution.create(),
   ]);
+  const attributeCatalog = new AttributeRegistry();
+  attributeCatalog.register(new BoxAttributeHandler());
   const helpText = new HelpText(registry);
   const editorCommandReceiver = new EditorCommandReceiver(
     history,
     new FileSvgStorage(),
     helpText,
     shapeCatalog,
+    attributeCatalog,
   );
   const session = new CommandSession(
     new CommandLineParser(registry),
