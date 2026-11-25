@@ -1,19 +1,24 @@
 import type { ViewCommandReceiver } from "@/protocol/receivers/ViewCommandReceiver";
 import type { CommandResult } from "@/protocol/results/CommandResult";
 import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import type { TreeDecoratorCatalog } from "@/protocol/tree/TreeDecoratorCatalog";
 import { HelpText } from "@/core/display/HelpText";
 import { ShapeDetailVisitor } from "@/core/display/ShapeDetailVisitor";
 import { TreeDisplay } from "@/core/display/TreeDisplay";
+import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
 import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
 export class EditorViewCommandReceiver implements ViewCommandReceiver {
   private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
-  private readonly treeDisplay: TreeDisplay = new TreeDisplay();
+  private readonly treeDisplay: TreeDisplay;
 
   public constructor(
     private readonly documentReceiver: EditorDocumentCommandReceiver,
     private readonly helpText: HelpText,
-  ) {}
+    treeDecorators: TreeDecoratorCatalog = new TreeDecoratorRegistry(),
+  ) {
+    this.treeDisplay = new TreeDisplay(treeDecorators);
+  }
 
   public async tree(shapeId?: string): Promise<CommandResult> {
     return new CommandSuccessResult(

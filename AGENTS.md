@@ -61,6 +61,7 @@
 - 命令共享基类、贡献契约与撤销快照放在 `protocol/commands/`（`Command`、`UndoableCommand`、`contribution/`、`memento/`）。
 - 图形贡献契约放在 `protocol/shapes/contribution/`（`ShapeContribution`、`ShapeCatalog`、`ShapeSvgReadInput`、`ShapeArgumentParser`）；运行时注册表为 `core/shapes/ShapeRegistry`。
 - 属性扩展点放在 `protocol/attributes/`（`AttributeHandler`、`AttributeCatalog`、`EditableAttributeRules`）；运行时注册表为 `core/attributes/AttributeRegistry`；`set` 先查处理器，未命中再走 Phase 1 白名单。
+- 树标签扩展点放在 `protocol/tree/`（`TreeDecorator`、`TreeDecoratorCatalog`）；运行时注册表为 `core/tree/TreeDecoratorRegistry`；`TreeDisplay` 按注册顺序拼接行尾标签。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 
 ## 现有偏差与整改

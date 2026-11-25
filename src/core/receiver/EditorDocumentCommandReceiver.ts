@@ -5,12 +5,14 @@ import type { CommandResult } from "@/protocol/results/CommandResult";
 import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
 import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import type { Shape } from "@/protocol/shapes/model/Shape";
+import type { TreeDecoratorCatalog } from "@/protocol/tree/TreeDecoratorCatalog";
 import { Document } from "@/core/document/Document";
 import type { CommandHistory } from "@/core/history/CommandHistory";
 import { FileSvgStorage } from "@/core/io/FileSvgStorage";
 import { SvgDocumentParser } from "@/core/io/SvgDocumentParser";
 import { SvgDocumentWriter } from "@/core/io/SvgDocumentWriter";
 import type { SvgStorage } from "@/core/io/SvgStorage";
+import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
 
 export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
   private document?: Document;
@@ -22,6 +24,7 @@ export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
     private readonly history: CommandHistory,
     shapeCatalog: ShapeCatalog,
     private readonly svgStorage: SvgStorage = new FileSvgStorage(),
+    private readonly treeDecorators: TreeDecoratorCatalog = new TreeDecoratorRegistry(),
   ) {
     this.svgDocumentParser = new SvgDocumentParser(shapeCatalog);
   }
@@ -32,6 +35,7 @@ export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
     this.currentPath = undefined;
     this.history.clear();
     this.history.lock();
+    this.syncTreeDecorators(document);
     return new CommandSuccessResult(
       `canvas ${document.getWidth()}x${document.getHeight()} created`,
     );
@@ -54,6 +58,7 @@ export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
     this.currentPath = path;
     this.history.clear();
     this.history.lock();
+    this.syncTreeDecorators(this.document);
     return new CommandSuccessResult([
       ...parsed.getWarnings(),
       `read ${path} (${parsed.getElementCount()} elements)`,
@@ -84,6 +89,7 @@ export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
 
     this.currentPath = targetPath;
     this.history.lock();
+    this.syncTreeDecorators(document);
     return new CommandSuccessResult(
       `saved to ${targetPath} (${this.svgDocumentWriter.countElements(document)} elements)`,
     );
@@ -125,5 +131,11 @@ export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
     }
 
     return this.document;
+  }
+
+  private syncTreeDecorators(document: Document): void {
+    for (const decorator of this.treeDecorators.getDecorators()) {
+      decorator.onDocumentSynced(document);
+    }
   }
 }

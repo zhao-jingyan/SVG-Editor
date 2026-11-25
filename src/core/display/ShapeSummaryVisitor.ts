@@ -55,7 +55,8 @@ export class ShapeSummaryVisitor implements ShapeVisitor<string> {
   }
 
   public visitGroup(shape: GroupShape): string {
-    return `${shape.getType()}#${shape.getId()}`;
+    // 容器行统一用 SVG 标签名 g；类型标注（如 (box)）由 TreeDecorator 追加
+    return `g#${shape.getId()}`;
   }
 
   private render(shape: Shape, attributes: readonly string[]): string {

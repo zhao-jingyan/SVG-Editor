@@ -5,6 +5,7 @@ import type { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement"
 import type { CommandResult } from "@/protocol/results/CommandResult";
 import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import type { Shape } from "@/protocol/shapes/model/Shape";
+import type { TreeDecoratorCatalog } from "@/protocol/tree/TreeDecoratorCatalog";
 import { AttributeRegistry } from "@/core/attributes/AttributeRegistry";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { HelpText } from "@/core/display/HelpText";
@@ -12,6 +13,7 @@ import { CommandHistory } from "@/core/history/CommandHistory";
 import { FileSvgStorage } from "@/core/io/FileSvgStorage";
 import type { SvgStorage } from "@/core/io/SvgStorage";
 import { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
+import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
 import { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 import { EditorShapeCommandReceiver } from "./EditorShapeCommandReceiver";
 import { EditorViewCommandReceiver } from "./EditorViewCommandReceiver";
@@ -27,11 +29,13 @@ export class EditorCommandReceiver implements CommandReceiver {
     helpText: HelpText = new HelpText(new CommandRegistry()),
     shapeCatalog: ShapeCatalog = new ShapeRegistry(),
     attributeCatalog: AttributeCatalog = new AttributeRegistry(),
+    treeDecorators: TreeDecoratorCatalog = new TreeDecoratorRegistry(),
   ) {
     this.documentReceiver = new EditorDocumentCommandReceiver(
       history,
       shapeCatalog,
       svgStorage,
+      treeDecorators,
     );
     this.shapeReceiver = new EditorShapeCommandReceiver(
       this.documentReceiver,
@@ -40,6 +44,7 @@ export class EditorCommandReceiver implements CommandReceiver {
     this.viewReceiver = new EditorViewCommandReceiver(
       this.documentReceiver,
       helpText,
+      treeDecorators,
     );
   }
 
