@@ -1,32 +1,97 @@
-import type { CommandCatalog } from "../../../../protocol/plugins/CommandCatalog";
-import type { CommandRegistrar } from "../../../../protocol/plugins/CommandRegistrar";
-import type { CommandRegistration } from "../../../../protocol/plugins/CommandRegistration";
+import type { Command } from "../../../../protocol/commands/Command";
+import type { ShapeFactory } from "../../../../protocol/shapes/factory/ShapeFactory";
+import type { CommandArguments } from "../../syntax/CommandArguments";
+import type { CommandDefinition } from "./CommandDefinition";
+import { DocumentCommandParser } from "../CommandsParser/doc/DocumentCommandParser";
+import { CreateCommandParser } from "../CommandsParser/shape/CreateCommandParser";
+import { ShapeCommandParser } from "../CommandsParser/shape/ShapeCommandParser";
+import { ViewCommandParser } from "../CommandsParser/view/ViewCommandParser";
 
 /**
- * 保存命令插件注册结果，并保持激活顺序。
+ * 集中维护命令名与参数构造器的唯一映射。
  */
-export class CommandDefinitionRegistry
-  implements CommandCatalog, CommandRegistrar
-{
-  private readonly definitions = new Map<string, CommandRegistration>();
-  private readonly registrationOrder: CommandRegistration[] = [];
+export class CommandDefinitionRegistry {
+  private readonly definitions = new Map<string, CommandDefinition>();
 
-  public register(registration: CommandRegistration): void {
-    const commandName = registration.getName();
+  public constructor(shapeFactory: ShapeFactory) {
+    const documentParser = new DocumentCommandParser();
+    const createParser = new CreateCommandParser(shapeFactory);
+    const shapeParser = new ShapeCommandParser();
+    const viewParser = new ViewCommandParser();
 
-    if (this.definitions.has(commandName)) {
-      throw new Error(`duplicate registration: commands/${commandName}`);
-    }
-
-    this.definitions.set(commandName, registration);
-    this.registrationOrder.push(registration);
+    this.register("init", "init [width height]", (args) =>
+      documentParser.parseInit(args),
+    );
+    this.register("read", "read <file.svg>", (args) =>
+      documentParser.parseRead(args),
+    );
+    this.register("save", "save [file.svg]", (args) =>
+      documentParser.parseSave(args),
+    );
+    this.register("canvas", "canvas [width height]", (args) =>
+      documentParser.parseCanvas(args),
+    );
+    this.register(
+      "create",
+      "create <type> <id> [params...] [in <containerId>]",
+      (args) => createParser.parse(args),
+    );
+    this.register("delete", "delete <id>", (args) =>
+      shapeParser.parseDelete(args),
+    );
+    this.register("move", "move <id> <dx> <dy>", (args) =>
+      shapeParser.parseMove(args),
+    );
+    this.register("scale", "scale <id> <factor>", (args) =>
+      shapeParser.parseScale(args),
+    );
+    this.register("set", "set <id> <attribute> <value>", (args) =>
+      shapeParser.parseSet(args),
+    );
+    this.register("group", "group <newGid> <id1> <id2>...", (args) =>
+      shapeParser.parseGroup(args),
+    );
+    this.register("ungroup", "ungroup <gid>", (args) =>
+      shapeParser.parseUngroup(args),
+    );
+    this.register("addto", "addto <gid> <id>", (args) =>
+      shapeParser.parseAddTo(args),
+    );
+    this.register("front", "front <id>", (args) =>
+      shapeParser.parseReorder(args, "front"),
+    );
+    this.register("back", "back <id>", (args) =>
+      shapeParser.parseReorder(args, "back"),
+    );
+    this.register("tree", "tree [id]", (args) =>
+      viewParser.parseTree(args),
+    );
+    this.register("show", "show <id>", (args) =>
+      viewParser.parseShow(args),
+    );
+    this.register("help", "help", (args) =>
+      viewParser.parseHelp(args),
+    );
+    this.register("undo", "undo", (args) =>
+      viewParser.parseUndo(args),
+    );
+    this.register("redo", "redo", (args) =>
+      viewParser.parseRedo(args),
+    );
+    this.register("exit", "exit", (args) =>
+      viewParser.parseExit(args),
+    );
   }
 
-  public find(commandName: string): CommandRegistration | undefined {
+  public find(commandName: string): CommandDefinition | undefined {
     return this.definitions.get(commandName);
   }
 
-  public getRegistrations(): readonly CommandRegistration[] {
-    return [...this.registrationOrder];
+  private register(
+    commandName: string,
+    usage: string,
+    parse: (args: CommandArguments) => Command,
+  ): void {
+    this.definitions.set(commandName, { usage, parse });
   }
 }

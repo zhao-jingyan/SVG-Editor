@@ -1,5 +1,4 @@
 import type { CommandReceiver } from "../../protocol/receivers/CommandReceiver";
-import type { HelpTextProvider } from "../../protocol/plugins/HelpTextProvider";
 import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "../../protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
@@ -18,16 +17,12 @@ export class EditorCommandReceiver implements CommandReceiver {
   private readonly viewReceiver: EditorViewCommandReceiver;
 
   public constructor(
-    private readonly history: CommandHistory,
-    helpText: HelpTextProvider,
+    private readonly history: CommandHistory = new CommandHistory(),
     svgStorage: SvgStorage = new FileSvgStorage(),
   ) {
     this.documentReceiver = new EditorDocumentCommandReceiver(history, svgStorage);
     this.shapeReceiver = new EditorShapeCommandReceiver(this.documentReceiver);
-    this.viewReceiver = new EditorViewCommandReceiver(
-      this.documentReceiver,
-      helpText,
-    );
+    this.viewReceiver = new EditorViewCommandReceiver(this.documentReceiver);
   }
 
   public init(width?: number, height?: number): Promise<CommandResult> {

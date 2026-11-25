@@ -16,8 +16,7 @@
 - 未设置的样式不出现在 tree 或 show 中；值为空的字符串样式与未设置是不同状态。
 - `show <id>` 首行显示 `type#id parent=svg` 或 `parent=g#父id`；后续按图形类型显示几何、文本和样式明细。
 - group 的 show 只显示直接子节点数量，不递归展开；需要层级时使用 tree。
-- `help` 输出由注入的 `CommandCatalog` 动态生成，不依赖当前文档；显示顺序与命令注册顺序一致。
-- help 行使用“两空格缩进 + command usage + 描述列”的稳定格式；描述列按最长 usage 加 6 个空格计算。
+- `help` 输出集中维护的完整命令表，不依赖当前文档。
 - 显示命令只读，不修改 Document，不进入历史栈，也不改变历史锁。
 
 ## 状态与生命周期
@@ -30,7 +29,7 @@
 
 - 显示层不得把展示格式写回 Shape，也不得按具体类型在 Receiver 中扩散分支。
 - tree 的层级顺序必须与 Document 当前顺序一致。
-- help usage、描述和注册顺序是用户可见契约；命令插件必须随命令一起提供。
+- help 文案是用户可见契约，新增命令时必须同步维护。
 
 ## 历史决策
 
@@ -38,7 +37,7 @@
 |---|---|---|
 | tree/show 通过 Visitor 扩展 | 类型相关格式离开领域对象，避免新增类型分派点 | [ShapeVisitor](../../protocol/shapes/visitor/ShapeVisitor.ts)、[ShapeSummaryVisitor](ShapeSummaryVisitor.ts) |
 | 属性内联到 tree | 脱离画布时仍能识别图形几何和顺序 | [TreeDisplay](TreeDisplay.ts)、[ShapeDisplay.test.ts](../../../tests/core/display/ShapeDisplay.test.ts) |
-| help 从命令注册目录动态生成 | 命令插件必须能同时提供命令名、usage 和描述；无插件时仍保持 Phase 1 完整输出 | [HelpText](HelpText.ts)、[CommandCatalog](../../protocol/plugins/CommandCatalog.ts) |
+| help 文本集中维护 | 避免帮助内容散落在 Parser 或 Receiver | [HelpText](HelpText.ts) |
 
 ## 相关代码
 

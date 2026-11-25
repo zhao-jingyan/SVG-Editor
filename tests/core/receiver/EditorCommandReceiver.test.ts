@@ -29,7 +29,6 @@ import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
 import { TextShape } from "../../../src/protocol/shapes/concrete/TextShape";
 import { InMemorySvgStorage } from "../../support/InMemorySvgStorage";
-import { StaticHelpTextProvider } from "../../support/StaticHelpTextProvider";
 
 function expectErrorMessage(
   result: CommandResult,
@@ -48,10 +47,7 @@ function createReceiver(storage?: InMemorySvgStorage): {
   executor: CommandExecutor;
 } {
   const history = new CommandHistory();
-  const helpText = new StaticHelpTextProvider(
-    "Commands:\n  tree [id]                     show the shape tree",
-  );
-  const receiver = new EditorCommandReceiver(history, helpText, storage);
+  const receiver = new EditorCommandReceiver(history, storage);
   return { receiver, executor: new CommandExecutor(receiver, history) };
 }
 
