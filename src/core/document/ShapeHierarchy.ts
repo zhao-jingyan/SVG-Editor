@@ -1,8 +1,8 @@
-import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import { ShapePlacement } from "../../protocol/commands/_common/memento/ShapePlacement";
-import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
-import type { Shape } from "../../protocol/shapes/model/Shape";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 import { ShapeIndex } from "./ShapeIndex";
 
 export class ShapeHierarchy {

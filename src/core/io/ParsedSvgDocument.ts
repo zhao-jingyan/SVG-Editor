@@ -1,4 +1,4 @@
-import type { Document } from "../document/Document";
+import type { Document } from "@/core/document/Document";
 
 export class ParsedSvgDocument {
   public constructor(

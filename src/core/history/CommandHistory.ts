@@ -1,9 +1,9 @@
-import type { CommandReceiver } from "../../protocol/receivers/CommandReceiver";
-import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import { CommandErrorResult } from "../../protocol/results/outcomes/CommandErrorResult";
-import type { CommandResult } from "../../protocol/results/CommandResult";
-import type { UndoableCommand } from "../../protocol/commands/_common/UndoableCommand";
+import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CommandErrorResult } from "@/protocol/results/outcomes/CommandErrorResult";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import type { UndoableCommand } from "@/protocol/commands/_common/UndoableCommand";
 
 export class CommandHistory {
   private readonly undoStack: UndoableCommand[] = [];

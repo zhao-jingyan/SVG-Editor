@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
-import { CommandExitResult } from "../../src/protocol/results/outcomes/CommandExitResult";
-import { CommandResult } from "../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CommandErrorResult } from "@/protocol/results/outcomes/CommandErrorResult";
+import { CommandExitResult } from "@/protocol/results/outcomes/CommandExitResult";
+import { CommandResult } from "@/protocol/results/CommandResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
 
 describe("CommandResult 类层次", () => {
   it("具体结果共享基类并转换为边界 DTO", () => {

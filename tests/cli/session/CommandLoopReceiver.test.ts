@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { CommandLineParser } from "../../../src/cli/parser/CommandLineParser";
-import { CommandLoop } from "../../../src/cli/session/CommandLoop";
-import { CommandSession } from "../../../src/cli/session/CommandSession";
-import type { InputReader } from "../../../src/cli/io/InputReader";
-import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
-import { CommandExecutor } from "../../../src/core/CommandExecutor";
-import { EditorCommandReceiver } from "../../../src/core/receiver/EditorCommandReceiver";
-import { CommandHistory } from "../../../src/core/history/CommandHistory";
+import { CommandLineParser } from "@/cli/parser/CommandLineParser";
+import { CommandLoop } from "@/cli/session/CommandLoop";
+import { CommandSession } from "@/cli/session/CommandSession";
+import type { InputReader } from "@/cli/io/InputReader";
+import type { OutputWriter } from "@/cli/io/OutputWriter";
+import { CommandExecutor } from "@/core/CommandExecutor";
+import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
+import { CommandHistory } from "@/core/history/CommandHistory";
 import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
 
 class FakeInputReader implements InputReader {

@@ -19,7 +19,7 @@
 - `protocol` 不得依赖 `cli`、`core`、`builtin`、`plugin`、Node 或 DOM。
 - 禁止跨层直接访问、循环依赖，以及在 CLI 中实现编辑规则或文档状态。
 - 命令专用 API 不上 `CommandReceiver`；文档结构只读查询可用 `getRootShapes()`；文件系统经独立 `DirectoryListing` 端口，不经 Receiver。
-- 路径别名：`@/*` → `src/*`（`tsconfig` paths + vitest alias；构建经 `resolve-tspaths` 回写相对路径）。跨层导入可用 `@/builtin`、`@/protocol` 等，不是 npm package。
+- 路径别名：`@/*` → `src/*`（`tsconfig` paths + vitest alias + `tests/tsconfig.json`；构建经 `resolve-tspaths` 回写相对路径）。指向 `src` 的导入统一用 `@/...`；同目录 `./X` 可保留相对路径。不是 npm package。
 
 ## 面向对象规则
 
@@ -46,7 +46,8 @@
 
 - 每次实现先给出计划，再小步提交；禁止一次性大提交。
 - 修改架构或依赖方向时，同步更新 `docs/facts/`、`docs/plans/` 和相关说明。
-- 验证命令固定为 `npm test` 和 `npm run build`。
+- 验证命令固定为 `npm test`、`npm run build` 和 `npm run lint`。
+- `npm run lint` 检查分层导入：`src/builtin` 仅可依赖 `protocol` 与自身。
 - 新增领域类层次时，测试必须覆盖多态行为、`instanceof` 关系和关键错误分支。
 - 提交只暂存本任务文件，禁止使用 `git add -A`；commit hook 已覆盖的检查不重复执行。
 

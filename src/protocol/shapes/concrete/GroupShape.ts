@@ -1,10 +1,10 @@
-import type { EditableAttribute } from "../model/EditableAttribute";
-import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { ProtocolError } from "../../errors/ProtocolError";
-import { Shape } from "../model/Shape";
-import type { ShapePosition } from "../model/ShapePosition";
-import { ShapeType } from "../model/ShapeType";
-import type { ShapeVisitor } from "../visitor/ShapeVisitor";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { Shape } from "@/protocol/shapes/model/Shape";
+import type { ShapePosition } from "@/protocol/shapes/model/ShapePosition";
+import { ShapeType } from "@/protocol/shapes/model/ShapeType";
+import type { ShapeVisitor } from "@/protocol/shapes/visitor/ShapeVisitor";
 
 export class GroupShape extends Shape {
   private readonly children: Shape[];

@@ -1,6 +1,6 @@
 import type { EditableAttribute } from "./EditableAttribute";
-import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { ProtocolError } from "../../errors/ProtocolError";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import { Shape } from "./Shape";
 
 export abstract class StyledShape extends Shape {

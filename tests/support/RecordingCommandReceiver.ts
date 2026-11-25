@@ -1,12 +1,12 @@
-import type { CommandReceiver } from "../../src/protocol/receivers/CommandReceiver";
-import type { EditableAttribute } from "../../src/protocol/shapes/model/EditableAttribute";
-import { ShapeAttributeSnapshot } from "../../src/protocol/commands/_common/memento/ShapeAttributeSnapshot";
-import { ShapePlacement } from "../../src/protocol/commands/_common/memento/ShapePlacement";
-import type { CommandResult } from "../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
-import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
-import type { Shape } from "../../src/protocol/shapes/model/Shape";
-import { ShapeType } from "../../src/protocol/shapes/model/ShapeType";
+import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import { ShapeAttributeSnapshot } from "@/protocol/commands/_common/memento/ShapeAttributeSnapshot";
+import { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
+import { ShapeType } from "@/protocol/shapes/model/ShapeType";
 
 export interface ReceiverCall {
   readonly method: string;

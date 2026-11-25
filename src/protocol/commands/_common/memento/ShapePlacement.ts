@@ -1,6 +1,6 @@
-import { CommandErrorCode } from "../../../errors/CommandErrorCode";
-import { ProtocolError } from "../../../errors/ProtocolError";
-import type { Shape } from "../../../shapes/model/Shape";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 
 export class ShapePlacement {
   private readonly shape: Shape;

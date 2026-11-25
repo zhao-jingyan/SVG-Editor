@@ -1,6 +1,6 @@
-import { CommandErrorCode } from "../../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../../protocol/errors/ProtocolError";
-import type { EditableAttribute } from "../../../protocol/shapes/model/EditableAttribute";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 
 /**
  * 仅服务 set 命令的属性名与数值属性判定。

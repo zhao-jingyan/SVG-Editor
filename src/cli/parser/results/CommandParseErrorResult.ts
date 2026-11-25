@@ -1,4 +1,4 @@
-import type { ProtocolError } from "../../../protocol/errors/ProtocolError";
+import type { ProtocolError } from "@/protocol/errors/ProtocolError";
 import {
   CommandParseResult,
   type CommandParseResultDto,

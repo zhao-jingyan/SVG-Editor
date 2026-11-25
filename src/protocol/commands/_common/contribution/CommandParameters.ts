@@ -1,5 +1,5 @@
-import { CommandErrorCode } from "../../../errors/CommandErrorCode";
-import { ProtocolError } from "../../../errors/ProtocolError";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 
 /**
  * 封装命令参数（不含命令名）的元数校验和类型转换。

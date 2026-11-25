@@ -1,5 +1,5 @@
-import type { InputReader } from "../io/InputReader";
-import type { OutputWriter } from "../io/OutputWriter";
+import type { InputReader } from "@/cli/io/InputReader";
+import type { OutputWriter } from "@/cli/io/OutputWriter";
 import { CommandSession } from "./CommandSession";
 import { CommandSessionStatus } from "./CommandSessionStatus";
 

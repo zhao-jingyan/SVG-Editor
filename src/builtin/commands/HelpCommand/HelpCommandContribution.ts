@@ -1,6 +1,6 @@
 import { HelpCommand } from "./HelpCommand";
-import { CommandContribution } from "../../../protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "../../../protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
 
 export class HelpCommandContribution {
   public static create(): CommandContribution {

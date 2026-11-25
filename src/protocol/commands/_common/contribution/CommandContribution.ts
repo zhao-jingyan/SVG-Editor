@@ -1,4 +1,4 @@
-import { Command } from "../Command";
+import { Command } from "@/protocol/commands/_common/Command";
 import type { CommandHelp } from "./CommandHelp";
 import type { CommandParameters } from "./CommandParameters";
 

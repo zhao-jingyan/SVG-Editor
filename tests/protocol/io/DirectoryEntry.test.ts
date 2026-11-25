@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DirectoryEntry } from "../../../src/protocol/io/DirectoryEntry";
-import { DirectoryEntryKind } from "../../../src/protocol/io/DirectoryEntryKind";
+import { DirectoryEntry } from "@/protocol/io/DirectoryEntry";
+import { DirectoryEntryKind } from "@/protocol/io/DirectoryEntryKind";
 
 describe("DirectoryEntry", () => {
   it("封装目录与文件项", () => {

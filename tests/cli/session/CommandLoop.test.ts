@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
-import type { CommandParser } from "../../../src/cli/parser/CommandParser";
-import { CommandLoop } from "../../../src/cli/session/CommandLoop";
-import { CommandSession } from "../../../src/cli/session/CommandSession";
-import type { InputReader } from "../../../src/cli/io/InputReader";
-import type { OutputWriter } from "../../../src/cli/io/OutputWriter";
-import type { CommandParseResult } from "../../../src/cli/parser/results/CommandParseResult";
-import { CommandParseSuccessResult } from "../../../src/cli/parser/results/CommandParseSuccessResult";
-import { ExitCommand } from "../../../src/builtin/commands/ExitCommand/ExitCommand";
-import { HelpCommand } from "../../../src/builtin/commands/HelpCommand/HelpCommand";
-import type { Command } from "../../../src/protocol/commands/_common/Command";
-import type { Executor } from "../../../src/protocol/execution/Executor";
-import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
-import type { CommandResult } from "../../../src/protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../../src/protocol/results/outcomes/CommandSuccessResult";
+import type { CommandParser } from "@/cli/parser/CommandParser";
+import { CommandLoop } from "@/cli/session/CommandLoop";
+import { CommandSession } from "@/cli/session/CommandSession";
+import type { InputReader } from "@/cli/io/InputReader";
+import type { OutputWriter } from "@/cli/io/OutputWriter";
+import type { CommandParseResult } from "@/cli/parser/results/CommandParseResult";
+import { CommandParseSuccessResult } from "@/cli/parser/results/CommandParseSuccessResult";
+import { ExitCommand } from "@/builtin/commands/ExitCommand/ExitCommand";
+import { HelpCommand } from "@/builtin/commands/HelpCommand/HelpCommand";
+import type { Command } from "@/protocol/commands/_common/Command";
+import type { Executor } from "@/protocol/execution/Executor";
+import { CommandExitResult } from "@/protocol/results/outcomes/CommandExitResult";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
 
 class FakeInputReader implements InputReader {
   public readCount = 0;

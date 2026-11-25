@@ -1,7 +1,7 @@
-import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
-import type { Shape } from "../../protocol/shapes/model/Shape";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 
 export class ShapeIndex {
   private readonly shapesById: Map<string, Shape> = new Map();

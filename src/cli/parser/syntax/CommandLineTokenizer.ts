@@ -1,5 +1,5 @@
-import { CommandErrorCode } from "../../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../../protocol/errors/ProtocolError";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 
 /**
  * 把一行 CLI 文本切分为带引号感知的参数。

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CommandRegistry } from "../../../src/core/commands/CommandRegistry";
-import { CommandContribution } from "../../../src/protocol/commands/_common/contribution/CommandContribution";
-import { HelpCommand } from "../../../src/builtin/commands/HelpCommand/HelpCommand";
+import { CommandRegistry } from "@/core/commands/CommandRegistry";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { HelpCommand } from "@/builtin/commands/HelpCommand/HelpCommand";
 import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
 
 describe("CommandRegistry", () => {

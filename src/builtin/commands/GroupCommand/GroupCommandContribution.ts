@@ -1,6 +1,6 @@
 import { GroupCommand } from "./GroupCommand";
-import { CommandContribution } from "../../../protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "../../../protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
 
 export class GroupCommandContribution {
   public static create(): CommandContribution {

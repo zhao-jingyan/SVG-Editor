@@ -1,9 +1,9 @@
-import type { ViewCommandReceiver } from "../../protocol/receivers/ViewCommandReceiver";
-import type { CommandResult } from "../../protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
-import { HelpText } from "../display/HelpText";
-import { ShapeDetailVisitor } from "../display/ShapeDetailVisitor";
-import { TreeDisplay } from "../display/TreeDisplay";
+import type { ViewCommandReceiver } from "@/protocol/receivers/ViewCommandReceiver";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import { HelpText } from "@/core/display/HelpText";
+import { ShapeDetailVisitor } from "@/core/display/ShapeDetailVisitor";
+import { TreeDisplay } from "@/core/display/TreeDisplay";
 import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
 export class EditorViewCommandReceiver implements ViewCommandReceiver {

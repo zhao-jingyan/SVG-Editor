@@ -10,6 +10,7 @@
     "build": "tsc -p tsconfig.json && resolve-tspaths -p tsconfig.json -s src -o dist",
     "start": "node dist/main.js",
     "cli": "node dist/main.js",
+    "lint": "node scripts/lint-layer-boundaries.mjs",
     "test": "vitest run",
     "test:e2e": "npm run build && vitest run tests/e2e",
     "e2e": "node scripts/e2e.mjs"

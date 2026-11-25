@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
-import { HelpText } from "../../../src/core/display/HelpText";
+import { HelpText } from "@/core/display/HelpText";
 
 const phase1Help = [
   "Commands:",

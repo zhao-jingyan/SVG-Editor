@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { ErrorSource } from "../../src/protocol/errors/ErrorSource";
-import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ErrorSource } from "@/protocol/errors/ErrorSource";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 
 describe("ProtocolError", () => {
   it("通过来源枚举区分错误而不建立子类", () => {

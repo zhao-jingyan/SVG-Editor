@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Document } from "../../../src/core/document/Document";
-import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { ErrorSource } from "../../../src/protocol/errors/ErrorSource";
-import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
-import { CircleShape } from "../../../src/protocol/shapes/concrete/CircleShape";
-import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
-import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
+import { Document } from "@/core/document/Document";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ErrorSource } from "@/protocol/errors/ErrorSource";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import { RectShape } from "@/protocol/shapes/concrete/RectShape";
 
 function expectDocumentProtocolError(
   action: () => void,

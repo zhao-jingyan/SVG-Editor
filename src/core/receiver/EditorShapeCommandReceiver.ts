@@ -1,11 +1,11 @@
-import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
-import type { ShapeCommandReceiver } from "../../protocol/receivers/ShapeCommandReceiver";
-import type { ShapeAttributeSnapshot } from "../../protocol/commands/_common/memento/ShapeAttributeSnapshot";
-import type { ShapePlacement } from "../../protocol/commands/_common/memento/ShapePlacement";
-import type { CommandResult } from "../../protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
-import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
-import type { Shape } from "../../protocol/shapes/model/Shape";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import type { ShapeCommandReceiver } from "@/protocol/receivers/ShapeCommandReceiver";
+import type { ShapeAttributeSnapshot } from "@/protocol/commands/_common/memento/ShapeAttributeSnapshot";
+import type { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
 export class EditorShapeCommandReceiver implements ShapeCommandReceiver {

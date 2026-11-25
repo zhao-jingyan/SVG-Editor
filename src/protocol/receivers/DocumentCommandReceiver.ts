@@ -1,5 +1,5 @@
-import type { CommandResult } from "../results/CommandResult";
-import type { Shape } from "../shapes/model/Shape";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 
 export interface DocumentCommandReceiver {
   init(width?: number, height?: number): Promise<CommandResult>;

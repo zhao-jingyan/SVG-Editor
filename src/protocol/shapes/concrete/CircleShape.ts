@@ -1,8 +1,8 @@
-import type { EditableAttribute } from "../model/EditableAttribute";
-import { StyledShape } from "../model/StyledShape";
-import { ShapeType } from "../model/ShapeType";
-import { ShapePosition } from "../model/ShapePosition";
-import type { ShapeVisitor } from "../visitor/ShapeVisitor";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import { StyledShape } from "@/protocol/shapes/model/StyledShape";
+import { ShapeType } from "@/protocol/shapes/model/ShapeType";
+import { ShapePosition } from "@/protocol/shapes/model/ShapePosition";
+import type { ShapeVisitor } from "@/protocol/shapes/visitor/ShapeVisitor";
 
 export class CircleShape extends StyledShape {
   private cx: number;

@@ -1,6 +1,6 @@
-import { Command } from "../../../protocol/commands/_common/Command";
-import type { CommandReceiver } from "../../../protocol/receivers/CommandReceiver";
-import type { CommandResult } from "../../../protocol/results/CommandResult";
+import { Command } from "@/protocol/commands/_common/Command";
+import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
+import type { CommandResult } from "@/protocol/results/CommandResult";
 
 export class ReadCommand extends Command {
   public constructor(private readonly path: string) {

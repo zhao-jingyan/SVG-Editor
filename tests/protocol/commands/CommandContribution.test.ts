@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { CommandContribution } from "../../../src/protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "../../../src/protocol/commands/_common/contribution/CommandHelp";
-import { CommandParameters } from "../../../src/protocol/commands/_common/contribution/CommandParameters";
-import { MoveCommand } from "../../../src/builtin/commands/MoveCommand/MoveCommand";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
+import { CommandParameters } from "@/protocol/commands/_common/contribution/CommandParameters";
+import { MoveCommand } from "@/builtin/commands/MoveCommand/MoveCommand";
 
 describe("CommandContribution", () => {
   it("校验名称和 usage 非空", () => {

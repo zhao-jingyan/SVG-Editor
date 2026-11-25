@@ -1,12 +1,12 @@
-import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { ProtocolError } from "../../errors/ProtocolError";
-import { CircleShape } from "../concrete/CircleShape";
-import { EllipseShape } from "../concrete/EllipseShape";
-import { GroupShape } from "../concrete/GroupShape";
-import { LineShape } from "../concrete/LineShape";
-import { RectShape } from "../concrete/RectShape";
-import type { Shape } from "../model/Shape";
-import { TextShape } from "../concrete/TextShape";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
+import { EllipseShape } from "@/protocol/shapes/concrete/EllipseShape";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import { LineShape } from "@/protocol/shapes/concrete/LineShape";
+import { RectShape } from "@/protocol/shapes/concrete/RectShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
+import { TextShape } from "@/protocol/shapes/concrete/TextShape";
 
 export class ShapeFactory {
   public create(typeName: string, id: string, args: readonly string[]): Shape {

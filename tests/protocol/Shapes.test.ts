@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { ErrorSource } from "../../src/protocol/errors/ErrorSource";
-import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { CircleShape } from "../../src/protocol/shapes/concrete/CircleShape";
-import { EllipseShape } from "../../src/protocol/shapes/concrete/EllipseShape";
-import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
-import { LineShape } from "../../src/protocol/shapes/concrete/LineShape";
-import { RectShape } from "../../src/protocol/shapes/concrete/RectShape";
-import { Shape } from "../../src/protocol/shapes/model/Shape";
-import { ShapeFactory } from "../../src/protocol/shapes/factory/ShapeFactory";
-import { ShapeType } from "../../src/protocol/shapes/model/ShapeType";
-import { TextShape } from "../../src/protocol/shapes/concrete/TextShape";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ErrorSource } from "@/protocol/errors/ErrorSource";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
+import { EllipseShape } from "@/protocol/shapes/concrete/EllipseShape";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import { LineShape } from "@/protocol/shapes/concrete/LineShape";
+import { RectShape } from "@/protocol/shapes/concrete/RectShape";
+import { Shape } from "@/protocol/shapes/model/Shape";
+import { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
+import { ShapeType } from "@/protocol/shapes/model/ShapeType";
+import { TextShape } from "@/protocol/shapes/concrete/TextShape";
 
 function expectShapeProtocolError(
   action: () => void,

@@ -1,7 +1,7 @@
-import type { CommandReceiver } from "../../../protocol/receivers/CommandReceiver";
-import type { CommandResult } from "../../../protocol/results/CommandResult";
-import { UndoableCommand } from "../../../protocol/commands/_common/UndoableCommand";
-import type { Shape } from "../../../protocol/shapes/model/Shape";
+import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { UndoableCommand } from "@/protocol/commands/_common/UndoableCommand";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 
 export class CreateCommand extends UndoableCommand {
   public constructor(

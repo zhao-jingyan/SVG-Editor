@@ -1,6 +1,6 @@
 import { MoveCommand } from "./MoveCommand";
-import { CommandContribution } from "../../../protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "../../../protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
 
 export class MoveCommandContribution {
   public static create(): CommandContribution {

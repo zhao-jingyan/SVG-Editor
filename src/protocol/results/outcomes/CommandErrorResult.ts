@@ -1,6 +1,6 @@
-import type { ProtocolError } from "../../errors/ProtocolError";
-import { CommandResult } from "../CommandResult";
-import type { CommandResultDto } from "../dto/CommandResultDto";
+import type { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CommandResult } from "@/protocol/results/CommandResult";
+import type { CommandResultDto } from "@/protocol/results/dto/CommandResultDto";
 
 export class CommandErrorResult extends CommandResult {
   private readonly error: ProtocolError;

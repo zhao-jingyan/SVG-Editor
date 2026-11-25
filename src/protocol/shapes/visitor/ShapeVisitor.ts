@@ -1,9 +1,9 @@
-import type { CircleShape } from "../concrete/CircleShape";
-import type { EllipseShape } from "../concrete/EllipseShape";
-import type { GroupShape } from "../concrete/GroupShape";
-import type { LineShape } from "../concrete/LineShape";
-import type { RectShape } from "../concrete/RectShape";
-import type { TextShape } from "../concrete/TextShape";
+import type { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
+import type { EllipseShape } from "@/protocol/shapes/concrete/EllipseShape";
+import type { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { LineShape } from "@/protocol/shapes/concrete/LineShape";
+import type { RectShape } from "@/protocol/shapes/concrete/RectShape";
+import type { TextShape } from "@/protocol/shapes/concrete/TextShape";
 
 export interface ShapeVisitor<T> {
   visitRect(shape: RectShape): T;

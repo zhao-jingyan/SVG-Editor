@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { EditableAttributeParser } from "../../../../src/builtin/commands/SetCommand/EditableAttributeParser";
-import { CommandErrorCode } from "../../../../src/protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../../../src/protocol/errors/ProtocolError";
+import { EditableAttributeParser } from "@/builtin/commands/SetCommand/EditableAttributeParser";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 
 describe("EditableAttributeParser", () => {
   const parser = new EditableAttributeParser();

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Document } from "../../../src/core/document/Document";
-import { SvgDocumentParser } from "../../../src/core/io/SvgDocumentParser";
-import { SvgDocumentWriter } from "../../../src/core/io/SvgDocumentWriter";
-import { CircleShape } from "../../../src/protocol/shapes/concrete/CircleShape";
-import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
-import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
-import { TextShape } from "../../../src/protocol/shapes/concrete/TextShape";
+import { Document } from "@/core/document/Document";
+import { SvgDocumentParser } from "@/core/io/SvgDocumentParser";
+import { SvgDocumentWriter } from "@/core/io/SvgDocumentWriter";
+import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import { RectShape } from "@/protocol/shapes/concrete/RectShape";
+import { TextShape } from "@/protocol/shapes/concrete/TextShape";
 
 describe("SvgDocumentWriter", () => {
   it("输出标准 SVG、递归 group、样式与转义文本", () => {

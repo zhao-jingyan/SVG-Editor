@@ -1,4 +1,4 @@
-import type { SvgStorage } from "../../src/core/io/SvgStorage";
+import type { SvgStorage } from "@/core/io/SvgStorage";
 
 export class InMemorySvgStorage implements SvgStorage {
   public readonly files: Map<string, string> = new Map<string, string>();

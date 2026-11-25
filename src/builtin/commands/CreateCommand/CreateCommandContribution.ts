@@ -1,8 +1,8 @@
 import { CreateCommand } from "./CreateCommand";
-import { CommandContribution } from "../../../protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "../../../protocol/commands/_common/contribution/CommandHelp";
-import type { CommandParameters } from "../../../protocol/commands/_common/contribution/CommandParameters";
-import type { ShapeFactory } from "../../../protocol/shapes/factory/ShapeFactory";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
+import type { CommandParameters } from "@/protocol/commands/_common/contribution/CommandParameters";
+import type { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
 
 export class CreateCommandContribution {
   public static create(shapeFactory: ShapeFactory): CommandContribution {

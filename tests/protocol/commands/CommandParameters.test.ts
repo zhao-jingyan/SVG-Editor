@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CommandParameters } from "../../../src/protocol/commands/_common/contribution/CommandParameters";
-import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
+import { CommandParameters } from "@/protocol/commands/_common/contribution/CommandParameters";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 
 function createParameters(values: readonly string[]): CommandParameters {
   return new CommandParameters(values, "move <id> <dx> <dy>");

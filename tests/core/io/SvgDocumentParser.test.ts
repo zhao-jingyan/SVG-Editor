@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { SvgDocumentParser } from "../../../src/core/io/SvgDocumentParser";
-import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { ErrorSource } from "../../../src/protocol/errors/ErrorSource";
-import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
-import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
+import { SvgDocumentParser } from "@/core/io/SvgDocumentParser";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ErrorSource } from "@/protocol/errors/ErrorSource";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
 
 function expectDocumentProtocolError(
   action: () => void,

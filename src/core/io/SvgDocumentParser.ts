@@ -1,11 +1,11 @@
 import { XMLParser } from "fast-xml-parser";
-import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
-import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
-import type { Shape } from "../../protocol/shapes/model/Shape";
-import { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
-import { Document } from "../document/Document";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
+import { ShapeFactory } from "@/protocol/shapes/factory/ShapeFactory";
+import { Document } from "@/core/document/Document";
 import { ParsedSvgDocument } from "./ParsedSvgDocument";
 import { SvgShapeIdAllocator } from "./SvgShapeIdAllocator";
 

@@ -1,10 +1,10 @@
-import type { EditableAttribute } from "../../protocol/shapes/model/EditableAttribute";
-import { ShapeAttributeSnapshot } from "../../protocol/commands/_common/memento/ShapeAttributeSnapshot";
-import { ShapePlacement } from "../../protocol/commands/_common/memento/ShapePlacement";
-import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import { GroupShape } from "../../protocol/shapes/concrete/GroupShape";
-import type { Shape } from "../../protocol/shapes/model/Shape";
+import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import { ShapeAttributeSnapshot } from "@/protocol/commands/_common/memento/ShapeAttributeSnapshot";
+import { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
+import type { Shape } from "@/protocol/shapes/model/Shape";
 import { ShapeHierarchy } from "./ShapeHierarchy";
 import { ShapeIndex } from "./ShapeIndex";
 

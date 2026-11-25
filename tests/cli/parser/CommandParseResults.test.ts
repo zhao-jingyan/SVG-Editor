@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { CommandParseEmptyResult } from "../../../src/cli/parser/results/CommandParseEmptyResult";
-import { CommandParseErrorResult } from "../../../src/cli/parser/results/CommandParseErrorResult";
-import { CommandParseResult } from "../../../src/cli/parser/results/CommandParseResult";
-import { CommandParseSuccessResult } from "../../../src/cli/parser/results/CommandParseSuccessResult";
-import { HelpCommand } from "../../../src/builtin/commands/HelpCommand/HelpCommand";
-import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
+import { CommandParseEmptyResult } from "@/cli/parser/results/CommandParseEmptyResult";
+import { CommandParseErrorResult } from "@/cli/parser/results/CommandParseErrorResult";
+import { CommandParseResult } from "@/cli/parser/results/CommandParseResult";
+import { CommandParseSuccessResult } from "@/cli/parser/results/CommandParseSuccessResult";
+import { HelpCommand } from "@/builtin/commands/HelpCommand/HelpCommand";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 
 describe("CommandParseResult 类层次", () => {
   it("具体解析结果共享基类并转换为边界 DTO", () => {

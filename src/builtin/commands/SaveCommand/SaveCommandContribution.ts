@@ -1,6 +1,6 @@
 import { SaveCommand } from "./SaveCommand";
-import { CommandContribution } from "../../../protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "../../../protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
 
 export class SaveCommandContribution {
   public static create(): CommandContribution {

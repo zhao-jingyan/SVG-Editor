@@ -1,8 +1,8 @@
-import { CommandSuccessResult } from "../../../protocol/results/outcomes/CommandSuccessResult";
-import type { ShapePlacement } from "../../../protocol/commands/_common/memento/ShapePlacement";
-import type { CommandReceiver } from "../../../protocol/receivers/CommandReceiver";
-import type { CommandResult } from "../../../protocol/results/CommandResult";
-import { UndoableCommand } from "../../../protocol/commands/_common/UndoableCommand";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import type { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { UndoableCommand } from "@/protocol/commands/_common/UndoableCommand";
 
 export class UngroupCommand extends UndoableCommand {
   private placement?: ShapePlacement;

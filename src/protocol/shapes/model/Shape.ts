@@ -1,8 +1,8 @@
 import type { EditableAttribute } from "./EditableAttribute";
-import { CommandErrorCode } from "../../errors/CommandErrorCode";
-import { ProtocolError } from "../../errors/ProtocolError";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import type { ShapeType } from "./ShapeType";
-import type { ShapeVisitor } from "../visitor/ShapeVisitor";
+import type { ShapeVisitor } from "@/protocol/shapes/visitor/ShapeVisitor";
 import type { ShapePosition } from "./ShapePosition";
 
 export abstract class Shape {

@@ -1,15 +1,15 @@
-import type { DocumentCommandReceiver } from "../../protocol/receivers/DocumentCommandReceiver";
-import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import type { CommandResult } from "../../protocol/results/CommandResult";
-import { CommandSuccessResult } from "../../protocol/results/outcomes/CommandSuccessResult";
-import type { Shape } from "../../protocol/shapes/model/Shape";
-import { Document } from "../document/Document";
-import type { CommandHistory } from "../history/CommandHistory";
-import { FileSvgStorage } from "../io/FileSvgStorage";
-import { SvgDocumentParser } from "../io/SvgDocumentParser";
-import { SvgDocumentWriter } from "../io/SvgDocumentWriter";
-import type { SvgStorage } from "../io/SvgStorage";
+import type { DocumentCommandReceiver } from "@/protocol/receivers/DocumentCommandReceiver";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import type { CommandResult } from "@/protocol/results/CommandResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
+import type { Shape } from "@/protocol/shapes/model/Shape";
+import { Document } from "@/core/document/Document";
+import type { CommandHistory } from "@/core/history/CommandHistory";
+import { FileSvgStorage } from "@/core/io/FileSvgStorage";
+import { SvgDocumentParser } from "@/core/io/SvgDocumentParser";
+import { SvgDocumentWriter } from "@/core/io/SvgDocumentWriter";
+import type { SvgStorage } from "@/core/io/SvgStorage";
 
 export class EditorDocumentCommandReceiver implements DocumentCommandReceiver {
   private document?: Document;

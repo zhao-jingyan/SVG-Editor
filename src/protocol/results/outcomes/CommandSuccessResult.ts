@@ -1,5 +1,5 @@
-import { CommandResult } from "../CommandResult";
-import type { CommandResultDto } from "../dto/CommandResultDto";
+import { CommandResult } from "@/protocol/results/CommandResult";
+import type { CommandResultDto } from "@/protocol/results/dto/CommandResultDto";
 
 export class CommandSuccessResult extends CommandResult {
   private readonly message: string;

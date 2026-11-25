@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CommandHistory } from "../../src/core/history/CommandHistory";
-import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
-import { ProtocolError } from "../../src/protocol/errors/ProtocolError";
-import { CommandErrorResult } from "../../src/protocol/results/outcomes/CommandErrorResult";
-import { CommandExitResult } from "../../src/protocol/results/outcomes/CommandExitResult";
-import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
+import { CommandHistory } from "@/core/history/CommandHistory";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
+import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { CommandErrorResult } from "@/protocol/results/outcomes/CommandErrorResult";
+import { CommandExitResult } from "@/protocol/results/outcomes/CommandExitResult";
+import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
 import { RecordingCommandReceiver } from "../support/RecordingCommandReceiver";
 import { ScriptedUndoableCommand } from "../support/ScriptedUndoableCommand";
 
