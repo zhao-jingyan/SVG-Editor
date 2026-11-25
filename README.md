@@ -4,3 +4,5 @@ SVG 编辑器项目。
 
 业务知识索引见 [`BUSINESS.md`](./BUSINESS.md)。
 交付架构与开发过程说明见 [`doc/README.md`](./doc/README.md)，实现事实与阶段计划见 [`docs/`](./docs/)。
+
+VSCode SVG 文件标记与大纲扩展见 [`vscode-extension/README.md`](./vscode-extension/README.md)。
