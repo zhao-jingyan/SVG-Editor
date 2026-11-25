@@ -6,7 +6,7 @@
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`syntax` 负责切词，`results` 负责解析结果包装。命令目录查询与 Command 创建由注入的 `CommandCatalog` 完成。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
-- `src/protocol` 还存放应用入口端口 `Executor`；具体命令按 `XxxCommand/` 目录组织，同目录放置 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。`src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry` / `BuiltinCommandContributions` 组装入口。`EditorCommandReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
+- `src/protocol` 还存放应用入口端口 `Executor`；内置具体命令按 `builtin/XxxCommand/` 组织，同目录放置 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。`src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry` / `BuiltinCommandContributions` 组装入口。`EditorCommandReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、命令目录、解析器、HelpText、Executor 与 CommandReceiver。
 - `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor、History 与命令目录测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、树形格式和 help 测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次、贡献契约与图形测试。
 
@@ -18,14 +18,10 @@ src/protocol
 │   │   ├── UndoableCommand.ts
 │   │   ├── contribution/
 │   │   └── memento/
-│   ├── MoveCommand/
-│   │   ├── MoveCommand.ts
-│   │   └── MoveCommandContribution.ts
-│   ├── ReorderCommand/
-│   │   ├── ReorderCommand.ts
-│   │   ├── FrontCommandContribution.ts
-│   │   └── BackCommandContribution.ts
-│   └── ...（其余 XxxCommand/）
+│   └── builtin/
+│       ├── MoveCommand/
+│       ├── ReorderCommand/
+│       └── ...（其余内置 XxxCommand/）
 ├── errors
 ├── execution
 │   └── Executor.ts

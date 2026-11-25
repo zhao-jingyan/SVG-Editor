@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CommandContribution } from "../../../src/protocol/commands/_common/contribution/CommandContribution";
 import { CommandHelp } from "../../../src/protocol/commands/_common/contribution/CommandHelp";
 import { CommandParameters } from "../../../src/protocol/commands/_common/contribution/CommandParameters";
-import { MoveCommand } from "../../../src/protocol/commands/MoveCommand/MoveCommand";
+import { MoveCommand } from "../../../src/protocol/commands/builtin/MoveCommand/MoveCommand";
 
 describe("CommandContribution", () => {
   it("校验名称和 usage 非空", () => {

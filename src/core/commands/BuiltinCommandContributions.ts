@@ -1,25 +1,25 @@
 import { CommandContribution } from "../../protocol/commands/_common/contribution/CommandContribution";
 import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
-import { AddToCommandContribution } from "../../protocol/commands/AddToCommand/AddToCommandContribution";
-import { BackCommandContribution } from "../../protocol/commands/ReorderCommand/BackCommandContribution";
-import { CanvasCommandContribution } from "../../protocol/commands/CanvasCommand/CanvasCommandContribution";
-import { CreateCommandContribution } from "../../protocol/commands/CreateCommand/CreateCommandContribution";
-import { DeleteCommandContribution } from "../../protocol/commands/DeleteCommand/DeleteCommandContribution";
-import { ExitCommandContribution } from "../../protocol/commands/ExitCommand/ExitCommandContribution";
-import { FrontCommandContribution } from "../../protocol/commands/ReorderCommand/FrontCommandContribution";
-import { GroupCommandContribution } from "../../protocol/commands/GroupCommand/GroupCommandContribution";
-import { HelpCommandContribution } from "../../protocol/commands/HelpCommand/HelpCommandContribution";
-import { InitCommandContribution } from "../../protocol/commands/InitCommand/InitCommandContribution";
-import { MoveCommandContribution } from "../../protocol/commands/MoveCommand/MoveCommandContribution";
-import { ReadCommandContribution } from "../../protocol/commands/ReadCommand/ReadCommandContribution";
-import { RedoCommandContribution } from "../../protocol/commands/RedoCommand/RedoCommandContribution";
-import { SaveCommandContribution } from "../../protocol/commands/SaveCommand/SaveCommandContribution";
-import { ScaleCommandContribution } from "../../protocol/commands/ScaleCommand/ScaleCommandContribution";
-import { SetCommandContribution } from "../../protocol/commands/SetCommand/SetCommandContribution";
-import { ShowCommandContribution } from "../../protocol/commands/ShowCommand/ShowCommandContribution";
-import { TreeCommandContribution } from "../../protocol/commands/TreeCommand/TreeCommandContribution";
-import { UndoCommandContribution } from "../../protocol/commands/UndoCommand/UndoCommandContribution";
-import { UngroupCommandContribution } from "../../protocol/commands/UngroupCommand/UngroupCommandContribution";
+import { AddToCommandContribution } from "../../protocol/commands/builtin/AddToCommand/AddToCommandContribution";
+import { BackCommandContribution } from "../../protocol/commands/builtin/ReorderCommand/BackCommandContribution";
+import { CanvasCommandContribution } from "../../protocol/commands/builtin/CanvasCommand/CanvasCommandContribution";
+import { CreateCommandContribution } from "../../protocol/commands/builtin/CreateCommand/CreateCommandContribution";
+import { DeleteCommandContribution } from "../../protocol/commands/builtin/DeleteCommand/DeleteCommandContribution";
+import { ExitCommandContribution } from "../../protocol/commands/builtin/ExitCommand/ExitCommandContribution";
+import { FrontCommandContribution } from "../../protocol/commands/builtin/ReorderCommand/FrontCommandContribution";
+import { GroupCommandContribution } from "../../protocol/commands/builtin/GroupCommand/GroupCommandContribution";
+import { HelpCommandContribution } from "../../protocol/commands/builtin/HelpCommand/HelpCommandContribution";
+import { InitCommandContribution } from "../../protocol/commands/builtin/InitCommand/InitCommandContribution";
+import { MoveCommandContribution } from "../../protocol/commands/builtin/MoveCommand/MoveCommandContribution";
+import { ReadCommandContribution } from "../../protocol/commands/builtin/ReadCommand/ReadCommandContribution";
+import { RedoCommandContribution } from "../../protocol/commands/builtin/RedoCommand/RedoCommandContribution";
+import { SaveCommandContribution } from "../../protocol/commands/builtin/SaveCommand/SaveCommandContribution";
+import { ScaleCommandContribution } from "../../protocol/commands/builtin/ScaleCommand/ScaleCommandContribution";
+import { SetCommandContribution } from "../../protocol/commands/builtin/SetCommand/SetCommandContribution";
+import { ShowCommandContribution } from "../../protocol/commands/builtin/ShowCommand/ShowCommandContribution";
+import { TreeCommandContribution } from "../../protocol/commands/builtin/TreeCommand/TreeCommandContribution";
+import { UndoCommandContribution } from "../../protocol/commands/builtin/UndoCommand/UndoCommandContribution";
+import { UngroupCommandContribution } from "../../protocol/commands/builtin/UngroupCommand/UngroupCommandContribution";
 
 /**
  * 按 Phase 1 help 顺序组装全部内置命令贡献。

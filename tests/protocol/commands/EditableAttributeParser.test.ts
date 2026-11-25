@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EditableAttributeParser } from "../../../src/protocol/commands/SetCommand/EditableAttributeParser";
+import { EditableAttributeParser } from "../../../src/protocol/commands/builtin/SetCommand/EditableAttributeParser";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 

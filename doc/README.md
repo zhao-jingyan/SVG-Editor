@@ -53,7 +53,7 @@ src/
 │   │   └── results/                 # 解析结果类层次
 │   └── session/                     # CommandLoop、CommandSession
 ├── protocol/
-│   ├── commands/                    # _common（基类、contribution/、memento/）与 XxxCommand/
+│   ├── commands/                    # _common + builtin/XxxCommand/
 │   ├── receivers/                   # 四类能力接口与聚合接口
 │   ├── execution/                   # Executor 端口
 │   ├── shapes/                      # model / concrete / factory / visitor

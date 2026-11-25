@@ -3,7 +3,7 @@ import { CommandParseEmptyResult } from "../../../src/cli/parser/results/Command
 import { CommandParseErrorResult } from "../../../src/cli/parser/results/CommandParseErrorResult";
 import { CommandParseResult } from "../../../src/cli/parser/results/CommandParseResult";
 import { CommandParseSuccessResult } from "../../../src/cli/parser/results/CommandParseSuccessResult";
-import { HelpCommand } from "../../../src/protocol/commands/HelpCommand/HelpCommand";
+import { HelpCommand } from "../../../src/protocol/commands/builtin/HelpCommand/HelpCommand";
 import { CommandErrorCode } from "../../../src/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../../src/protocol/errors/ProtocolError";
 
