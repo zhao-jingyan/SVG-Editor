@@ -6,31 +6,32 @@ import { RedoCommand } from "../../protocol/commands/history/RedoCommand";
 import { UndoCommand } from "../../protocol/commands/history/UndoCommand";
 import { ExitCommand } from "../../protocol/commands/session/ExitCommand";
 import { AddToCommand } from "../../protocol/commands/shape/AddToCommand";
+import { CreateCommand } from "../../protocol/commands/shape/CreateCommand";
 import { DeleteCommand } from "../../protocol/commands/shape/DeleteCommand";
 import { GroupCommand } from "../../protocol/commands/shape/GroupCommand";
 import { MoveCommand } from "../../protocol/commands/shape/MoveCommand";
 import { ReorderCommand } from "../../protocol/commands/shape/ReorderCommand";
 import { ScaleCommand } from "../../protocol/commands/shape/ScaleCommand";
+import { SetCommand } from "../../protocol/commands/shape/SetCommand";
 import { UngroupCommand } from "../../protocol/commands/shape/UngroupCommand";
 import { HelpCommand } from "../../protocol/commands/view/HelpCommand";
 import { ShowCommand } from "../../protocol/commands/view/ShowCommand";
 import { TreeCommand } from "../../protocol/commands/view/TreeCommand";
 import { CommandContribution } from "../../protocol/contribution/CommandContribution";
 import { CommandHelp } from "../../protocol/contribution/CommandHelp";
+import type { CommandParameters } from "../../protocol/contribution/CommandParameters";
 import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
-import { CreateCommandParser } from "./parsers/CreateCommandParser";
-import { ShapeCommandParser } from "./parsers/ShapeCommandParser";
+import { EditableAttributeParser } from "./EditableAttributeParser";
 
 /**
  * 集中创建 Phase 1 全部内置命令贡献对象。
  */
 export class BuiltinCommandContributions {
+  private readonly attributeParser = new EditableAttributeParser();
+
   public constructor(private readonly shapeFactory: ShapeFactory) {}
 
   public create(): readonly CommandContribution[] {
-    const createParser = new CreateCommandParser(this.shapeFactory);
-    const shapeParser = new ShapeCommandParser();
-
     return [
       new CommandContribution(
         "init",
@@ -95,7 +96,7 @@ export class BuiltinCommandContributions {
           "create <type> <id> [params...]",
           "create a shape",
         ),
-        (parameters) => createParser.parse(parameters),
+        (parameters) => this.parseCreate(parameters),
       ),
       new CommandContribution(
         "delete",
@@ -136,7 +137,18 @@ export class BuiltinCommandContributions {
           "set <id> <attribute> <value>",
           "set a shape attribute",
         ),
-        (parameters) => shapeParser.parseSet(parameters),
+        (parameters) => {
+          parameters.expectLength(3);
+          const shapeId = parameters.text(0, "shape id");
+          const attribute = this.attributeParser.parse(
+            parameters.text(1, "attribute"),
+          );
+          const value = this.attributeParser.isNumeric(attribute)
+            ? parameters.number(2)
+            : parameters.rawText(2, "attribute value");
+
+          return new SetCommand(shapeId, attribute, value);
+        },
       ),
       new CommandContribution(
         "group",
@@ -261,5 +273,36 @@ export class BuiltinCommandContributions {
         },
       ),
     ];
+  }
+
+  private parseCreate(parameters: CommandParameters): CreateCommand {
+    parameters.expectMinimumLength(2);
+
+    const shapeType = parameters.text(0, "shape type");
+    const shapeId = parameters.text(1, "shape id");
+    const parsedArguments = this.parseCreateArguments(parameters);
+    const shape = this.shapeFactory.create(
+      shapeType,
+      shapeId,
+      parsedArguments.values,
+    );
+
+    return new CreateCommand(shape, parsedArguments.parentId);
+  }
+
+  private parseCreateArguments(parameters: CommandParameters): {
+    values: readonly string[];
+    parentId?: string;
+  } {
+    const parentKeywordIndex = parameters.length - 2;
+
+    if (parameters.tokenAt(parentKeywordIndex) !== "in") {
+      return { values: parameters.slice(2) };
+    }
+
+    return {
+      values: parameters.slice(2, parentKeywordIndex),
+      parentId: parameters.text(parentKeywordIndex + 1, "container id"),
+    };
   }
 }

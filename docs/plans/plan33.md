@@ -98,3 +98,9 @@ new CommandContribution(
 
 - `BuiltinCommandContributions` 可以变长；可读性优先于强行保持短文件。若单文件过长，可按语义拆成 `documentContributions.ts` 等组装函数，但仍是“每命令一工厂”，不是族 Parser。
 - `ShapeFactory` 仍由 `BuiltinCommandContributions` 构造器注入，仅 `create` 使用。
+
+## 完成状态
+
+- 两次小提交已落地：简单命令内联后，再内联 create/set 并删除全部族 Parser。
+- `EditableAttributeParser` 仅服务 `set`。
+- `npm test` 与 `npm run build` 通过。

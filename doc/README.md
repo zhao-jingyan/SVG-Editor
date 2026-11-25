@@ -49,14 +49,12 @@ src/
 │   ├── parser/
 │   │   ├── CommandParser.ts
 │   │   ├── CommandLineParser.ts
-│   │   ├── syntax/                  # Tokenizer、参数校验
-│   │   ├── commands/
-│   │   │   ├── definition/          # 命令名注册与定义
-│   │   │   └── CommandsParser/       # doc / shape / view 命令族
+│   │   ├── syntax/                  # Tokenizer
 │   │   └── results/                 # 解析结果类层次
 │   └── session/                     # CommandLoop、CommandSession
 ├── protocol/
 │   ├── commands/                    # 基类、具体命令、Memento
+│   ├── contribution/                # CommandContribution、Catalog、Parameters
 │   ├── receivers/                   # 四类能力接口与聚合接口
 │   ├── execution/                   # Executor 端口
 │   ├── shapes/                      # model / concrete / factory / visitor
@@ -64,6 +62,7 @@ src/
 │   └── errors/                      # 错误模型与 dto
 └── core/
     ├── CommandExecutor.ts
+    ├── commands/                    # Registry、Builtin 贡献、属性校验
     ├── receiver/                    # 聚合门面与三个能力实现
     ├── document/                    # Document、ShapeHierarchy、ShapeIndex
     ├── history/                     # CommandHistory
@@ -95,7 +94,6 @@ stdin
   -> CommandLineTokenizer
   -> CommandCatalog / CommandRegistry
   -> CommandContribution
-  -> Core 命令族 Parser
   -> ShapeFactory（仅 create）
   -> 具体 Command
   -> CommandExecutor
@@ -114,7 +112,7 @@ stdin
 - `CommandLoop` 只负责启动提示、提示符、逐行读取和终止；它不解释解析结果或执行结果。
 - `CommandSession` 负责单次输入的交互策略：空输入不输出，解析错误输出 `error: ...`，成功结果输出消息，退出结果结束会话。
 - `CommandLineParser` 只负责切词、目录查找、`CommandParameters` 创建和解析结果包装；命令名分派集中在 `CommandCatalog` / `CommandRegistry`。
-- Core 命令族 Parser 负责各自参数语义；只有 `CreateCommandParser` 通过 `ShapeFactory` 创建具体图形，其他模块不直接按类型名构造 Shape。
+- 每条内置命令的参数解释落在对应 `CommandContribution` 工厂内；仅 `create` 通过 `ShapeFactory` 创建具体图形。
 - `CommandExecutor` 调用具体 Command，成功且可撤销时立即记录到 `CommandHistory`，再把 `ProtocolError` 转换为错误结果；未知异常继续上抛，由组合根终止进程。
 - `EditorCommandReceiver` 把文档、图形、显示能力委托给三个能力对象，并把 undo/redo 委托给共享 History；它不持有文档状态，历史和当前文档分别由 `CommandHistory` 与 `EditorDocumentCommandReceiver` 管理。
 - 具体命令通过 `CommandReceiver` 操作文档，并通过 `ShapePlacement` / `ShapeAttributeSnapshot` 保存局部逆操作状态。
@@ -149,7 +147,7 @@ Shape
 |---|---|---|---|
 | Command | `Command` / `UndoableCommand`、语义族具体命令、作为 Invoker 的 `CommandExecutor`、作为 Receiver 的 `CommandReceiver` | 把每条 CLI 命令封装为具有身份和行为的对象；执行与撤销都通过命令对象完成 | 命令联合类型 + Executor 大 `switch` 会把分发和业务逻辑糅在一起，不采用 |
 | Composite | `Shape`、`StyledShape`、`GroupShape` 与五种叶子图形 | 容器和叶子统一支持 move、scale、公共样式 set、delete 和显示遍历 | 在命令或 Receiver 中到处判断 `instanceof GroupShape` 会扩散组合知识，不采用 |
-| Factory | `ShapeFactory`，由 `CreateCommandParser` 和 `SvgDocumentParser` 使用 | 集中处理“图形类型名 -> 具体 Shape”，统一参数、文本和样式校验 | 各 Parser 重复按类型名构造会扩散第二处分派，不采用 |
+| Factory | `ShapeFactory`，由 `BuiltinCommandContributions`（create）和 `SvgDocumentParser` 使用 | 集中处理“图形类型名 -> 具体 Shape”，统一参数、文本和样式校验 | 各处重复按类型名构造会扩散第二处分派，不采用 |
 | Visitor | `ShapeVisitor`、各图形的 `accept`；`ShapeSummaryVisitor`、`ShapeDetailVisitor`、`SvgShapeWriter` | tree/show/save 需要按具体类型输出不同内容，但不把显示或 SVG 格式知识放进领域对象 | 在显示和序列化层按 `type` / `instanceof` 分支会增加分派点，不采用 |
 | Memento | `ShapePlacement`、`ShapeAttributeSnapshot`；具体命令创建并在 undo 时恢复 | 保存图形位置、父级、顺序和叶子旧属性，实现局部精确撤销 | 整文档快照会掩盖命令逆操作、增加内存成本，也无法表达恢复前后置条件，不采用 |
 | Facade | `EditorCommandReceiver` 聚合 `EditorDocumentCommandReceiver`、`EditorShapeCommandReceiver`、`EditorViewCommandReceiver` 和共享 History；`Document` 聚合树与索引 | 给具体命令和上层流程提供稳定入口，隐藏能力分发与领域协作细节 | 让 Session 直接持有 Document、History 和 IO 会把应用编排推入 CLI，不采用 |
@@ -188,7 +186,7 @@ src/core -/-> src/cli
 | 图形类型扩展 | `box`、流程图节点、插件提供的复合图形 | `ShapeFactory` 集中创建；`Shape`/`GroupShape` 支持组合与 Visitor | 尚无插件生命周期和第三方注册需求，提前做注册表会引入不稳定接口 |
 | SVG 保真度 | 保留未知元素、注释、`defs`、复杂 `transform`、样式继承 | `SvgStorage`、Parser、Writer 已隔离在 `core/io` | 当前只要求受控子集，复杂 DOM 保真策略尚未确定 |
 | 新入口 | GUI、IPC、Web API、批量脚本 | `Executor`、Receiver、Command、Shape、Result 和 Error 均位于 Protocol | 还没有第二个真实入口，不先造通用应用框架 |
-| 命令扩展 | 新命令或新参数族 | `CommandDefinitionRegistry` 集中注册命令名，`CommandsParser` 按文档、图形、显示族扩展 | 当前命令族清晰，没必要为每个命令再建注册框架 |
+| 命令扩展 | 新命令或新参数族 | `CommandRegistry` 注册 `CommandContribution`；每条命令自带参数工厂与 help | 后续插件可复用 Registry；本轮不引入插件生命周期 |
 | 接收者能力扩展 | 新编辑能力或命令需要不同的查询/快照接口 | `CommandReceiver` 已按文档、图形、显示、历史拆为能力接口，再组合成聚合接口 | 现有四类能力对应真实变化方向，继续细分会制造空接口 |
 | 渲染与预览 | 画布渲染、坐标变换、命中测试 | 领域状态与 CLI 输出解耦 | CLI 阶段没有渲染器需求，不为假设中的 UI 建空抽象 |
 | 持久化格式演进 | 文档版本、迁移、非 SVG 存储 | `SvgStorage` 作为文件边界 | SVG 是当前唯一格式，版本迁移需求尚未出现 |
@@ -225,7 +223,7 @@ src/core -/-> src/cli
 
 - 实际目录与本文档树一致：`main -> cli + core + protocol`，`cli -> protocol`，`core -> protocol`，`protocol` 不反向依赖。
 - 抽样检查未发现 `src/protocol` 导入 `src/cli`、`src/core`、Node 或 DOM，也未发现 `src/core` 导入 `src/cli`。
-- 命令名分派只存在于 `CommandDefinitionRegistry`，按类型名选择具体图形的分派只存在于 `ShapeFactory`；显示和 SVG 写出通过 Visitor 多态完成。
+- 命令名分派只存在于 `CommandCatalog` / `CommandRegistry`，按类型名选择具体图形的分派只存在于 `ShapeFactory`；显示和 SVG 写出通过 Visitor 多态完成。
 - `Command` 的流转方向是 CLI Parser -> Core Executor -> Core Receiver；Protocol 只提供交换对象和端口契约，不参与执行。
 - `CommandExecutor` 是唯一成功命令记录点；`CommandHistory` 是撤销/重做栈和历史锁的唯一所有者；Document 不持有历史。
 - `EditorCommandReceiver` 只做接口聚合和能力委托，当前文档由 `EditorDocumentCommandReceiver` 持有，图形和显示能力通过该对象取得文档。
