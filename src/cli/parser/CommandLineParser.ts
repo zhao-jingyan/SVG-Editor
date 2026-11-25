@@ -1,8 +1,7 @@
 import { CommandErrorCode } from "../../protocol/errors/CommandErrorCode";
 import { ProtocolError } from "../../protocol/errors/ProtocolError";
-import type { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
-import { CommandArguments } from "./syntax/CommandArguments";
-import { CommandDefinitionRegistry } from "./commands/definition/CommandDefinitionRegistry";
+import type { CommandCatalog } from "../../protocol/contribution/CommandCatalog";
+import { CommandParameters } from "../../protocol/contribution/CommandParameters";
 import type { CommandParser } from "./CommandParser";
 import { CommandLineTokenizer } from "./syntax/CommandLineTokenizer";
 import { CommandParseEmptyResult } from "./results/CommandParseEmptyResult";
@@ -11,18 +10,14 @@ import type { CommandParseResult } from "./results/CommandParseResult";
 import { CommandParseSuccessResult } from "./results/CommandParseSuccessResult";
 
 /**
- * CLI 命令解析入口，只负责词法、命令查找和结果包装。
+ * CLI 命令解析入口，只负责词法、目录查询和结果包装。
  */
 export class CommandLineParser implements CommandParser {
-  private readonly definitions: CommandDefinitionRegistry;
-
   public constructor(
-    shapeFactory: ShapeFactory,
+    private readonly catalog: CommandCatalog,
     private readonly tokenizer: CommandLineTokenizer =
       new CommandLineTokenizer(),
-  ) {
-    this.definitions = new CommandDefinitionRegistry(shapeFactory);
-  }
+  ) {}
 
   public parse(line: string): CommandParseResult {
     try {
@@ -33,17 +28,17 @@ export class CommandLineParser implements CommandParser {
       }
 
       const commandName = tokens[0];
-      const definition = this.definitions.find(commandName);
+      const contribution = this.catalog.find(commandName);
 
-      if (definition === undefined) {
+      if (contribution === undefined) {
         throw ProtocolError.commandParse(
           CommandErrorCode.InvalidCommand,
           `unknown command: ${commandName}`,
         );
       }
 
-      const command = definition.parse(
-        new CommandArguments(tokens, definition.usage),
+      const command = contribution.createCommand(
+        new CommandParameters(tokens.slice(1), contribution.getUsage()),
       );
       return new CommandParseSuccessResult(command);
     } catch (error: unknown) {

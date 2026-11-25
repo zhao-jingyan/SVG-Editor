@@ -31,10 +31,10 @@ import { GroupShape } from "../../../src/protocol/shapes/concrete/GroupShape";
 import { LineShape } from "../../../src/protocol/shapes/concrete/LineShape";
 import { RectShape } from "../../../src/protocol/shapes/concrete/RectShape";
 import { Shape } from "../../../src/protocol/shapes/model/Shape";
-import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
 import { TextShape } from "../../../src/protocol/shapes/concrete/TextShape";
 import { CommandExitResult } from "../../../src/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "../../../src/protocol/results/CommandResult";
+import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
 import {
   RecordingCommandReceiver,
   type ReceiverCall,
@@ -43,7 +43,7 @@ import {
 type CommandConstructor = new (...args: any[]) => Command;
 type ShapeConstructor = new (...args: any[]) => Shape;
 
-const parser = new CommandLineParser(new ShapeFactory());
+const parser = new CommandLineParser(createBuiltinCatalog());
 
 function parseCommand(input: string): Command {
   const result = parseDto(input);

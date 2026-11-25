@@ -7,12 +7,12 @@ import { TreeDisplay } from "../display/TreeDisplay";
 import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
 export class EditorViewCommandReceiver implements ViewCommandReceiver {
-  private readonly helpText: HelpText = new HelpText();
   private readonly shapeDetailVisitor: ShapeDetailVisitor = new ShapeDetailVisitor();
   private readonly treeDisplay: TreeDisplay = new TreeDisplay();
 
   public constructor(
     private readonly documentReceiver: EditorDocumentCommandReceiver,
+    private readonly helpText: HelpText,
   ) {}
 
   public async tree(shapeId?: string): Promise<CommandResult> {

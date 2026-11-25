@@ -4,6 +4,10 @@ import type { ShapeAttributeSnapshot } from "../../protocol/commands/memento/Sha
 import type { ShapePlacement } from "../../protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "../../protocol/results/CommandResult";
 import type { Shape } from "../../protocol/shapes/model/Shape";
+import { ShapeFactory } from "../../protocol/shapes/factory/ShapeFactory";
+import { BuiltinCommandContributions } from "../commands/BuiltinCommandContributions";
+import { CommandRegistry } from "../commands/CommandRegistry";
+import { HelpText } from "../display/HelpText";
 import { CommandHistory } from "../history/CommandHistory";
 import { FileSvgStorage } from "../io/FileSvgStorage";
 import type { SvgStorage } from "../io/SvgStorage";
@@ -19,10 +23,22 @@ export class EditorCommandReceiver implements CommandReceiver {
   public constructor(
     private readonly history: CommandHistory = new CommandHistory(),
     svgStorage: SvgStorage = new FileSvgStorage(),
+    helpText: HelpText = EditorCommandReceiver.createDefaultHelpText(),
   ) {
     this.documentReceiver = new EditorDocumentCommandReceiver(history, svgStorage);
     this.shapeReceiver = new EditorShapeCommandReceiver(this.documentReceiver);
-    this.viewReceiver = new EditorViewCommandReceiver(this.documentReceiver);
+    this.viewReceiver = new EditorViewCommandReceiver(
+      this.documentReceiver,
+      helpText,
+    );
+  }
+
+  private static createDefaultHelpText(): HelpText {
+    const registry = new CommandRegistry();
+    registry.registerAll(
+      new BuiltinCommandContributions(new ShapeFactory()).create(),
+    );
+    return new HelpText(registry);
   }
 
   public init(width?: number, height?: number): Promise<CommandResult> {
