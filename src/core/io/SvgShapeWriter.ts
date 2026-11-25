@@ -60,7 +60,14 @@ export class SvgShapeWriter implements ShapeVisitor<string> {
   }
 
   public visitGroup(shape: GroupShape): string {
-    const attributes = this.writeAttributes([["id", shape.getId()]]);
+    const entries: Attribute[] = [["id", shape.getId()]];
+    const dataKind = shape.getDataKind();
+
+    if (dataKind !== undefined) {
+      entries.push(["data-kind", dataKind]);
+    }
+
+    const attributes = this.writeAttributes(entries);
     const children = shape.getChildren();
 
     if (children.length === 0) {

@@ -26,6 +26,16 @@ export class GroupShape extends Shape {
     return undefined;
   }
 
+  /** 普通分组可解散；复合图形（如 box）覆写为 false。 */
+  public canUngroup(): boolean {
+    return true;
+  }
+
+  /** 是否允许移出/删除指定直接子节点；复合图形可保护必要子部件。 */
+  public allowsRemovingChild(_childId: string): boolean {
+    return true;
+  }
+
   public override accept<T>(visitor: ShapeVisitor<T>): T {
     return visitor.visitGroup(this);
   }

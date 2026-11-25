@@ -19,9 +19,7 @@ export class EditorShapeCommandReceiver implements ShapeCommandReceiver {
   ): Promise<CommandResult> {
     this.documentReceiver.requireDocument().addShape(shape, parentId);
     const suffix = parentId === undefined ? "" : ` in g#${parentId}`;
-    return new CommandSuccessResult(
-      `${shape.getType()}#${shape.getId()} created${suffix}`,
-    );
+    return new CommandSuccessResult(`${shape.describeCreated()}${suffix}`);
   }
 
   public async deleteShape(shapeId: string): Promise<CommandResult> {

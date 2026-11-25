@@ -230,6 +230,13 @@ export class ShapeHierarchy {
       );
     }
 
+    if (!container.canUngroup()) {
+      throw ProtocolError.document(
+        CommandErrorCode.InvalidArgument,
+        `cannot ungroup composite shape: ${containerId}`,
+      );
+    }
+
     const parent = this.shapeIndex.getParent(containerId);
 
     if (parent === undefined) {
@@ -560,9 +567,17 @@ export class ShapeHierarchy {
     if (parent === undefined) {
       const index = this.rootShapes.indexOf(shape);
       this.rootShapes.splice(index, 1);
-    } else {
-      parent.removeChild(shapeId);
+      return;
     }
+
+    if (!parent.allowsRemovingChild(shapeId)) {
+      throw ProtocolError.document(
+        CommandErrorCode.InvalidArgument,
+        `cannot modify composite shape structure: ${shapeId}`,
+      );
+    }
+
+    parent.removeChild(shapeId);
   }
 
   private groupDescendantError(containerId: string): ProtocolError {

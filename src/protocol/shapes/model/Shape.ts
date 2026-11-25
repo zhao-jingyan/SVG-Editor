@@ -25,6 +25,16 @@ export abstract class Shape {
   /** 类型名字符串；内置取值见 ShapeType 常量。 */
   public abstract getType(): string;
 
+  /** SVG 写出用的 data-kind；普通图形为 undefined。 */
+  public getDataKind(): string | undefined {
+    return undefined;
+  }
+
+  /** 创建成功时的反馈文案（不含 in 尾缀）。 */
+  public describeCreated(): string {
+    return `${this.getType()}#${this.getId()} created`;
+  }
+
   public abstract getPosition(): ShapePosition | undefined;
 
   public abstract accept<T>(visitor: ShapeVisitor<T>): T;

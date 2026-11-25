@@ -15,7 +15,7 @@ export class GroupShapeContribution {
     return new ShapeContribution(
       ShapeType.Group,
       create,
-      (tag, dataKind) => tag === ShapeType.Group && dataKind === undefined,
+      (tag) => tag === ShapeType.Group,
       (input) => {
         const group = create(input.getId(), []);
         for (const child of input.getChildren()) {
