@@ -1,0 +1,9 @@
+# stats / dir / 标签会话
+# dir 的工作目录由 verify 脚本注入为固定临时目录
+init 200 100
+create rect r1 0 0 10 10
+create box b1 10 10 40 20 "x"
+stats
+tree
+dir
+exit

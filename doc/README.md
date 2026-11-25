@@ -2,7 +2,9 @@
 
 ## 1. 项目范围
 
-本项目发布版本为 `1.0.0`，实现一个面向 SVG 图形文档的命令行编辑器。当前阶段覆盖：
+本项目实现面向 SVG 图形文档的命令行编辑器。
+
+**Phase 1（tag `final`，版本 `1.0.0`）**
 
 - `init` / `read` / `save` / `canvas` 文档命令；
 - `create` / `delete` / `move` / `scale` / `set` / `group` / `ungroup` / `addto` / `front` / `back` 编辑命令；
@@ -11,9 +13,14 @@
 - `rect`、`circle`、`ellipse`、`line`、`text`、`g` 六种图形及嵌套容器；
 - SVG 子集读写、缺失 id 自动分配与 IO 后的历史锁。
 
-CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要或 `error:` 消息。图形统一以 `id` 定位，容器与叶子图形共享 `move`、`scale`、`set`、`delete` 等编辑语义。
+**Phase 2（交付完成后打 tag `p2`，当前未打）**
 
-本阶段暂不实现 `box` 插件、ShapeProvider 注册表、复杂 SVG 特性（`defs`、外部引用、复杂 `transform` 等）、GUI 或渲染器。架构重构已在行为基线完成后持续进行；`1.0.0` 作为本阶段交付版本，`final` tag 指向对应发布提交。
+- 四个扩展点：`ShapeContribution`（角色名 ShapeProvider）、`CommandContribution`、`AttributeHandler`、`TreeDecorator`；
+- 命令插件 `stats` / `dir`；图形插件 `box`；树标签 `(box)` 与 `modified-star`；
+- 方式 A（代码装配）与方式 B（`plugins.config.json` + `--config`）共用 `PluginHost` 注册路径；
+- VSCode 扩展：Explorer `[]` 标记与 Outline 大纲（见第 10 节）。
+
+CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要或 `error:` 消息。暂不实现复杂 SVG 特性（`defs`、外部引用、复杂 `transform` 等）或独立 GUI 渲染器。
 
 ## 2. 模块划分与职责
 
@@ -21,61 +28,41 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 
 | 模块 | 职责 | 依赖边界 |
 |---|---|---|
-| `src/main.ts` | 组合根；创建 I/O 适配器、Parser、Session、Executor、Receiver、History，并注册 Command/Shape 贡献 | 可以依赖 `cli`、`core`、`protocol`、`_builtin`、`_plugin` |
-| `src/cli/io` | `InputReader` / `OutputWriter` 端口及控制台适配器，仅处理标准输入输出 | 可以使用 Node `readline`；不依赖 Parser、Session 或 Core |
-| `src/cli/parser` | 文本切词、参数校验、命令定义注册、按命令族构造具体 Command，以及解析结果模型 | 仅依赖自身子模块和 `protocol` |
-| `src/cli/session` | REPL 生命周期和单次输入处理；把空输入、解析结果、执行结果和退出状态转换为交互反馈 | 依赖 `cli/io` 端口、`CommandParser` 接口和 `protocol` 的 `Executor` 端口 |
-| `src/protocol/commands` | 定义 CLI Parser 产出、Core Executor / Receiver 消费的命令对象，以及撤销所需的局部快照；它不是独立执行层 | 可以依赖 Protocol 内的 receivers、shapes、results、errors |
-| `src/protocol/receivers` | 文档、图形、显示、历史四个命令接收能力接口及聚合 `CommandReceiver` | 仅依赖 Protocol 内的命令快照、图形、结果模型 |
-| `src/protocol/execution` | `Executor` 命令执行端口，隔离 CLI Session 与 Core 实现 | 仅依赖 Protocol 的命令与结果模型 |
-| `src/protocol/shapes` | 图形类层次、图形类型与属性值对象、`ShapeContribution` 契约和 Visitor 扩展点 | 仅依赖 Protocol 内的错误模型 |
-| `src/protocol/results` | 运行时命令结果类层次及边界 `CommandResultDto` | 可以依赖 Protocol 命令与错误模型 |
-| `src/protocol/errors` | `ProtocolError`、错误来源、错误码和边界 `CommandErrorDto` | 仅依赖标准 TypeScript 能力 |
-| `src/core/CommandExecutor.ts` | 实现执行端口，调用命令、记录成功命令并转换协议错误 | 依赖 Protocol 端口/模型和 Core History |
-| `src/core/receiver` | 聚合 Receiver 门面及文档、图形、显示三个能力实现，持有当前文档上下文并协作 | 依赖 Protocol Receiver 契约及 Core 的 document、history、display、io |
-| `src/core/document` | `Document` 聚合根，以及树结构 `ShapeHierarchy` 与身份索引 `ShapeIndex` | 依赖 Protocol 图形、快照和错误模型 |
-| `src/core/history` | undo/redo 双栈与历史锁，只保存 `UndoableCommand` | 依赖 Protocol Receiver 契约及命令、错误、结果模型 |
-| `src/core/display` | tree/show/help 的格式化与 Visitor 实现 | 依赖 Protocol 图形模型和 Core Document |
-| `src/core/io` | SVG 文件端口、文本解析、写出、id 分配和 XML 转义 | 依赖 Protocol 图形模型和 Core Document；文件适配器可使用 Node `fs/promises` |
-| `scripts` / `tests` | 黑盒回归、单元测试、协作测试和进程级 E2E | 按测试对象依赖公开接口，测试支持代码集中放在 `tests/support` |
+| `src/main.ts` | 组合根；组装 CLI/Core，选择方式 A/B 装入插件，注册内置贡献 | 可依赖 `cli`、`core`、`host`、`protocol`、`_builtin`、`_plugin` |
+| `src/host` | 插件宿主与配置加载：`PluginHost`、`loadPluginsFromConfig`、方式 A `activateDefaultPlugins` | 依赖 `protocol` + `core` 注册表；方式 A 可依赖 `_plugin`；加载器不硬编码插件 |
+| `src/cli/io` | `InputReader` / `OutputWriter` 端口及控制台适配器 | 可用 Node `readline`；不依赖 Parser/Session/Core |
+| `src/cli/parser` | 切词、参数校验、按 `CommandCatalog` 构造 Command | 仅依赖自身与 `protocol` |
+| `src/cli/session` | REPL 与单次输入反馈 | 依赖 `cli/io`、`CommandParser`、`Executor` |
+| `src/protocol` | 命令/图形/结果/错误、扩展点契约（Contribution、AttributeHandler、TreeDecorator、SvgPlugin） | 不依赖 `cli`/`core`/`host`/插件/Node/DOM |
+| `src/core` | Executor、Receiver、Document、History、Display、SVG IO、各 Registry | 只依赖 `protocol` |
+| `src/_builtin` | Phase 1 内置命令与六种图形贡献 | 只依赖 `protocol` |
+| `src/_plugin` | 可选插件：stats、dir、box、树标签 | 只依赖 `protocol`（允许 `node:` 适配器） |
+| `scripts` / `tests` | 回归、metrics、双装配校验、E2E | 按对象依赖公开接口 |
 
 实际目录结构如下。README、业务文档和实践说明随模块下沉，避免把全部知识堆在仓库根目录。
 
 ```text
 src/
 ├── main.ts
-├── cli/
-│   ├── io/                          # 输入输出端口与控制台适配器
-│   ├── parser/
-│   │   ├── CommandParser.ts
-│   │   ├── CommandLineParser.ts
-│   │   ├── syntax/                  # Tokenizer
-│   │   └── results/                 # 解析结果类层次
-│   └── session/                     # CommandLoop、CommandSession
-├── protocol/
-│   ├── commands/                    # Command / UndoableCommand / contribution / memento
-│   ├── receivers/                   # 四类能力接口与聚合接口
-│   ├── execution/                   # Executor 端口
-│   ├── shapes/                      # model / concrete / contribution / visitor
-│   ├── results/                     # outcomes / dto
-│   └── errors/                      # 错误模型与 dto
-└── core/
-    ├── CommandExecutor.ts
-    ├── commands/                    # Registry、Builtin 组装入口
-    ├── receiver/                    # 聚合门面与三个能力实现
-    ├── document/                    # Document、ShapeHierarchy、ShapeIndex
-    ├── history/                     # CommandHistory
-    ├── display/                     # 显示 Visitor、TreeDisplay、HelpText
-    └── io/                          # SVG Storage、Parser、Writer、辅助对象
+├── host/                            # 插件宿主、配置加载、方式 A 装配
+├── cli/                             # I/O · Parser · Session
+├── protocol/                        # 契约与扩展点（含 attributes / tree / plugins）
+├── core/                            # Executor · Receiver · Registries · IO
+├── _builtin/                        # Phase 1 内置命令/图形贡献
+└── _plugin/                         # stats · dir · box · tree 标签插件
 ```
 
 ### 2.2 分层包图
 
+**Phase 1（`final`）**
+
 ![SVG Editor CLI 分层架构](./architecture.png)
 
-图中只保留包级依赖，模块内部对象已经在 2.1 的模块表中列出。`Protocol` 是 CLI 与 Core 共享的交换契约，不是第三个执行层：CLI 与 Core 都依赖它，它不反向依赖二者。为避免不必要的视觉噪声，组合根注册 `ShapeContribution` 的细节不单独画线。
+源文件：[`architecture.puml`](./architecture.puml)。`Protocol` 是 CLI 与 Core 的交换契约，不是第三执行层。
 
-图片由 [`architecture.puml`](./architecture.puml) 预渲染生成，Markdown 查看器不需要安装 PlantUML 插件；修改架构后应同步更新源文件并重新生成 PNG。
+**Phase 2**
+
+源文件：[`architecture-phase2.puml`](./architecture-phase2.puml)（增加 `host`、`_builtin`、`_plugin`）。本地可用 PlantUML 渲染 PNG；未预渲染时以 `.puml` 为准。
 
 ### 2.3 命令交换与执行链路
 
@@ -151,44 +138,40 @@ Shape
 | Memento | `ShapePlacement`、`ShapeAttributeSnapshot`；具体命令创建并在 undo 时恢复 | 保存图形位置、父级、顺序和叶子旧属性，实现局部精确撤销 | 整文档快照会掩盖命令逆操作、增加内存成本，也无法表达恢复前后置条件，不采用 |
 | Facade | `EditorCommandReceiver` 聚合 `EditorDocumentCommandReceiver`、`EditorShapeCommandReceiver`、`EditorViewCommandReceiver` 和共享 History；`Document` 聚合树与索引 | 给具体命令和上层流程提供稳定入口，隐藏能力分发与领域协作细节 | 让 Session 直接持有 Document、History 和 IO 会把应用编排推入 CLI，不采用 |
 | Caretaker | `CommandHistory` | 管理 undo/redo 两栈和历史锁，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
-| Adapter / Port | `Executor`、`CommandReceiver`、`InputReader` / `OutputWriter`、`SvgStorage` 及各自生产适配器 | 隔离 CLI、Core、标准输入输出和文件系统，使组合根可替换具体实现 | 层与层直接依赖具体类会破坏依赖方向，也降低测试可控性，不采用 |
+| Adapter / Port | `Executor`、`CommandReceiver`、`InputReader` / `OutputWriter`、`SvgStorage`、`DirectoryListing` + `NodeDirectoryListing` | 隔离 CLI、Core、终端、文件与目录访问 | 层直接依赖具体类会破坏依赖方向，不采用 |
+| Plugin Host | `SvgPlugin`、`PluginContext`、`PluginHost`、配置加载器 | 统一 A/B 装入、清单校验与失败回滚 | 在 main 里直接 `register` 绕过校验会破坏双装配一致性，不采用 |
 
-按名字分派只保留两个集中位置：`CommandCatalog` / `CommandRegistry` 负责“命令名 -> CommandContribution”，`ShapeCatalog` / `ShapeRegistry` 负责“图形类型名 -> ShapeContribution”。后续插件直接注册贡献。`GroupShape` 还会由 Document 的 group 领域操作直接创建，但这不是按文本类型名分派。`ShapeVisitor` 是领域内的多态访问机制，不属于字符串类型分派。Phase 2 角色名 `ShapeProvider` 对应 `ShapeContribution`。
+按名字分派集中在 Registry：命令名、图形类型名、属性处理器名、树装饰器名。Phase 2 角色名 `ShapeProvider` 对应 `ShapeContribution`。
 
 ## 4. 依赖方向与理由
 
 ```text
-src/main.ts -> src/cli
-src/main.ts -> src/core
-src/main.ts -> src/protocol
-src/cli -> src/protocol
-src/core -> src/protocol
-src/protocol -/-> src/cli
-src/protocol -/-> src/core
-src/core -/-> src/cli
+main -> cli + core + host + _builtin + _plugin
+host -> protocol + core   （方式 A 装配可再依赖 _plugin）
+cli  -> protocol
+core -> protocol
+_builtin -> protocol
+_plugin  -> protocol
+protocol -/-> cli | core | host | _builtin | _plugin | Node | DOM
 ```
 
 理由：
 
-- `protocol` 是 CLI 与 Core 共同交换对象的定义，包含 Command、Shape、Receiver 能力、Result/Error 和 `Executor` 端口。CLI 因此不需要依赖 Core 的具体执行器，Command 也不构成第三层。
-- `cli/parser` 只向 `protocol` 输出具体 Command 和错误；`cli/session` 只依赖 Parser 接口与 Executor 端口，不接触 Document 或文件系统。
-- `cli/io` 与 `core/io` 分别隔离终端和文件/XML 运行时细节：只有 `ConsoleInputReader` 使用 Node `readline`，只有 `FileSvgStorage` 使用 Node `fs/promises`，`SvgDocumentParser` 使用 `fast-xml-parser`。
-- `core/receiver` 通过 Protocol 的四个能力接口实现聚合 Receiver，再组合 Document、History、Display、SVG IO 等 Core 协作对象。Core 可以依赖 Protocol，但不能反向依赖 CLI。
-- `CommandExecutor` 与 `EditorCommandReceiver` 共享组合根注入的同一个 `CommandHistory`；命令栈由 History 排他持有，Receiver 不保存历史集合。
-- `main.ts` 是唯一同时知道所有具体实现并完成装配的组合根。替换终端、存储或执行入口时，下层接口保持不变。
-- `protocol` 不依赖 Node、DOM、`cli` 或 `core`，使未来 GUI、IPC 或测试入口可以复用同一套命令、图形和结果模型。
+- `protocol` 持有交换对象与扩展点契约；实现落在 `_builtin` / `_plugin`，运行时注册表在 `core`。
+- `host` 负责装入与清单校验，不属于内核；加载器按模块字符串解析，不 import 具体插件包。
+- `cli` / `core` 仍单向依赖 `protocol`；插件不得依赖 `core` / `host` / `_builtin` 内部。
+- `main.ts` 是组合根：内置叶子 → 插件 activate → 内置 `g`（保证 box 认领 `data-kind`）。
 
 ## 5. 未来变化点与预留方式
 
-| 变化点 | 可能的变化 | 当前预留 | 暂不抽象的原因 |
-|---|---|---|---|
-| 图形类型扩展 | `box`、流程图节点、插件提供的复合图形 | `ShapeContribution` 注册；`Shape`/`GroupShape` 支持组合与 Visitor | plan39 落地 box；配置装配见后续方式 B |
-| SVG 保真度 | 保留未知元素、注释、`defs`、复杂 `transform`、样式继承 | `SvgStorage`、Parser、Writer 已隔离在 `core/io` | 当前只要求受控子集，复杂 DOM 保真策略尚未确定 |
-| 新入口 | GUI、IPC、Web API、批量脚本 | `Executor`、Receiver、Command、Shape、Result 和 Error 均位于 Protocol | 还没有第二个真实入口，不先造通用应用框架 |
-| 命令扩展 | 新命令或新参数族 | `CommandRegistry` 注册 `CommandContribution`；每条命令自带参数工厂与 help | 后续插件可复用 Registry；本轮不引入插件生命周期 |
-| 接收者能力扩展 | 新编辑能力或命令需要不同的查询/快照接口 | `CommandReceiver` 已按文档、图形、显示、历史拆为能力接口，再组合成聚合接口 | 现有四类能力对应真实变化方向，继续细分会制造空接口 |
-| 渲染与预览 | 画布渲染、坐标变换、命中测试 | 领域状态与 CLI 输出解耦 | CLI 阶段没有渲染器需求，不为假设中的 UI 建空抽象 |
-| 持久化格式演进 | 文档版本、迁移、非 SVG 存储 | `SvgStorage` 作为文件边界 | SVG 是当前唯一格式，版本迁移需求尚未出现 |
+| 变化点 | 状态 / 预留 |
+|---|---|
+| 图形类型扩展 | **已落地** `ShapeContribution` + `box`；可继续加 diamond/arrow 等插件 |
+| 命令扩展 | **已落地** `CommandContribution` + `stats`/`dir` + PluginHost |
+| 属性语义扩展 | **已落地** `AttributeHandler` |
+| 树行标签 | **已落地** `TreeDecorator` |
+| 配置装配 | **已落地** 方式 B（`plugins.config.json`） |
+| SVG 保真度 / 新入口 / 渲染 | 仍隔离在 IO 与 Protocol，本阶段不扩展 |
 
 ## 6. 过程记录
 
@@ -220,36 +203,95 @@ src/core -/-> src/cli
 
 ## 7. 一致性自查
 
-- 实际目录与本文档树一致：`main -> cli + core + protocol`，`cli -> protocol`，`core -> protocol`，`protocol` 不反向依赖。
-- 抽样检查未发现 `src/protocol` 导入 `src/cli`、`src/core`、Node 或 DOM，也未发现 `src/core` 导入 `src/cli`。
-- 命令名分派只存在于 `CommandCatalog` / `CommandRegistry`，按类型名选择具体图形的分派只存在于 `ShapeCatalog` / `ShapeRegistry`；显示和 SVG 写出通过 Visitor 多态完成。
-- `Command` 的流转方向是 CLI Parser -> Core Executor -> Core Receiver；Protocol 只提供交换对象和端口契约，不参与执行。
-- `CommandExecutor` 是唯一成功命令记录点；`CommandHistory` 是撤销/重做栈和历史锁的唯一所有者；Document 不持有历史。
-- `EditorCommandReceiver` 只做接口聚合和能力委托，当前文档由 `EditorDocumentCommandReceiver` 持有，图形和显示能力通过该对象取得文档。
-- 组件图、执行链路、设计模式参与者和模块目录均按当前源码核对；`docs/facts/` 记录局部实现事实，`docs/plans/` 记录阶段计划。
-- `1.0.0` 发布提交已通过本文件、事实文档、依赖方向和 E2E 回归核对，并由 `final` tag 标记。
+- 依赖：`main -> cli + core + host + _builtin + _plugin`；`host/cli/core/_builtin/_plugin -> protocol`；`protocol` 不反向依赖。
+- `npm run lint` 检查 `_builtin` / `_plugin` 分层导入。
+- 扩展点调用只经 Catalog/Registry；显示与 SVG 写出经 Visitor。
+- `CommandExecutor` 是成功命令入栈点；`CommandHistory` 独占撤销栈与历史锁。
+- Phase 1 行为由 `final` 标记；Phase 2 文档与校验就绪后再打 `p2`（见 metrics 与双装配校验）。
 
 ## 8. 质量保证
-
-本地验证命令：
 
 ```bash
 npm test
 npm run build
+npm run lint
 npm run test:e2e
 npm run e2e
+npm run metrics
+npm run verify:dual-assembly
 ```
 
-覆盖内容：
+覆盖：Protocol/Document/History/CLI、插件单测（含 `dir` 替身与真实 FS）、加载器失败路径与回滚、进程级 A/B 一致性、黑盒 E2E。
 
-- Protocol：命令类层次、图形多态行为、属性白名单、工厂校验、结果与错误转换。
-- Document：指定索引插入、跨父级恢复、group/ungroup 恢复、空/单子节点容器、非法索引、祖先冲突与失败原子性。
-- History 与 Receiver：成功入栈、失败不入栈、undo/redo、空历史、no-document、历史锁、能力委托和 `ProtocolError` 映射。
-- CLI：Tokenizer 的引号感知切词、参数元数与类型校验、命令注册与命令族解析、解析结果类层次、Session 反馈策略和 Loop 生命周期。
-- 装配链路：真实 Parser / EditorCommandReceiver / CommandExecutor 的组合测试，以及进程级测试覆盖命令序列与输出。
-- SVG IO：解析、元素计数、缺 id 补充、序列化 round-trip、文件错误与 IO 历史锁。
-- 黑盒 E2E：`npm run e2e` 构建真实产物后，通过 stdin 运行完整编辑闭环、显示、保存、读入、默认 save 与历史锁，并检查生成文件内容。
+---
 
-`npm run e2e` 使用临时目录并在结束时清理，不依赖仓库内残留文件。它适合在架构重构、命令反馈调整或 IO 行为变化后快速回归关键用户路径。
+## 9. Phase 2 扩展点清单
 
-这些验证共同构成代码质量的证据链：单元测试与协作测试约束对象行为和边界规则，进程级测试验证 CLI 装配，黑盒 E2E 验证真实构建产物上的完整用户路径。因此，目录、命名、依赖或职责调整后，只要相关回归全部通过，就可以有依据地判断重构没有改变已经交付的行为；若测试失败，则以原有行为为准修正重构，而不是修改预期掩盖回归。
+| 扩展点（角色名） | 接口 / 抽象类 | 职责 | 内核调用位置 | 已有实现 | 禁用可选扩展时 | 违约时报错 |
+|---|---|---|---|---|---|---|
+| ShapeProvider | `ShapeContribution` + `ShapeCatalog` | 按类型名创建；按 tag/`data-kind` 读回 | `CreateCommandContribution` 工厂；`SvgDocumentParser` → `ShapeRegistry.find` / `findForSvg` | `_builtin` 六种；`_plugin` `box` | 仅六种内置；带 `data-kind=box` 的 g 降级为普通 `GroupShape` | 未知类型：create/parse 报错；重复类型名：`duplicate shape type` |
+| Command | `CommandContribution` + `CommandCatalog` | 命令名、help、参数→Command | `CommandLineParser` → `CommandRegistry.find` | Phase 1 内置；`stats`、`dir` | help/执行无插件命令；未知命令 `error: unknown command` | 重复名：`duplicate command` / `duplicate registration: commands/…` |
+| AttributeHandler | `AttributeHandler` + `AttributeCatalog` | 图形+属性领域语义 | `EditorShapeCommandReceiver.setAttribute` / 撤销恢复 → `AttributeRegistry.find` | `BoxAttributeHandler`（`fill`/`label`） | 仅 Phase 1 白名单；`label` 等扩展属性执行期失败 | 多处理器命中：ambiguous；注册重名：`duplicate attribute handler` |
+| TreeDecorator | `TreeDecorator` + `TreeDecoratorCatalog` | tree 行尾标签；IO 后同步基线 | `TreeDisplay` 拼接；`EditorDocumentCommandReceiver.syncTreeDecorators` | `box-type-label`、`modified-star` | tree 输出与 Phase 1 逐字节一致 | 注册重名：`duplicate tree decorator` |
+
+插件以类实现扩展点，经 `SvgPlugin.activate(PluginContext)` 注册；不得依赖 `core`/`host` 内部。
+
+## 10. 两种装配方式与配置格式
+
+**共用路径**：`PluginHost.activate`（暂存 → `contributes` 集合校验 → commit）。
+
+**方式 A（改代码）** — 默认启动：
+
+```ts
+// src/host/activateDefaultPlugins.ts
+await host.activate(new StatsCommandPlugin(), PluginContributes.of({ commands: ["stats"] }));
+// … dir、box、modified-star
+```
+
+**方式 B（改配置）**：
+
+```bash
+node dist/main.js --config plugins.config.json
+```
+
+```json
+{
+  "plugins": [
+    { "module": "./dist/_plugin/commands/StatsCommand" },
+    { "module": "./dist/_plugin/commands/DirCommand" },
+    { "module": "./dist/_plugin/shapes/BoxShape" },
+    { "module": "./dist/_plugin/tree/ModifiedStarPlugin" }
+  ]
+}
+```
+
+- `enabled: false` 跳过；`options` 经 `PluginContext.getOptions()` 传入（如 dir 的 `directoryPath`）。
+- 相对 `module` 以配置文件目录为基准；`package.json` 的 `contributes` 提供 `shapes`/`commands`/`attributes`/`decorators` 名称列表。
+- 失败输出：`plugin not found` / `no default export` / `manifest mismatch` / `failed to activate` / `duplicate registration` / `invalid plugin config`；失败插件回滚，主程序继续。
+
+证明材料：`docs/facts/dual-assembly-proof.md`；自动化 `npm run verify:dual-assembly`；transcript 在 `doc/transcript/`。
+
+## 11. `dir` 与目录访问适配器
+
+- 端口：`protocol/io/DirectoryListing`（只描述列出目录条目）。
+- 适配器：`_plugin/commands/DirCommand/NodeDirectoryListing`（Node `fs`）。
+- `DirCommand` 只依赖端口；测试可注入替身。真实 FS 与替身测试见 `tests/_plugin/commands/DirCommand/`。
+
+这是 Adapter：插件命令面向稳定端口，文件系统细节留在适配器。
+
+## 12. ADR 与指标
+
+- ADR：[`docs/adr/`](../docs/adr/)（属性契约、box 降级、dirty 语义、清单校验时机）。
+- Metrics：`npm run metrics` → [`docs/metrics/summary.md`](../docs/metrics/summary.md)（相对 `final` 的内核/装配/插件行数与复杂度增量，脚本生成、禁止手填）。
+
+## 13. VSCode 扩展（第一部分）
+
+源码：`vscode-extension/`。
+
+- A.1 Explorer 中 `.svg` 旁 `[]` 标记（不改文件名）。
+- A.2 原生 Outline 嵌套层级、定位与编辑更新；不完整 XML 不崩溃。
+- A.3 分析：[`docs/pj1-phase2-2/vscode-extension/analysis.md`](../docs/pj1-phase2-2/vscode-extension/analysis.md)；效果图：`outline-and-badge.png`。
+
+安装/调试见 `vscode-extension/README.md`（F5 启动 Extension Development Host）。
+
+与 CLI 复用结论见 A.3：Outline 解析与 CLI 的 SVG 子集模型目标不同，本阶段未强行共用 Phase 1 Parser，而以轻量 Outline 解析 + Visitor 产出 `DocumentSymbol`。

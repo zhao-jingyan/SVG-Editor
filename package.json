@@ -13,7 +13,9 @@
     "lint": "node scripts/lint-layer-boundaries.mjs",
     "test": "vitest run",
     "test:e2e": "npm run build && vitest run tests/e2e",
-    "e2e": "node scripts/e2e.mjs"
+    "e2e": "node scripts/e2e.mjs",
+    "metrics": "node scripts/generate-metrics.mjs",
+    "verify:dual-assembly": "node scripts/verify-dual-assembly.mjs"
   },
   "keywords": [],
   "author": "",

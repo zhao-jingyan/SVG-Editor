@@ -1,0 +1,1364 @@
+{
+  "generatedAt": "2026-11-25T17:14:46.987Z",
+  "baseRef": "final",
+  "headRef": "HEAD",
+  "classification": {
+    "kernel": "src/protocol, src/core, src/cli, src/_builtin",
+    "assembly": "src/main.ts, src/host",
+    "plugin": "src/_plugin"
+  },
+  "note": "VSCode 扩展不计入本 CLI metrics；依赖包与 dist 排除。圈复杂度为脚本估计值，非工具厂商标准实现。",
+  "base": {
+    "kernel": {
+      "lines": 5055,
+      "complexity": 526,
+      "files": [
+        {
+          "path": "src/cli/io/ConsoleInputReader.ts",
+          "lines": 67,
+          "complexity": 6
+        },
+        {
+          "path": "src/cli/io/ConsoleOutputWriter.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/io/InputReader.ts",
+          "lines": 4,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/io/OutputWriter.ts",
+          "lines": 5,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/CommandLineParser.ts",
+          "lines": 58,
+          "complexity": 5
+        },
+        {
+          "path": "src/cli/parser/CommandParser.ts",
+          "lines": 9,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/commands/CommandsParser/doc/DocumentCommandParser.ts",
+          "lines": 45,
+          "complexity": 4
+        },
+        {
+          "path": "src/cli/parser/commands/CommandsParser/shape/CreateCommandParser.ts",
+          "lines": 42,
+          "complexity": 3
+        },
+        {
+          "path": "src/cli/parser/commands/CommandsParser/shape/ShapeCommandParser.ts",
+          "lines": 133,
+          "complexity": 4
+        },
+        {
+          "path": "src/cli/parser/commands/CommandsParser/view/ViewCommandParser.ts",
+          "lines": 47,
+          "complexity": 2
+        },
+        {
+          "path": "src/cli/parser/commands/definition/CommandDefinition.ts",
+          "lines": 8,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/commands/definition/CommandDefinitionRegistry.ts",
+          "lines": 98,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseEmptyResult.ts",
+          "lines": 11,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseErrorResult.ts",
+          "lines": 19,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseResult.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseSuccessResult.ts",
+          "lines": 19,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/syntax/CommandArguments.ts",
+          "lines": 106,
+          "complexity": 10
+        },
+        {
+          "path": "src/cli/parser/syntax/CommandLineTokenizer.ts",
+          "lines": 58,
+          "complexity": 10
+        },
+        {
+          "path": "src/cli/session/CommandLoop.ts",
+          "lines": 40,
+          "complexity": 7
+        },
+        {
+          "path": "src/cli/session/CommandSession.ts",
+          "lines": 50,
+          "complexity": 5
+        },
+        {
+          "path": "src/cli/session/CommandSessionStatus.ts",
+          "lines": 5,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/CommandExecutor.ts",
+          "lines": 34,
+          "complexity": 5
+        },
+        {
+          "path": "src/core/display/HelpText.ts",
+          "lines": 26,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/display/ShapeDetailVisitor.ts",
+          "lines": 65,
+          "complexity": 3
+        },
+        {
+          "path": "src/core/display/ShapeSummaryVisitor.ts",
+          "lines": 82,
+          "complexity": 4
+        },
+        {
+          "path": "src/core/display/TreeDisplay.ts",
+          "lines": 97,
+          "complexity": 12
+        },
+        {
+          "path": "src/core/document/Document.ts",
+          "lines": 169,
+          "complexity": 10
+        },
+        {
+          "path": "src/core/document/ShapeHierarchy.ts",
+          "lines": 575,
+          "complexity": 81
+        },
+        {
+          "path": "src/core/document/ShapeIndex.ts",
+          "lines": 101,
+          "complexity": 12
+        },
+        {
+          "path": "src/core/history/CommandHistory.ts",
+          "lines": 86,
+          "complexity": 7
+        },
+        {
+          "path": "src/core/io/FileSvgStorage.ts",
+          "lines": 13,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/io/ParsedSvgDocument.ts",
+          "lines": 22,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/io/SvgDocumentParser.ts",
+          "lines": 353,
+          "complexity": 48
+        },
+        {
+          "path": "src/core/io/SvgDocumentWriter.ts",
+          "lines": 47,
+          "complexity": 4
+        },
+        {
+          "path": "src/core/io/SvgShapeIdAllocator.ts",
+          "lines": 39,
+          "complexity": 7
+        },
+        {
+          "path": "src/core/io/SvgShapeWriter.ts",
+          "lines": 113,
+          "complexity": 22
+        },
+        {
+          "path": "src/core/io/SvgStorage.ts",
+          "lines": 5,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/io/XmlEscaper.ts",
+          "lines": 15,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/receiver/EditorCommandReceiver.ts",
+          "lines": 148,
+          "complexity": 8
+        },
+        {
+          "path": "src/core/receiver/EditorDocumentCommandReceiver.ts",
+          "lines": 121,
+          "complexity": 17
+        },
+        {
+          "path": "src/core/receiver/EditorShapeCommandReceiver.ts",
+          "lines": 155,
+          "complexity": 6
+        },
+        {
+          "path": "src/core/receiver/EditorViewCommandReceiver.ts",
+          "lines": 40,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/commands/Command.ts",
+          "lines": 10,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/CommandType.ts",
+          "lines": 21,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/doc/CanvasCommand.ts",
+          "lines": 19,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/commands/doc/InitCommand.ts",
+          "lines": 19,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/commands/doc/ReadCommand.ts",
+          "lines": 16,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/doc/SaveCommand.ts",
+          "lines": 16,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/commands/history/RedoCommand.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/history/UndoCommand.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapeAttributeSnapshot.ts",
+          "lines": 42,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapePlacement.ts",
+          "lines": 35,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/session/ExitCommand.ts",
+          "lines": 13,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/shape/AddToCommand.ts",
+          "lines": 41,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/shape/CreateCommand.ts",
+          "lines": 24,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/commands/shape/DeleteCommand.ts",
+          "lines": 36,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/shape/GroupCommand.ts",
+          "lines": 42,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/shape/MoveCommand.ts",
+          "lines": 50,
+          "complexity": 5
+        },
+        {
+          "path": "src/protocol/commands/shape/ReorderCommand.ts",
+          "lines": 39,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/commands/shape/ScaleCommand.ts",
+          "lines": 42,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/shape/SetCommand.ts",
+          "lines": 51,
+          "complexity": 5
+        },
+        {
+          "path": "src/protocol/commands/shape/UngroupCommand.ts",
+          "lines": 33,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/commands/UndoableCommand.ts",
+          "lines": 27,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/view/HelpCommand.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/view/ShowCommand.ts",
+          "lines": 16,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/view/TreeCommand.ts",
+          "lines": 16,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/errors/CommandErrorCode.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/dto/CommandErrorDto.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/ErrorSource.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/ProtocolError.ts",
+          "lines": 60,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/execution/Executor.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/receivers/CommandReceiver.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/receivers/DocumentCommandReceiver.ts",
+          "lines": 9,
+          "complexity": 6
+        },
+        {
+          "path": "src/protocol/receivers/HistoryCommandReceiver.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/receivers/ShapeCommandReceiver.ts",
+          "lines": 30,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/receivers/ViewCommandReceiver.ts",
+          "lines": 8,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/results/CommandResult.ts",
+          "lines": 8,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/dto/CommandResultDto.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/outcomes/CommandErrorResult.ts",
+          "lines": 21,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/outcomes/CommandExitResult.ts",
+          "lines": 13,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/outcomes/CommandSuccessResult.ts",
+          "lines": 20,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/concrete/CircleShape.ts",
+          "lines": 85,
+          "complexity": 10
+        },
+        {
+          "path": "src/protocol/shapes/concrete/EllipseShape.ts",
+          "lines": 94,
+          "complexity": 12
+        },
+        {
+          "path": "src/protocol/shapes/concrete/GroupShape.ts",
+          "lines": 137,
+          "complexity": 20
+        },
+        {
+          "path": "src/protocol/shapes/concrete/LineShape.ts",
+          "lines": 96,
+          "complexity": 12
+        },
+        {
+          "path": "src/protocol/shapes/concrete/RectShape.ts",
+          "lines": 94,
+          "complexity": 12
+        },
+        {
+          "path": "src/protocol/shapes/concrete/TextShape.ts",
+          "lines": 84,
+          "complexity": 10
+        },
+        {
+          "path": "src/protocol/shapes/factory/ShapeFactory.ts",
+          "lines": 184,
+          "complexity": 17
+        },
+        {
+          "path": "src/protocol/shapes/model/EditableAttribute.ts",
+          "lines": 20,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/model/Shape.ts",
+          "lines": 97,
+          "complexity": 8
+        },
+        {
+          "path": "src/protocol/shapes/model/ShapePosition.ts",
+          "lines": 15,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/model/ShapeType.ts",
+          "lines": 9,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/model/StyledShape.ts",
+          "lines": 92,
+          "complexity": 20
+        },
+        {
+          "path": "src/protocol/shapes/visitor/ShapeVisitor.ts",
+          "lines": 16,
+          "complexity": 1
+        }
+      ]
+    },
+    "assembly": {
+      "lines": 39,
+      "complexity": 2,
+      "files": [
+        {
+          "path": "src/main.ts",
+          "lines": 39,
+          "complexity": 2
+        }
+      ]
+    },
+    "plugin": {
+      "lines": 0,
+      "complexity": 0,
+      "files": []
+    }
+  },
+  "head": {
+    "kernel": {
+      "lines": 6147,
+      "complexity": 619,
+      "files": [
+        {
+          "path": "src/_builtin/commands/AddToCommand/AddToCommand.ts",
+          "lines": 40,
+          "complexity": 4
+        },
+        {
+          "path": "src/_builtin/commands/AddToCommand/AddToCommandContribution.ts",
+          "lines": 21,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/CanvasCommand/CanvasCommand.ts",
+          "lines": 17,
+          "complexity": 3
+        },
+        {
+          "path": "src/_builtin/commands/CanvasCommand/CanvasCommandContribution.ts",
+          "lines": 26,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/CreateCommand/CreateCommand.ts",
+          "lines": 22,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/CreateCommand/CreateCommandContribution.ts",
+          "lines": 62,
+          "complexity": 5
+        },
+        {
+          "path": "src/_builtin/commands/DeleteCommand/DeleteCommand.ts",
+          "lines": 35,
+          "complexity": 4
+        },
+        {
+          "path": "src/_builtin/commands/DeleteCommand/DeleteCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ExitCommand/ExitCommand.ts",
+          "lines": 11,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ExitCommand/ExitCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/GroupCommand/GroupCommand.ts",
+          "lines": 41,
+          "complexity": 4
+        },
+        {
+          "path": "src/_builtin/commands/GroupCommand/GroupCommandContribution.ts",
+          "lines": 28,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/HelpCommand/HelpCommand.ts",
+          "lines": 10,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/HelpCommand/HelpCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/InitCommand/InitCommand.ts",
+          "lines": 17,
+          "complexity": 3
+        },
+        {
+          "path": "src/_builtin/commands/InitCommand/InitCommandContribution.ts",
+          "lines": 26,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/MoveCommand/MoveCommand.ts",
+          "lines": 48,
+          "complexity": 5
+        },
+        {
+          "path": "src/_builtin/commands/MoveCommand/MoveCommandContribution.ts",
+          "lines": 20,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ReadCommand/ReadCommand.ts",
+          "lines": 14,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ReadCommand/ReadCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/RedoCommand/RedoCommand.ts",
+          "lines": 10,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/RedoCommand/RedoCommandContribution.ts",
+          "lines": 17,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ReorderCommand/BackCommandContribution.ts",
+          "lines": 20,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ReorderCommand/FrontCommandContribution.ts",
+          "lines": 21,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ReorderCommand/ReorderCommand.ts",
+          "lines": 38,
+          "complexity": 3
+        },
+        {
+          "path": "src/_builtin/commands/SaveCommand/SaveCommand.ts",
+          "lines": 14,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/SaveCommand/SaveCommandContribution.ts",
+          "lines": 22,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/ScaleCommand/ScaleCommand.ts",
+          "lines": 40,
+          "complexity": 4
+        },
+        {
+          "path": "src/_builtin/commands/ScaleCommand/ScaleCommandContribution.ts",
+          "lines": 21,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/SetCommand/EditableAttributeParser.ts",
+          "lines": 31,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/SetCommand/SetCommand.ts",
+          "lines": 81,
+          "complexity": 10
+        },
+        {
+          "path": "src/_builtin/commands/SetCommand/SetCommandContribution.ts",
+          "lines": 30,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/ShowCommand/ShowCommand.ts",
+          "lines": 14,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/ShowCommand/ShowCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/TreeCommand/TreeCommand.ts",
+          "lines": 14,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/TreeCommand/TreeCommandContribution.ts",
+          "lines": 22,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/commands/UndoCommand/UndoCommand.ts",
+          "lines": 10,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/UndoCommand/UndoCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/commands/UngroupCommand/UngroupCommand.ts",
+          "lines": 32,
+          "complexity": 3
+        },
+        {
+          "path": "src/_builtin/commands/UngroupCommand/UngroupCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_builtin/shapes/CircleShape/CircleShapeContribution.ts",
+          "lines": 54,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/shapes/EllipseShape/EllipseShapeContribution.ts",
+          "lines": 56,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/shapes/GroupShape/GroupShapeContribution.ts",
+          "lines": 29,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/shapes/LineShape/LineShapeContribution.ts",
+          "lines": 56,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/shapes/RectShape/RectShapeContribution.ts",
+          "lines": 56,
+          "complexity": 2
+        },
+        {
+          "path": "src/_builtin/shapes/TextShape/TextShapeContribution.ts",
+          "lines": 48,
+          "complexity": 2
+        },
+        {
+          "path": "src/cli/io/ConsoleInputReader.ts",
+          "lines": 67,
+          "complexity": 6
+        },
+        {
+          "path": "src/cli/io/ConsoleOutputWriter.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/io/InputReader.ts",
+          "lines": 4,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/io/OutputWriter.ts",
+          "lines": 5,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/CommandLineParser.ts",
+          "lines": 53,
+          "complexity": 5
+        },
+        {
+          "path": "src/cli/parser/CommandParser.ts",
+          "lines": 9,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseEmptyResult.ts",
+          "lines": 11,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseErrorResult.ts",
+          "lines": 19,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseResult.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/results/CommandParseSuccessResult.ts",
+          "lines": 19,
+          "complexity": 1
+        },
+        {
+          "path": "src/cli/parser/syntax/CommandLineTokenizer.ts",
+          "lines": 58,
+          "complexity": 10
+        },
+        {
+          "path": "src/cli/session/CommandLoop.ts",
+          "lines": 40,
+          "complexity": 7
+        },
+        {
+          "path": "src/cli/session/CommandSession.ts",
+          "lines": 50,
+          "complexity": 5
+        },
+        {
+          "path": "src/cli/session/CommandSessionStatus.ts",
+          "lines": 5,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/attributes/AttributeRegistry.ts",
+          "lines": 50,
+          "complexity": 4
+        },
+        {
+          "path": "src/core/CommandExecutor.ts",
+          "lines": 34,
+          "complexity": 5
+        },
+        {
+          "path": "src/core/commands/CommandRegistry.ts",
+          "lines": 36,
+          "complexity": 3
+        },
+        {
+          "path": "src/core/display/HelpText.ts",
+          "lines": 29,
+          "complexity": 3
+        },
+        {
+          "path": "src/core/display/ShapeDetailVisitor.ts",
+          "lines": 65,
+          "complexity": 3
+        },
+        {
+          "path": "src/core/display/ShapeSummaryVisitor.ts",
+          "lines": 83,
+          "complexity": 4
+        },
+        {
+          "path": "src/core/display/TreeDisplay.ts",
+          "lines": 122,
+          "complexity": 12
+        },
+        {
+          "path": "src/core/document/Document.ts",
+          "lines": 169,
+          "complexity": 10
+        },
+        {
+          "path": "src/core/document/ShapeHierarchy.ts",
+          "lines": 590,
+          "complexity": 83
+        },
+        {
+          "path": "src/core/document/ShapeIndex.ts",
+          "lines": 101,
+          "complexity": 12
+        },
+        {
+          "path": "src/core/history/CommandHistory.ts",
+          "lines": 86,
+          "complexity": 7
+        },
+        {
+          "path": "src/core/io/FileSvgStorage.ts",
+          "lines": 13,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/io/ParsedSvgDocument.ts",
+          "lines": 22,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/io/SvgDocumentParser.ts",
+          "lines": 318,
+          "complexity": 44
+        },
+        {
+          "path": "src/core/io/SvgDocumentWriter.ts",
+          "lines": 47,
+          "complexity": 4
+        },
+        {
+          "path": "src/core/io/SvgShapeIdAllocator.ts",
+          "lines": 39,
+          "complexity": 7
+        },
+        {
+          "path": "src/core/io/SvgShapeWriter.ts",
+          "lines": 120,
+          "complexity": 23
+        },
+        {
+          "path": "src/core/io/SvgStorage.ts",
+          "lines": 5,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/io/XmlEscaper.ts",
+          "lines": 15,
+          "complexity": 1
+        },
+        {
+          "path": "src/core/receiver/EditorCommandReceiver.ts",
+          "lines": 175,
+          "complexity": 8
+        },
+        {
+          "path": "src/core/receiver/EditorDocumentCommandReceiver.ts",
+          "lines": 142,
+          "complexity": 18
+        },
+        {
+          "path": "src/core/receiver/EditorShapeCommandReceiver.ts",
+          "lines": 178,
+          "complexity": 8
+        },
+        {
+          "path": "src/core/receiver/EditorViewCommandReceiver.ts",
+          "lines": 45,
+          "complexity": 3
+        },
+        {
+          "path": "src/core/shapes/ShapeRegistry.ts",
+          "lines": 43,
+          "complexity": 3
+        },
+        {
+          "path": "src/core/tree/TreeDecoratorRegistry.ts",
+          "lines": 30,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/attributes/AttributeCatalog.ts",
+          "lines": 9,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/attributes/AttributeHandler.ts",
+          "lines": 30,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/attributes/EditableAttributeRules.ts",
+          "lines": 63,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/commands/Command.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandCatalog.ts",
+          "lines": 10,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandContribution.ts",
+          "lines": 50,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandHelp.ts",
+          "lines": 26,
+          "complexity": 3
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandParameters.ts",
+          "lines": 106,
+          "complexity": 10
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapeAttributeSnapshot.ts",
+          "lines": 48,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapePlacement.ts",
+          "lines": 35,
+          "complexity": 4
+        },
+        {
+          "path": "src/protocol/commands/UndoableCommand.ts",
+          "lines": 27,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/CommandErrorCode.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/dto/CommandErrorDto.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/ErrorSource.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/errors/ProtocolError.ts",
+          "lines": 60,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/execution/Executor.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/io/DirectoryEntry.ts",
+          "lines": 34,
+          "complexity": 6
+        },
+        {
+          "path": "src/protocol/io/DirectoryEntryKind.ts",
+          "lines": 6,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/io/DirectoryListing.ts",
+          "lines": 11,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/plugins/PluginContext.ts",
+          "lines": 22,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/plugins/PluginContributes.ts",
+          "lines": 139,
+          "complexity": 22
+        },
+        {
+          "path": "src/protocol/plugins/SvgPlugin.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/receivers/CommandReceiver.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/receivers/DocumentCommandReceiver.ts",
+          "lines": 16,
+          "complexity": 6
+        },
+        {
+          "path": "src/protocol/receivers/HistoryCommandReceiver.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/receivers/ShapeCommandReceiver.ts",
+          "lines": 26,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/receivers/ViewCommandReceiver.ts",
+          "lines": 8,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/results/CommandResult.ts",
+          "lines": 8,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/dto/CommandResultDto.ts",
+          "lines": 7,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/outcomes/CommandErrorResult.ts",
+          "lines": 21,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/outcomes/CommandExitResult.ts",
+          "lines": 13,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/results/outcomes/CommandSuccessResult.ts",
+          "lines": 20,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/concrete/CircleShape.ts",
+          "lines": 85,
+          "complexity": 10
+        },
+        {
+          "path": "src/protocol/shapes/concrete/EllipseShape.ts",
+          "lines": 94,
+          "complexity": 12
+        },
+        {
+          "path": "src/protocol/shapes/concrete/GroupShape.ts",
+          "lines": 147,
+          "complexity": 20
+        },
+        {
+          "path": "src/protocol/shapes/concrete/LineShape.ts",
+          "lines": 96,
+          "complexity": 12
+        },
+        {
+          "path": "src/protocol/shapes/concrete/RectShape.ts",
+          "lines": 94,
+          "complexity": 12
+        },
+        {
+          "path": "src/protocol/shapes/concrete/TextShape.ts",
+          "lines": 84,
+          "complexity": 10
+        },
+        {
+          "path": "src/protocol/shapes/contribution/ShapeArgumentParser.ts",
+          "lines": 69,
+          "complexity": 9
+        },
+        {
+          "path": "src/protocol/shapes/contribution/ShapeCatalog.ts",
+          "lines": 12,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/contribution/ShapeContribution.ts",
+          "lines": 39,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/shapes/contribution/ShapeSvgReadInput.ts",
+          "lines": 38,
+          "complexity": 2
+        },
+        {
+          "path": "src/protocol/shapes/model/EditableAttribute.ts",
+          "lines": 20,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/model/Shape.ts",
+          "lines": 107,
+          "complexity": 8
+        },
+        {
+          "path": "src/protocol/shapes/model/ShapePosition.ts",
+          "lines": 15,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/model/ShapeType.ts",
+          "lines": 9,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/shapes/model/StyledShape.ts",
+          "lines": 92,
+          "complexity": 20
+        },
+        {
+          "path": "src/protocol/shapes/visitor/ShapeVisitor.ts",
+          "lines": 16,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/tree/TreeDecorator.ts",
+          "lines": 30,
+          "complexity": 1
+        },
+        {
+          "path": "src/protocol/tree/TreeDecoratorCatalog.ts",
+          "lines": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    "assembly": {
+      "lines": 726,
+      "complexity": 77,
+      "files": [
+        {
+          "path": "src/host/activateDefaultPlugins.ts",
+          "lines": 34,
+          "complexity": 1
+        },
+        {
+          "path": "src/host/DuplicateRegistrationError.ts",
+          "lines": 11,
+          "complexity": 1
+        },
+        {
+          "path": "src/host/loadPluginsFromConfig.ts",
+          "lines": 56,
+          "complexity": 7
+        },
+        {
+          "path": "src/host/parseConfigArg.ts",
+          "lines": 26,
+          "complexity": 7
+        },
+        {
+          "path": "src/host/PluginActivationContext.ts",
+          "lines": 134,
+          "complexity": 14
+        },
+        {
+          "path": "src/host/PluginConfig.ts",
+          "lines": 26,
+          "complexity": 5
+        },
+        {
+          "path": "src/host/PluginConfigEntry.ts",
+          "lines": 56,
+          "complexity": 13
+        },
+        {
+          "path": "src/host/PluginConfigLoader.ts",
+          "lines": 28,
+          "complexity": 1
+        },
+        {
+          "path": "src/host/PluginHost.ts",
+          "lines": 86,
+          "complexity": 5
+        },
+        {
+          "path": "src/host/PluginModuleLoader.ts",
+          "lines": 108,
+          "complexity": 19
+        },
+        {
+          "path": "src/host/registerBuiltinContributions.ts",
+          "lines": 75,
+          "complexity": 1
+        },
+        {
+          "path": "src/main.ts",
+          "lines": 86,
+          "complexity": 3
+        }
+      ]
+    },
+    "plugin": {
+      "lines": 650,
+      "complexity": 62,
+      "files": [
+        {
+          "path": "src/_plugin/commands/DirCommand/DirCommand.ts",
+          "lines": 60,
+          "complexity": 4
+        },
+        {
+          "path": "src/_plugin/commands/DirCommand/DirCommandContribution.ts",
+          "lines": 23,
+          "complexity": 3
+        },
+        {
+          "path": "src/_plugin/commands/DirCommand/DirCommandPlugin.ts",
+          "lines": 20,
+          "complexity": 2
+        },
+        {
+          "path": "src/_plugin/commands/DirCommand/index.ts",
+          "lines": 3,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/commands/DirCommand/NodeDirectoryListing.ts",
+          "lines": 30,
+          "complexity": 5
+        },
+        {
+          "path": "src/_plugin/commands/StatsCommand/DocumentShapeStats.ts",
+          "lines": 49,
+          "complexity": 6
+        },
+        {
+          "path": "src/_plugin/commands/StatsCommand/index.ts",
+          "lines": 3,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/commands/StatsCommand/StatsCommand.ts",
+          "lines": 13,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/commands/StatsCommand/StatsCommandContribution.ts",
+          "lines": 18,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/commands/StatsCommand/StatsCommandPlugin.ts",
+          "lines": 15,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/shapes/BoxShape/BoxAttributeHandler.ts",
+          "lines": 109,
+          "complexity": 9
+        },
+        {
+          "path": "src/_plugin/shapes/BoxShape/BoxShape.ts",
+          "lines": 102,
+          "complexity": 6
+        },
+        {
+          "path": "src/_plugin/shapes/BoxShape/BoxShapeContribution.ts",
+          "lines": 37,
+          "complexity": 2
+        },
+        {
+          "path": "src/_plugin/shapes/BoxShape/BoxShapePlugin.ts",
+          "lines": 22,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/shapes/BoxShape/index.ts",
+          "lines": 3,
+          "complexity": 1
+        },
+        {
+          "path": "src/_plugin/tree/BoxTypeLabelDecorator.ts",
+          "lines": 14,
+          "complexity": 2
+        },
+        {
+          "path": "src/_plugin/tree/ModifiedStarDecorator.ts",
+          "lines": 114,
+          "complexity": 15
+        },
+        {
+          "path": "src/_plugin/tree/ModifiedStarPlugin.ts",
+          "lines": 15,
+          "complexity": 1
+        }
+      ]
+    }
+  },
+  "delta": {
+    "kernel": {
+      "lines": 1092,
+      "complexity": 93
+    },
+    "assembly": {
+      "lines": 687,
+      "complexity": 75
+    },
+    "plugin": {
+      "lines": 650,
+      "complexity": 62
+    }
+  }
+}

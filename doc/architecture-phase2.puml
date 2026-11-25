@@ -1,0 +1,49 @@
+@startuml
+skinparam shadowing false
+skinparam dpi 144
+skinparam nodesep 40
+skinparam ranksep 55
+skinparam defaultFontName "Arial"
+skinparam linetype ortho
+top to bottom direction
+
+title SVG Editor Phase 2 模块依赖
+
+rectangle "main.ts\n组合根 A/B 选择" as Main
+
+rectangle "host\nPluginHost · ConfigLoader\nModuleLoader · 方式 A 装配" as Host
+
+rectangle "CLI\nI/O · Parser · Session" as Cli
+
+rectangle "Core\nExecutor · Receiver · Document\nRegistries · Display · SVG IO" as Core
+
+rectangle "Protocol\nCommand · Shape · AttributeHandler\nTreeDecorator · SvgPlugin 契约" as Protocol
+
+rectangle "_builtin\nPhase 1 命令/图形贡献" as Builtin
+
+rectangle "_plugin\nstats · dir · box · tree 标签" as Plugin
+
+Main --> Cli
+Main --> Core
+Main --> Host
+Main --> Builtin
+Main --> Plugin
+Host --> Protocol
+Host --> Core
+Host ..> Plugin : 方式 A 显式导入
+Cli --> Protocol
+Core --> Protocol
+Builtin --> Protocol
+Plugin --> Protocol
+
+note bottom of Host
+  方式 B：plugins.config.json
+  字符串模块加载，无硬编码插件表
+end note
+
+note bottom of Protocol
+  扩展点接口在此；实现在 _builtin/_plugin
+  Protocol 不依赖 cli/core/host/插件
+end note
+
+@enduml

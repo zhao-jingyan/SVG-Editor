@@ -1,0 +1,9 @@
+# box 会话（§6.1 / Phase 2）
+init 400 300
+create box n1 120 100 160 60 "处理数据"
+set n1 fill #f5a623
+set n1 label "处理数据"
+tree
+save /tmp/svg-editor-box-session.svg
+tree
+exit
