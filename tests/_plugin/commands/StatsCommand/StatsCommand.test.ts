@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { CreateCommand } from "@/builtin/commands/CreateCommand/CreateCommand";
-import { GroupCommand } from "@/builtin/commands/GroupCommand/GroupCommand";
-import { InitCommand } from "@/builtin/commands/InitCommand/InitCommand";
-import { UndoCommand } from "@/builtin/commands/UndoCommand/UndoCommand";
+import { CreateCommand } from "@/_builtin/commands/CreateCommand/CreateCommand";
+import { GroupCommand } from "@/_builtin/commands/GroupCommand/GroupCommand";
+import { InitCommand } from "@/_builtin/commands/InitCommand/InitCommand";
+import { UndoCommand } from "@/_builtin/commands/UndoCommand/UndoCommand";
 import { CommandExecutor } from "@/core/CommandExecutor";
 import { CommandHistory } from "@/core/history/CommandHistory";
 import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
-import { StatsCommand } from "@/plugin/commands/StatsCommand/StatsCommand";
+import { StatsCommand } from "@/_plugin/commands/StatsCommand/StatsCommand";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
 import { RectShape } from "@/protocol/shapes/concrete/RectShape";

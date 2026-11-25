@@ -49,7 +49,7 @@ new CommandContribution(
 
 ### 保留并改写
 
-- `src/builtin/BuiltinCommandContributions.ts`：20 个工厂内联参数逻辑。
+- `src/_builtin/BuiltinCommandContributions.ts`：20 个工厂内联参数逻辑。
 - 可选新增：`src/core/commands/EditableAttributeParser.ts`（仅 `set` 共享校验）。
 
 ### 删除

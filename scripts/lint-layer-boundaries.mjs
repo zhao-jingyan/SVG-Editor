@@ -17,18 +17,18 @@ const srcRoot = path.join(repositoryRoot, "src");
 /** @type {readonly LayerRule[]} */
 const layers = [
   {
-    name: "builtin",
-    root: path.join(srcRoot, "builtin"),
+    name: "_builtin",
+    root: path.join(srcRoot, "_builtin"),
     allow: [
-      path.join(srcRoot, "builtin"),
+      path.join(srcRoot, "_builtin"),
       path.join(srcRoot, "protocol"),
     ],
   },
   {
-    name: "plugin",
-    root: path.join(srcRoot, "plugin"),
+    name: "_plugin",
+    root: path.join(srcRoot, "_plugin"),
     allow: [
-      path.join(srcRoot, "plugin"),
+      path.join(srcRoot, "_plugin"),
       path.join(srcRoot, "protocol"),
     ],
     allowExternalPrefixes: ["node:"],

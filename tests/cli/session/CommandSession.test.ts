@@ -8,8 +8,8 @@ import { CommandParseErrorResult } from "@/cli/parser/results/CommandParseErrorR
 import type { CommandParseResult } from "@/cli/parser/results/CommandParseResult";
 import { CommandParseSuccessResult } from "@/cli/parser/results/CommandParseSuccessResult";
 import type { Command } from "@/protocol/commands/Command";
-import { ExitCommand } from "@/builtin/commands/ExitCommand/ExitCommand";
-import { HelpCommand } from "@/builtin/commands/HelpCommand/HelpCommand";
+import { ExitCommand } from "@/_builtin/commands/ExitCommand/ExitCommand";
+import { HelpCommand } from "@/_builtin/commands/HelpCommand/HelpCommand";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import type { Executor } from "@/protocol/execution/Executor";

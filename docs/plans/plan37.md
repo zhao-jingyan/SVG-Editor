@@ -6,13 +6,13 @@
 
 ## 目标
 
-在 `src/plugin/commands/` 实现两个独立于 builtin 的命令插件，经同一 `CommandRegistry` 注册路径接入。
+在 `src/_plugin/commands/` 实现两个独立于 builtin 的命令插件，经同一 `CommandRegistry` 注册路径接入。
 
 ### `stats`
 
 - 包路径：`plugin/commands/StatsCommand/`（`StatsCommand` + `StatsCommandContribution`）。
 - `execute` 调用 `receiver.getRootShapes()`，插件内 DFS：叶子按类型首次出现顺序计数；普通 `g`（及后续 `box`）只计 containers；根 SVG 不计；输出形如 `rect: 3  circle: 1  text: 2  (total 6, containers 2)`；空画布 `(total 0, containers 0)`。
-- 不入 undo；依赖 `protocol` 图形模型，不依赖 `builtin` / `core` 内部。
+- 不入 undo；依赖 `protocol` 图形模型，不依赖 `_builtin` / `core` 内部。
 
 ### `dir`
 

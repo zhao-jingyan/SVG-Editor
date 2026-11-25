@@ -4,7 +4,7 @@
 
 - 每个具体命令目录 `builtin/commands/XxxCommand/` 同时存放 `Command` 与对应 `*CommandContribution`。
 - `front`/`back` 共用 `ReorderCommand/`；`EditableAttributeParser` 随 `SetCommand/`。
-- Core 只保留 `CommandRegistry`；具体命令已迁至 `src/builtin`；统一注册改由 `main` / 测试夹具负责。
+- Core 只保留 `CommandRegistry`；具体命令已迁至 `src/_builtin`；统一注册改由 `main` / 测试夹具负责。
 
 ## 完成状态
 

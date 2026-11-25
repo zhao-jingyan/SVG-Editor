@@ -11,12 +11,12 @@
 
 - `src/cli`：只负责输入输出、终端适配和文本到命令对象的解析，不承载业务规则。
 - `src/protocol`：只存放契约——命令基类与贡献 API、图形领域模型、接收者接口、IO 端口（如 `DirectoryListing`）、结果/错误模型与边界 DTO；不含具体内置/插件命令实现。
-- `src/builtin`：内置命令包（具体 `XxxCommand` 与对应 `*CommandContribution`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
-- `src/plugin`：可选命令等插件包，依赖 `protocol`；不得依赖 `builtin` / `core` 内部；由组合根注册。
-- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `builtin` / `plugin`。
-- `src/main.ts`：只作为组合根，负责组装 CLI、Core、builtin/plugin 贡献注册与依赖实例。
-- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`builtin -> protocol`、`plugin -> protocol`、`main -> cli + core + builtin + plugin`。
-- `protocol` 不得依赖 `cli`、`core`、`builtin`、`plugin`、Node 或 DOM。
+- `src/_builtin`：内置命令包（具体 `XxxCommand` 与对应 `*CommandContribution`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
+- `src/_plugin`：可选命令等插件包，依赖 `protocol`；不得依赖 `_builtin` / `core` 内部；由组合根注册。
+- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `_builtin` / `_plugin`。
+- `src/main.ts`：只作为组合根，负责组装 CLI、Core、`_builtin` / `_plugin` 贡献注册与依赖实例。
+- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`_builtin -> protocol`、`_plugin -> protocol`、`main -> cli + core + _builtin + _plugin`。
+- `protocol` 不得依赖 `cli`、`core`、`_builtin`、`_plugin`、Node 或 DOM。
 - 禁止跨层直接访问、循环依赖，以及在 CLI 中实现编辑规则或文档状态。
 - 命令专用 API 不上 `CommandReceiver`；文档结构只读查询可用 `getRootShapes()`；文件系统经独立 `DirectoryListing` 端口，不经 Receiver。
 - 路径别名：`@/*` → `src/*`（`tsconfig` paths + vitest alias + `tests/tsconfig.json`；构建经 `resolve-tspaths` 回写相对路径）。指向 `src` 的导入统一用 `@/...`；同目录 `./X` 可保留相对路径。不是 npm package。
@@ -47,7 +47,7 @@
 - 每次实现先给出计划，再小步提交；禁止一次性大提交。
 - 修改架构或依赖方向时，同步更新 `docs/facts/`、`docs/plans/` 和相关说明。
 - 验证命令固定为 `npm test`、`npm run build` 和 `npm run lint`。
-- `npm run lint` 检查分层导入：`src/builtin` / `src/plugin` 仅可依赖 `protocol` 与自身（`plugin` 允许 `node:` 适配器）。
+- `npm run lint` 检查分层导入：`src/_builtin` / `src/_plugin` 仅可依赖 `protocol` 与自身（`_plugin` 允许 `node:` 适配器）。
 - 新增领域类层次时，测试必须覆盖多态行为、`instanceof` 关系和关键错误分支。
 - 提交只暂存本任务文件，禁止使用 `git add -A`；commit hook 已覆盖的检查不重复执行。
 
@@ -56,7 +56,7 @@
 - 领域形状以 `Shape` 抽象类为根，具体类包括 `RectShape`、`CircleShape`、`EllipseShape`、`LineShape`、`TextShape`、`GroupShape`。
 - 容器形状通过 `GroupShape` 维护子节点，并递归实现统一操作。
 - `Command` 抽象类、`UndoableCommand` 和具体命令类继续作为命令模型；禁止退回命令联合类型。
-- 具体内置命令在 `src/builtin/commands/XxxCommand/`，同目录放置 Command 与 `*CommandContribution`；`front`/`back` 同属 `ReorderCommand/`；由 `main`（及测试夹具）按 Phase 1 顺序注册进 `CommandRegistry`。
+- 具体内置命令在 `src/_builtin/commands/XxxCommand/`，同目录放置 Command 与 `*CommandContribution`；`front`/`back` 同属 `ReorderCommand/`；由 `main`（及测试夹具）按 Phase 1 顺序注册进 `CommandRegistry`。
 - 命令共享基类、贡献契约与撤销快照放在 `protocol/commands/`（`Command`、`UndoableCommand`、`contribution/`、`memento/`）。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 

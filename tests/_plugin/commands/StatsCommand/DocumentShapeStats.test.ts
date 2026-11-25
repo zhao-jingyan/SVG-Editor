@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DocumentShapeStats } from "@/plugin/commands/StatsCommand/DocumentShapeStats";
+import { DocumentShapeStats } from "@/_plugin/commands/StatsCommand/DocumentShapeStats";
 import { CircleShape } from "@/protocol/shapes/concrete/CircleShape";
 import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "@/protocol/shapes/concrete/RectShape";

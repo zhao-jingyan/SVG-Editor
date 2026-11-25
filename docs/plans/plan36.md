@@ -12,7 +12,7 @@
 - `getRootShapes()`：无文档抛 `NoDocument`；有文档返回画布根下直接子节点（只读，顺序与文档一致）；空画布返回 `[]`。
 - 不改文档、dirty、history、cwd。
 - `DirectoryListing` 仅契约；Node 适配器与 `DirCommand` 留 plan37。
-- `protocol` 仍不得依赖 `cli` / `core` / `builtin` / `plugin` / Node。
+- `protocol` 仍不得依赖 `cli` / `core` / `_builtin` / `_plugin` / Node。
 
 ## 改动面
 
