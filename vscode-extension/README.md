@@ -50,6 +50,44 @@ svg
 
 4. 点击 `rect#start`，光标应定位到对应的 `<rect>` 行。
 
+## 故障排查：终端 `code` 打开了 Cursor
+
+Cursor 安装时可能把 `/usr/local/bin/code` 指向自己的 CLI，导致终端中的 `code`
+打开 Cursor 而不是 VSCode。先确认链接目标：
+
+```bash
+type -a code
+ls -l /usr/local/bin/code
+```
+
+如果输出包含：
+
+```text
+/usr/local/bin/code -> /Applications/Cursor.app/Contents/Resources/app/bin/code
+```
+
+可将 `code` 重新指向 VSCode：
+
+```bash
+sudo ln -sfn \
+  "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
+  /usr/local/bin/code
+
+hash -r
+code --version
+```
+
+`code --version` 应显示 VSCode 版本，而不是 Cursor 版本。Cursor 更新后如果再次占用
+该命令，重新执行上述链接命令即可。
+
+不希望修改全局命令时，也可以直接使用 VSCode CLI 的完整路径启动扩展：
+
+```bash
+"/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
+  --extensionDevelopmentPath="$PWD" \
+  "$PWD/test-fixtures/workspace"
+```
+
 ## 测试
 
 ```bash
