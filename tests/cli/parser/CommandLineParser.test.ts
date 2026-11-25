@@ -289,10 +289,9 @@ describe("CommandLineParser", () => {
     });
   });
 
-  it("报告属性、引号和尾缀错误", () => {
+  it("报告引号和尾缀错误；未知属性留到执行期由白名单/处理器判定", () => {
     expect(parseDto("set r1 opacity 0.5")).toMatchObject({
-      type: "error",
-      error: { code: CommandErrorCode.UnknownAttribute },
+      type: "command",
     });
     expect(parseDto('create text t1 0 0 "unterminated')).toMatchObject({
       type: "error",

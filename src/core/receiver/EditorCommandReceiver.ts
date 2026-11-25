@@ -1,10 +1,11 @@
+import type { AttributeCatalog } from "@/protocol/attributes/AttributeCatalog";
 import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
-import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 import type { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "@/protocol/results/CommandResult";
 import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import type { Shape } from "@/protocol/shapes/model/Shape";
+import { AttributeRegistry } from "@/core/attributes/AttributeRegistry";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { HelpText } from "@/core/display/HelpText";
 import { CommandHistory } from "@/core/history/CommandHistory";
@@ -25,13 +26,17 @@ export class EditorCommandReceiver implements CommandReceiver {
     svgStorage: SvgStorage = new FileSvgStorage(),
     helpText: HelpText = new HelpText(new CommandRegistry()),
     shapeCatalog: ShapeCatalog = new ShapeRegistry(),
+    attributeCatalog: AttributeCatalog = new AttributeRegistry(),
   ) {
     this.documentReceiver = new EditorDocumentCommandReceiver(
       history,
       shapeCatalog,
       svgStorage,
     );
-    this.shapeReceiver = new EditorShapeCommandReceiver(this.documentReceiver);
+    this.shapeReceiver = new EditorShapeCommandReceiver(
+      this.documentReceiver,
+      attributeCatalog,
+    );
     this.viewReceiver = new EditorViewCommandReceiver(
       this.documentReceiver,
       helpText,
@@ -86,7 +91,7 @@ export class EditorCommandReceiver implements CommandReceiver {
 
   public setAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
     value: string | number,
   ): Promise<CommandResult> {
     return this.shapeReceiver.setAttribute(shapeId, attribute, value);
@@ -131,7 +136,7 @@ export class EditorCommandReceiver implements CommandReceiver {
 
   public captureAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
   ): ShapeAttributeSnapshot {
     return this.shapeReceiver.captureAttribute(shapeId, attribute);
   }

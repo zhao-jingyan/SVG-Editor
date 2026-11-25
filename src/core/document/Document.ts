@@ -82,7 +82,7 @@ export class Document {
   }
 
   public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {
-    const attribute = snapshot.getAttribute();
+    const attribute = snapshot.getRestoreAttribute() as EditableAttribute;
 
     for (const shapeId of snapshot.getShapeIds()) {
       this.getShape(shapeId);

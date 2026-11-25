@@ -1,5 +1,4 @@
 import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
-import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 import { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
 import { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "@/protocol/results/CommandResult";
@@ -59,7 +58,7 @@ export class RecordingCommandReceiver implements CommandReceiver {
 
   public setAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
     value: string | number,
   ): Promise<CommandResult> {
     return this.record("setAttribute", [shapeId, attribute, value]);
@@ -97,7 +96,7 @@ export class RecordingCommandReceiver implements CommandReceiver {
 
   public captureAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
   ): ShapeAttributeSnapshot {
     return new ShapeAttributeSnapshot(
       shapeId,

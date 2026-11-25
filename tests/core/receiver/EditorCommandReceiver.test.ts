@@ -272,7 +272,7 @@ describe("EditorCommandReceiver", () => {
     expect(receiver.captureAttribute("r2", "fill").getValue("r2")).toBe("blue");
     expect(
       (await executor.execute(new UndoCommand())).toCommandResultDto(),
-    ).toEqual({ type: "success", message: "g#g1 updated: fill unset" });
+    ).toEqual({ type: "success", message: 'g#g1 updated: fill="red"' });
     expect(receiver.captureAttribute("r1", "fill").getValue("r1")).toBe("red");
     expect(receiver.captureAttribute("r2", "fill").getValue("r2")).toBeUndefined();
 

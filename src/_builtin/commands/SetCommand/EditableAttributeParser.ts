@@ -1,64 +1,30 @@
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
+import { EditableAttributeRules } from "@/protocol/attributes/EditableAttributeRules";
 import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 
 /**
- * 仅服务 set 命令的属性名与数值属性判定。
+ * set 命令用的属性名辅助；白名单本体在 protocol EditableAttributeRules。
  */
 export class EditableAttributeParser {
-  private static readonly editableAttributes = new Set<EditableAttribute>([
-    "fill",
-    "stroke",
-    "stroke-width",
-    "x",
-    "y",
-    "width",
-    "height",
-    "cx",
-    "cy",
-    "r",
-    "rx",
-    "ry",
-    "x1",
-    "y1",
-    "x2",
-    "y2",
-    "text",
-  ]);
+  private readonly rules = new EditableAttributeRules();
 
-  private static readonly numericAttributes = new Set<EditableAttribute>([
-    "stroke-width",
-    "x",
-    "y",
-    "width",
-    "height",
-    "cx",
-    "cy",
-    "r",
-    "rx",
-    "ry",
-    "x1",
-    "y1",
-    "x2",
-    "y2",
-  ]);
+  public isEditable(token: string): token is EditableAttribute {
+    return this.rules.isEditable(token);
+  }
 
   public parse(token: string): EditableAttribute {
-    if (
-      !EditableAttributeParser.editableAttributes.has(
-        token as EditableAttribute,
-      )
-    ) {
+    if (!this.isEditable(token)) {
       throw ProtocolError.commandParse(
         CommandErrorCode.UnknownAttribute,
         `unknown attribute: ${token}`,
       );
     }
 
-    return token as EditableAttribute;
+    return token;
   }
 
-  public isNumeric(attribute: EditableAttribute): boolean {
-    return EditableAttributeParser.numericAttributes.has(attribute);
+  public isNumeric(attribute: string): boolean {
+    return this.rules.isNumeric(attribute);
   }
 }

@@ -1,4 +1,5 @@
-import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
+import type { AttributeCatalog } from "@/protocol/attributes/AttributeCatalog";
+import { EditableAttributeRules } from "@/protocol/attributes/EditableAttributeRules";
 import type { ShapeCommandReceiver } from "@/protocol/receivers/ShapeCommandReceiver";
 import type { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
@@ -6,11 +7,15 @@ import type { CommandResult } from "@/protocol/results/CommandResult";
 import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
 import type { Shape } from "@/protocol/shapes/model/Shape";
+import { AttributeRegistry } from "@/core/attributes/AttributeRegistry";
 import type { EditorDocumentCommandReceiver } from "./EditorDocumentCommandReceiver";
 
 export class EditorShapeCommandReceiver implements ShapeCommandReceiver {
+  private readonly attributeRules = new EditableAttributeRules();
+
   public constructor(
     private readonly documentReceiver: EditorDocumentCommandReceiver,
+    private readonly attributeCatalog: AttributeCatalog = new AttributeRegistry(),
   ) {}
 
   public async createShape(
@@ -66,12 +71,20 @@ export class EditorShapeCommandReceiver implements ShapeCommandReceiver {
 
   public async setAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
     value: string | number,
   ): Promise<CommandResult> {
     const document = this.documentReceiver.requireDocument();
     const shape = document.getShape(shapeId);
-    document.setAttribute(shapeId, attribute, value);
+    const handler = this.attributeCatalog.find(shape, attribute);
+
+    if (handler !== undefined) {
+      const message = handler.apply(shape, attribute, `${value}`);
+      return new CommandSuccessResult(message);
+    }
+
+    const editable = this.attributeRules.requireEditable(attribute);
+    document.setAttribute(shapeId, editable, value);
     return new CommandSuccessResult(
       `${shape.getType()}#${shape.getId()} updated: ${attribute}=${this.formatValue(value)}`,
     );
@@ -137,9 +150,21 @@ export class EditorShapeCommandReceiver implements ShapeCommandReceiver {
 
   public captureAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
   ): ShapeAttributeSnapshot {
-    return this.documentReceiver.requireDocument().captureAttribute(shapeId, attribute);
+    const document = this.documentReceiver.requireDocument();
+    const shape = document.getShape(shapeId);
+    // 查找属性处理程序
+    const handler = this.attributeCatalog.find(shape, attribute);
+
+    // 如果找到处理程序，则调用其捕获方法
+    if (handler !== undefined) {
+      return handler.capture(shape, attribute);
+    }
+
+    // 如果未找到处理程序，则使用默认的捕获方法
+    const editable = this.attributeRules.requireEditable(attribute);
+    return document.captureAttribute(shapeId, editable);
   }
 
   public restoreAttribute(snapshot: ShapeAttributeSnapshot): void {

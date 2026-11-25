@@ -17,9 +17,7 @@ export class SetCommandContribution {
       (parameters) => {
         parameters.expectLength(3);
         const shapeId = parameters.text(0, "shape id");
-        const attribute = attributeParser.parse(
-          parameters.text(1, "attribute"),
-        );
+        const attribute = parameters.text(1, "attribute");
         const value = attributeParser.isNumeric(attribute)
           ? parameters.number(2)
           : parameters.rawText(2, "attribute value");

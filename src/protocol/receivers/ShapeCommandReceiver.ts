@@ -1,7 +1,6 @@
 import type { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
 import type { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "@/protocol/results/CommandResult";
-import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 import type { Shape } from "@/protocol/shapes/model/Shape";
 
 export interface ShapeCommandReceiver {
@@ -11,7 +10,7 @@ export interface ShapeCommandReceiver {
   scaleShape(shapeId: string, factor: number): Promise<CommandResult>;
   setAttribute(
     shapeId: string,
-    attribute: EditableAttribute,
+    attribute: string,
     value: string | number,
   ): Promise<CommandResult>;
   groupShapes(containerId: string, memberIds: readonly string[]): Promise<CommandResult>;
@@ -21,9 +20,6 @@ export interface ShapeCommandReceiver {
   capturePlacement(shapeId: string): ShapePlacement;
   restorePlacements(placements: readonly ShapePlacement[]): void;
   restoreGroup(placement: ShapePlacement): void;
-  captureAttribute(
-    shapeId: string,
-    attribute: EditableAttribute,
-  ): ShapeAttributeSnapshot;
+  captureAttribute(shapeId: string, attribute: string): ShapeAttributeSnapshot;
   restoreAttribute(snapshot: ShapeAttributeSnapshot): void;
 }

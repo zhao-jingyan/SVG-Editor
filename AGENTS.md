@@ -60,6 +60,7 @@
 - 具体内置图形贡献在 `src/_builtin/shapes/XxxShape/`（如 `RectShape/RectShapeContribution.ts`）；内置领域 Shape 类在 `protocol/shapes/concrete/`；插件图形（如 `box`）的具体类与 Contribution 同目录于 `src/_plugin/shapes/XxxShape/`，不进 protocol concrete；由 `main`（及测试夹具）注册进 `ShapeRegistry`。
 - 命令共享基类、贡献契约与撤销快照放在 `protocol/commands/`（`Command`、`UndoableCommand`、`contribution/`、`memento/`）。
 - 图形贡献契约放在 `protocol/shapes/contribution/`（`ShapeContribution`、`ShapeCatalog`、`ShapeSvgReadInput`、`ShapeArgumentParser`）；运行时注册表为 `core/shapes/ShapeRegistry`。
+- 属性扩展点放在 `protocol/attributes/`（`AttributeHandler`、`AttributeCatalog`、`EditableAttributeRules`）；运行时注册表为 `core/attributes/AttributeRegistry`；`set` 先查处理器，未命中再走 Phase 1 白名单。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 
 ## 现有偏差与整改
