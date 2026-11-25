@@ -5,7 +5,6 @@ import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class AddToCommand extends UndoableCommand {
-  public readonly type = "addto";
   private placement?: ShapePlacement;
 
   public constructor(

@@ -7,7 +7,7 @@
 - `EditorDocumentCommandReceiver` 持有可选 `Document`、当前文件路径、可注入 `SvgStorage`、SVG 解析器与写入器；文档不存在时只允许 `init`、`read`、`exit` 和 `help`；`save`、`canvas` 等其余命令仍要求文档存在。
 - `EditorShapeCommandReceiver` 负责图形创建、编辑、组合、排序和局部快照；`EditorViewCommandReceiver` 负责 tree、show 和 help。
 - `CommandExecutor` 位于 `src/core/CommandExecutor.ts`，实现 `Executor`，依赖抽象的 `CommandReceiver` 和共享 `CommandHistory`；成功执行可撤销命令后直接记录历史。
-- `main.ts` 只负责创建同一个 `CommandHistory` 实例，并组装 `ConsoleInputReader`、`CommandLoop`、`CommandSession`、`CommandLineParser`、`EditorCommandReceiver` 和 `CommandExecutor`。
+- `main.ts` 只负责创建同一个 `CommandHistory` 与 `CommandRegistry`，并组装 `ConsoleInputReader`、`CommandLoop`、`CommandSession`、`CommandLineParser`、`HelpText`、`EditorCommandReceiver` 和 `CommandExecutor`。
 
 ## 生命周期与历史
 
@@ -25,7 +25,7 @@
 - `tree` 由 `TreeDisplay` 渲染，使用 `ShapeSummaryVisitor` 取得各图形摘要，再统一计算属性对齐和树形连接线；无参数显示根级 `svg (WxH)`，带 id 时只显示该节点子树。
 - `show` 使用 `ShapeDetailVisitor` 输出几何与样式明细；首行为 `type#id  parent=g#parent`，根级图形显示 `parent=svg`。
 - 显示结果是一条可包含换行的成功消息，不进入历史栈，也不改变历史锁。
-- `HelpText` 集中维护 `help` 文本，由 EditorViewCommandReceiver 调用，避免命令说明散落在 Receiver 或 CLI。
+- `HelpText` 从注入的 `CommandCatalog` 读取帮助行，由 EditorViewCommandReceiver 调用；Parser 与 help 共享同一命令目录，避免第二份硬编码列表。
 
 ## SVG IO
 

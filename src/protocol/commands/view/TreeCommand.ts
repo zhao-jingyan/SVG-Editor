@@ -3,8 +3,6 @@ import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class TreeCommand extends Command {
-  public readonly type = "tree";
-
   public constructor(private readonly shapeId?: string) {
     super();
   }

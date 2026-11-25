@@ -6,7 +6,6 @@ import type { EditableAttribute } from "../../shapes/model/EditableAttribute";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class SetCommand extends UndoableCommand {
-  public readonly type = "set";
   private snapshot?: ShapeAttributeSnapshot;
 
   public constructor(

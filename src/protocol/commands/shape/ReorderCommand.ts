@@ -5,7 +5,6 @@ import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class ReorderCommand extends UndoableCommand {
-  public readonly type = "reorder";
   private placement?: ShapePlacement;
 
   public constructor(

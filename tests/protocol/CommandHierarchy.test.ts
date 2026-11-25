@@ -20,6 +20,10 @@ import { TreeCommand } from "../../src/protocol/commands/view/TreeCommand";
 import { UndoCommand } from "../../src/protocol/commands/history/UndoCommand";
 import { UngroupCommand } from "../../src/protocol/commands/shape/UngroupCommand";
 import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
+import { CommandErrorCode } from "../../src/protocol/errors/CommandErrorCode";
+import type { CommandReceiver } from "../../src/protocol/receivers/CommandReceiver";
+import type { CommandResult } from "../../src/protocol/results/CommandResult";
+import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "../../src/protocol/shapes/concrete/GroupShape";
 import { RecordingCommandReceiver } from "../support/RecordingCommandReceiver";
 
@@ -74,5 +78,38 @@ describe("Command 类层次", () => {
       { method: "moveShape", args: ["r1", 10, 20] },
       { method: "moveShape", args: ["r1", -10, -20] },
     ]);
+  });
+
+  it("UndoableCommand 未执行与未实现 undo 使用类名诊断", async () => {
+    class IncompleteUndoableCommand extends UndoableCommand {
+      public async execute(
+        _receiver: CommandReceiver,
+      ): Promise<CommandResult> {
+        return new CommandSuccessResult("ok");
+      }
+    }
+
+    const receiver = new RecordingCommandReceiver();
+
+    expect(
+      (await new IncompleteUndoableCommand().undo(receiver)).toCommandResultDto(),
+    ).toEqual({
+      type: "error",
+      error: {
+        code: CommandErrorCode.CommandNotImplemented,
+        message:
+          "undo is not implemented for command: IncompleteUndoableCommand",
+      },
+    });
+
+    expect(
+      (await new MoveCommand("r1", 1, 2).undo(receiver)).toCommandResultDto(),
+    ).toEqual({
+      type: "error",
+      error: {
+        code: CommandErrorCode.InvalidArgument,
+        message: "command has not been executed: MoveCommand",
+      },
+    });
   });
 });

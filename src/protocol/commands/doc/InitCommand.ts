@@ -3,8 +3,6 @@ import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class InitCommand extends Command {
-  public readonly type = "init";
-
   public constructor(
     private readonly width?: number,
     private readonly height?: number,

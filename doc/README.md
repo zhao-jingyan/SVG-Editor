@@ -93,8 +93,9 @@ stdin
   -> CommandParser
   -> CommandLineParser
   -> CommandLineTokenizer
-  -> CommandDefinitionRegistry
-  -> doc / shape / view 命令族 Parser
+  -> CommandCatalog / CommandRegistry
+  -> CommandContribution
+  -> Core 命令族 Parser
   -> ShapeFactory（仅 create）
   -> 具体 Command
   -> CommandExecutor
@@ -112,8 +113,8 @@ stdin
 - 结果沿相反方向返回：Receiver 返回 `CommandResult` 或 `ProtocolError`，Executor 统一转换错误并在需要时记录可撤销命令，Session 转换为边界 DTO 后输出。
 - `CommandLoop` 只负责启动提示、提示符、逐行读取和终止；它不解释解析结果或执行结果。
 - `CommandSession` 负责单次输入的交互策略：空输入不输出，解析错误输出 `error: ...`，成功结果输出消息，退出结果结束会话。
-- `CommandLineParser` 只负责切词、命令查找、参数对象创建和解析结果包装；命令名分派集中在 `CommandDefinitionRegistry`。
-- 命令族 Parser 负责各自参数语义；只有 `CreateCommandParser` 通过 `ShapeFactory` 创建具体图形，其他模块不直接按类型名构造 Shape。
+- `CommandLineParser` 只负责切词、目录查找、`CommandParameters` 创建和解析结果包装；命令名分派集中在 `CommandCatalog` / `CommandRegistry`。
+- Core 命令族 Parser 负责各自参数语义；只有 `CreateCommandParser` 通过 `ShapeFactory` 创建具体图形，其他模块不直接按类型名构造 Shape。
 - `CommandExecutor` 调用具体 Command，成功且可撤销时立即记录到 `CommandHistory`，再把 `ProtocolError` 转换为错误结果；未知异常继续上抛，由组合根终止进程。
 - `EditorCommandReceiver` 把文档、图形、显示能力委托给三个能力对象，并把 undo/redo 委托给共享 History；它不持有文档状态，历史和当前文档分别由 `CommandHistory` 与 `EditorDocumentCommandReceiver` 管理。
 - 具体命令通过 `CommandReceiver` 操作文档，并通过 `ShapePlacement` / `ShapeAttributeSnapshot` 保存局部逆操作状态。
@@ -155,7 +156,7 @@ Shape
 | Caretaker | `CommandHistory` | 管理 undo/redo 两栈和历史锁，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
 | Adapter / Port | `Executor`、`CommandReceiver`、`InputReader` / `OutputWriter`、`SvgStorage` 及各自生产适配器 | 隔离 CLI、Core、标准输入输出和文件系统，使组合根可替换具体实现 | 层与层直接依赖具体类会破坏依赖方向，也降低测试可控性，不采用 |
 
-按名字分派只保留两个集中位置：`CommandDefinitionRegistry` 负责“命令名 -> 命令族 Parser”，`ShapeFactory` 负责“图形类型名 -> 具体 Shape”。这两处仍是待重构的观察点：若命令或图形扩展变成插件机制，应改为可扩展注册与发现，而不是继续扩大集中分支。`GroupShape` 还会由 Document 的 group 领域操作直接创建，但这不是按文本类型名分派。`ShapeVisitor` 是领域内的多态访问机制，不属于字符串类型分派。
+按名字分派只保留两个集中位置：`CommandCatalog` / `CommandRegistry` 负责“命令名 -> CommandContribution”，`ShapeFactory` 负责“图形类型名 -> 具体 Shape”。后续插件运行时可直接复用 Registry 的注册能力。`GroupShape` 还会由 Document 的 group 领域操作直接创建，但这不是按文本类型名分派。`ShapeVisitor` 是领域内的多态访问机制，不属于字符串类型分派。
 
 ## 4. 依赖方向与理由
 

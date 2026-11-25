@@ -3,8 +3,6 @@ import type { CommandReceiver } from "../../receivers/CommandReceiver";
 import type { CommandResult } from "../../results/CommandResult";
 
 export class ShowCommand extends Command {
-  public readonly type = "show";
-
   public constructor(private readonly shapeId: string) {
     super();
   }

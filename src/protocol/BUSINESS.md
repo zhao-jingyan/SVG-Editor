@@ -9,8 +9,9 @@
 
 ## 核心规则
 
-- `Command` 不是独立层或模块边界：它由 CLI Parser 构造，经 CLI Session 交给 Core Executor，再由 Executor 调用 `command.execute(receiver)` 进入 Core Receiver。
-- Protocol 是这些跨层对象的共同定义：Command、Shape、CommandResult、ProtocolError，以及 Executor 和 Receiver 能力端口。CLI 与 Core 都依赖 Protocol，Protocol 不依赖二者。
+- `Command` 不是独立层或模块边界：它由命令贡献对象创建，经 CLI Session 交给 Core Executor，再由 Executor 调用 `command.execute(receiver)` 进入 Core Receiver。
+- Protocol 是这些跨层对象的共同定义：Command、贡献契约、Shape、CommandResult、ProtocolError，以及 Executor 和 Receiver 能力端口。CLI 与 Core 都依赖 Protocol，Protocol 不依赖二者。
+- 命令身份由 `CommandContribution.getName()` 表达；`Command` 自身不再携带封闭的类型字段。
 - `Executor` 接收已经解析好的 `Command`，返回 `CommandResult`；它不接收原始文本，也不负责命令名解析。
 - `CommandReceiver` 由文档、图形、显示、历史四个能力接口组合而成。能力拆分用于说明命令所需能力，但具体命令仍面对统一聚合接口。
 - 文档、显示、历史、会话命令只执行一次，不属于撤销单元；九类编辑命令继承 `UndoableCommand`，一条命令对应一个 undo 单元。
@@ -53,6 +54,7 @@
 
 - 执行端口：[Executor](execution/Executor.ts)。
 - 命令流：[Command](commands/Command.ts)、[UndoableCommand](commands/UndoableCommand.ts)、具体命令族 [commands](commands/)。
+- 贡献契约：[CommandContribution](contribution/CommandContribution.ts)、[CommandHelp](contribution/CommandHelp.ts)、[CommandParameters](contribution/CommandParameters.ts)、[CommandCatalog](contribution/CommandCatalog.ts)。
 - Receiver 契约：[CommandReceiver](receivers/CommandReceiver.ts) 及四个能力接口。
 - 结果：[CommandResult](results/CommandResult.ts)、[outcomes](results/outcomes/)、[CommandResultDto](results/dto/CommandResultDto.ts)。
 - 错误：[ProtocolError](errors/ProtocolError.ts)、[CommandErrorCode](errors/CommandErrorCode.ts)、[ErrorSource](errors/ErrorSource.ts)、[CommandErrorDto](errors/dto/CommandErrorDto.ts)。

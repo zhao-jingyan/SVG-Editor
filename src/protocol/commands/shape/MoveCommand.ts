@@ -5,7 +5,6 @@ import type { ShapeType } from "../../shapes/model/ShapeType";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class MoveCommand extends UndoableCommand {
-  public readonly type = "move";
   private shapeType?: ShapeType;
 
   public constructor(

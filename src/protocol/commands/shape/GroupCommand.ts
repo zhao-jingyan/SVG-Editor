@@ -5,7 +5,6 @@ import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class GroupCommand extends UndoableCommand {
-  public readonly type = "group";
   private placements?: readonly ShapePlacement[];
 
   public constructor(

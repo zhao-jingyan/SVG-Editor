@@ -5,7 +5,6 @@ import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class DeleteCommand extends UndoableCommand {
-  public readonly type = "delete";
   private placement?: ShapePlacement;
 
   public constructor(private readonly shapeId: string) {

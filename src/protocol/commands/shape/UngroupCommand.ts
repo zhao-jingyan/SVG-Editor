@@ -5,7 +5,6 @@ import type { CommandResult } from "../../results/CommandResult";
 import { UndoableCommand } from "../UndoableCommand";
 
 export class UngroupCommand extends UndoableCommand {
-  public readonly type = "ungroup";
   private placement?: ShapePlacement;
 
   public constructor(private readonly containerId: string) {

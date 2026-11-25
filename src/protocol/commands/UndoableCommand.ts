@@ -10,7 +10,7 @@ export abstract class UndoableCommand extends Command {
     return new CommandErrorResult(
       ProtocolError.commandExecution(
         CommandErrorCode.CommandNotImplemented,
-        `undo is not implemented for command: ${this.type}`,
+        `undo is not implemented for command: ${this.constructor.name}`,
       ),
     );
   }
@@ -19,7 +19,7 @@ export abstract class UndoableCommand extends Command {
     return new CommandErrorResult(
       ProtocolError.commandExecution(
         CommandErrorCode.InvalidArgument,
-        `command has not been executed: ${this.type}`,
+        `command has not been executed: ${this.constructor.name}`,
       ),
     );
   }

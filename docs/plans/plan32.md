@@ -12,6 +12,11 @@
 2. Core 内置目录接线：Registry、Builtin 贡献、Parser/Help/main 组装。
 3. 移除 `CommandType` 与旧 CLI 注册表，更新测试与文档。
 
+## 完成状态
+
+- 三次提交已落地；help 黄金文本与 E2E 保持不变。
+- 本轮未引入插件生命周期、配置加载器或贡献暂存回滚。
+
 ## 验证
 
 - `npm test`

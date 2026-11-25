@@ -4,8 +4,6 @@ import { UndoableCommand } from "../UndoableCommand";
 import type { Shape } from "../../shapes/model/Shape";
 
 export class CreateCommand extends UndoableCommand {
-  public readonly type = "create";
-
   public constructor(
     private readonly shape: Shape,
     private readonly parentId?: string,

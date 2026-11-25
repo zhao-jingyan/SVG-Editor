@@ -1,5 +1,4 @@
 import type { CommandReceiver } from "../../src/protocol/receivers/CommandReceiver";
-import type { CommandType } from "../../src/protocol/commands/CommandType";
 import type { CommandResult } from "../../src/protocol/results/CommandResult";
 import { CommandSuccessResult } from "../../src/protocol/results/outcomes/CommandSuccessResult";
 import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
@@ -7,8 +6,6 @@ import { UndoableCommand } from "../../src/protocol/commands/UndoableCommand";
 type ScriptedOutcome = CommandResult | Error;
 
 export class ScriptedUndoableCommand extends UndoableCommand {
-  public readonly type: CommandType = "move";
-
   private executeCount = 0;
   private undoCount = 0;
 

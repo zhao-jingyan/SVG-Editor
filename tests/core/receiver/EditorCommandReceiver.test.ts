@@ -289,7 +289,7 @@ describe("EditorCommandReceiver", () => {
       expectErrorMessage(
         result,
         CommandErrorCode.InvalidArgument,
-        `command has not been executed: ${command.type}`,
+        `command has not been executed: ${command.constructor.name}`,
       );
     }
   });
@@ -497,8 +497,6 @@ describe("EditorCommandReceiver", () => {
     const { executor } = createReceiver();
 
     class ExplodingCommand extends Command {
-      public readonly type = "help";
-
       public async execute(): Promise<CommandResult> {
         throw new Error("boom");
       }
