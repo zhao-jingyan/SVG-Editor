@@ -1,5 +1,5 @@
-import type { ShapeAttributeSnapshot } from "@/protocol/commands/_common/memento/ShapeAttributeSnapshot";
-import type { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import type { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
+import type { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "@/protocol/results/CommandResult";
 import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 import type { Shape } from "@/protocol/shapes/model/Shape";

@@ -1,5 +1,5 @@
-import type { CommandCatalog } from "@/protocol/commands/_common/contribution/CommandCatalog";
-import type { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import type { CommandCatalog } from "@/protocol/commands/contribution/CommandCatalog";
+import type { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
 
 /**
  * 运行时命令注册表：维护插入顺序并拒绝同名命令。

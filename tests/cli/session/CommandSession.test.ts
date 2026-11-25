@@ -7,7 +7,7 @@ import { CommandParseEmptyResult } from "@/cli/parser/results/CommandParseEmptyR
 import { CommandParseErrorResult } from "@/cli/parser/results/CommandParseErrorResult";
 import type { CommandParseResult } from "@/cli/parser/results/CommandParseResult";
 import { CommandParseSuccessResult } from "@/cli/parser/results/CommandParseSuccessResult";
-import type { Command } from "@/protocol/commands/_common/Command";
+import type { Command } from "@/protocol/commands/Command";
 import { ExitCommand } from "@/builtin/commands/ExitCommand/ExitCommand";
 import { HelpCommand } from "@/builtin/commands/HelpCommand/HelpCommand";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";

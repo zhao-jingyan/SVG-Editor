@@ -1,7 +1,7 @@
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
-import type { CommandCatalog } from "@/protocol/commands/_common/contribution/CommandCatalog";
-import { CommandParameters } from "@/protocol/commands/_common/contribution/CommandParameters";
+import type { CommandCatalog } from "@/protocol/commands/contribution/CommandCatalog";
+import { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
 import type { CommandParser } from "./CommandParser";
 import { CommandLineTokenizer } from "./syntax/CommandLineTokenizer";
 import { CommandParseEmptyResult } from "./results/CommandParseEmptyResult";

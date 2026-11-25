@@ -37,7 +37,7 @@
 |---|---|---|
 | tree/show 通过 Visitor 扩展 | 类型相关格式离开领域对象，避免新增类型分派点 | [ShapeVisitor](../../protocol/shapes/visitor/ShapeVisitor.ts)、[ShapeSummaryVisitor](ShapeSummaryVisitor.ts) |
 | 属性内联到 tree | 脱离画布时仍能识别图形几何和顺序 | [TreeDisplay](TreeDisplay.ts)、[ShapeDisplay.test.ts](../../../tests/core/display/ShapeDisplay.test.ts) |
-| help 从命令目录读取 | Parser 与 help 共享同一贡献对象，避免第二份硬编码列表 | [HelpText](HelpText.ts)、[CommandCatalog](../../protocol/commands/_common/contribution/CommandCatalog.ts) |
+| help 从命令目录读取 | Parser 与 help 共享同一贡献对象，避免第二份硬编码列表 | [HelpText](HelpText.ts)、[CommandCatalog](../../protocol/commands/contribution/CommandCatalog.ts) |
 
 ## 相关代码
 

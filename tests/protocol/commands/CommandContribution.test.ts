@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
-import { CommandParameters } from "@/protocol/commands/_common/contribution/CommandParameters";
+import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
+import { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
 import { MoveCommand } from "@/builtin/commands/MoveCommand/MoveCommand";
 
 describe("CommandContribution", () => {

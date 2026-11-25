@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Command } from "@/protocol/commands/_common/Command";
+import { Command } from "@/protocol/commands/Command";
 import { AddToCommand } from "@/builtin/commands/AddToCommand/AddToCommand";
 import { CanvasCommand } from "@/builtin/commands/CanvasCommand/CanvasCommand";
 import { CreateCommand } from "@/builtin/commands/CreateCommand/CreateCommand";
@@ -19,7 +19,7 @@ import { ShowCommand } from "@/builtin/commands/ShowCommand/ShowCommand";
 import { TreeCommand } from "@/builtin/commands/TreeCommand/TreeCommand";
 import { UndoCommand } from "@/builtin/commands/UndoCommand/UndoCommand";
 import { UngroupCommand } from "@/builtin/commands/UngroupCommand/UngroupCommand";
-import { UndoableCommand } from "@/protocol/commands/_common/UndoableCommand";
+import { UndoableCommand } from "@/protocol/commands/UndoableCommand";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
 import type { CommandResult } from "@/protocol/results/CommandResult";

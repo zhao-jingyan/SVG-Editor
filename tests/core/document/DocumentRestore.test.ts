@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Document } from "@/core/document/Document";
-import { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ErrorSource } from "@/protocol/errors/ErrorSource";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";

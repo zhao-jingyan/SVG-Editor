@@ -1,5 +1,5 @@
 import { RedoCommand } from "./RedoCommand";
-import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
+import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
 
 export class RedoCommandContribution {
   public static create(): CommandContribution {

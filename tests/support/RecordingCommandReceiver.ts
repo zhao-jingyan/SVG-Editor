@@ -1,7 +1,7 @@
 import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
 import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
-import { ShapeAttributeSnapshot } from "@/protocol/commands/_common/memento/ShapeAttributeSnapshot";
-import { ShapePlacement } from "@/protocol/commands/_common/memento/ShapePlacement";
+import { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
+import { ShapePlacement } from "@/protocol/commands/memento/ShapePlacement";
 import type { CommandResult } from "@/protocol/results/CommandResult";
 import { CommandSuccessResult } from "@/protocol/results/outcomes/CommandSuccessResult";
 import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";

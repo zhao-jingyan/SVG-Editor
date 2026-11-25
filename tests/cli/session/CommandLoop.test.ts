@@ -8,7 +8,7 @@ import type { CommandParseResult } from "@/cli/parser/results/CommandParseResult
 import { CommandParseSuccessResult } from "@/cli/parser/results/CommandParseSuccessResult";
 import { ExitCommand } from "@/builtin/commands/ExitCommand/ExitCommand";
 import { HelpCommand } from "@/builtin/commands/HelpCommand/HelpCommand";
-import type { Command } from "@/protocol/commands/_common/Command";
+import type { Command } from "@/protocol/commands/Command";
 import type { Executor } from "@/protocol/execution/Executor";
 import { CommandExitResult } from "@/protocol/results/outcomes/CommandExitResult";
 import type { CommandResult } from "@/protocol/results/CommandResult";

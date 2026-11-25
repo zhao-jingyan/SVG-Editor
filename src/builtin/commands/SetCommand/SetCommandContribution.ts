@@ -1,6 +1,6 @@
 import { SetCommand } from "./SetCommand";
-import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 import { EditableAttributeParser } from "./EditableAttributeParser";
 
 export class SetCommandContribution {

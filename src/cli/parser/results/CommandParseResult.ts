@@ -1,4 +1,4 @@
-import type { Command } from "@/protocol/commands/_common/Command";
+import type { Command } from "@/protocol/commands/Command";
 import type { CommandErrorDto } from "@/protocol/errors/dto/CommandErrorDto";
 
 export type CommandParseResultDto =

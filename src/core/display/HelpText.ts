@@ -1,4 +1,4 @@
-import type { CommandCatalog } from "@/protocol/commands/_common/contribution/CommandCatalog";
+import type { CommandCatalog } from "@/protocol/commands/contribution/CommandCatalog";
 
 /**
  * 从命令目录渲染 Phase 1 help 文本。

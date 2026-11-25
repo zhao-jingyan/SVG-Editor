@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CommandParameters } from "@/protocol/commands/_common/contribution/CommandParameters";
+import { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 

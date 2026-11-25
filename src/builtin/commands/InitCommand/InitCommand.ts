@@ -1,4 +1,4 @@
-import { Command } from "@/protocol/commands/_common/Command";
+import { Command } from "@/protocol/commands/Command";
 import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
 import type { CommandResult } from "@/protocol/results/CommandResult";
 

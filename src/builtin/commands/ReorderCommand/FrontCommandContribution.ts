@@ -1,6 +1,6 @@
 import { ReorderCommand } from "./ReorderCommand";
-import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 
 export class FrontCommandContribution {
   public static create(): CommandContribution {

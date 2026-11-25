@@ -3,7 +3,7 @@ import { CommandLineParser } from "@/cli/parser/CommandLineParser";
 import type { CommandParseResultDto } from "@/cli/parser/results/CommandParseResult";
 import { CommandParseEmptyResult } from "@/cli/parser/results/CommandParseEmptyResult";
 import { CommandParseErrorResult } from "@/cli/parser/results/CommandParseErrorResult";
-import type { Command } from "@/protocol/commands/_common/Command";
+import type { Command } from "@/protocol/commands/Command";
 import type { EditableAttribute } from "@/protocol/shapes/model/EditableAttribute";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { AddToCommand } from "@/builtin/commands/AddToCommand/AddToCommand";

@@ -1,6 +1,6 @@
 import { AddToCommand } from "./AddToCommand";
-import { CommandContribution } from "@/protocol/commands/_common/contribution/CommandContribution";
-import { CommandHelp } from "@/protocol/commands/_common/contribution/CommandHelp";
+import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 
 export class AddToCommandContribution {
   public static create(): CommandContribution {

@@ -10,8 +10,8 @@
 ## 核心规则
 
 - 一行输入只有三种业务结果：空输入、已解析命令或解析错误。空行、纯空白行和首个非空字符为 `#` 的注释行不产生命令，也不产生输出。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `tokenize`。
-- 双引号用于保留参数中的空白；`""` 表示空字符串参数。引号未闭合属于解析错误。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `scan` 与 Protocol 的 [CommandParameters](../protocol/commands/_common/contribution/CommandParameters.ts)。
-- 未注册的命令名属于解析错误，只产生 `error: unknown command: <name>`，不得进入 Executor。依据：注入的 [CommandCatalog](../protocol/commands/_common/contribution/CommandCatalog.ts) 与 [CommandLineParser](parser/CommandLineParser.ts) 的 `parse`。
+- 双引号用于保留参数中的空白；`""` 表示空字符串参数。引号未闭合属于解析错误。依据：[CommandLineTokenizer](parser/syntax/CommandLineTokenizer.ts) 的 `scan` 与 Protocol 的 [CommandParameters](../protocol/commands/contribution/CommandParameters.ts)。
+- 未注册的命令名属于解析错误，只产生 `error: unknown command: <name>`，不得进入 Executor。依据：注入的 [CommandCatalog](../protocol/commands/contribution/CommandCatalog.ts) 与 [CommandLineParser](parser/CommandLineParser.ts) 的 `parse`。
 - 解析错误和已建模的命令失败都输出一条 `error: <message>`，随后继续读取下一条输入；CLI 当前不向用户显示错误码。依据：[CommandSession](session/CommandSession.ts) 的 `handle` 与 `writeError`。
 - 命令成功后输出命令结果中的业务消息。成功的命令名分派只由 `CommandCatalog` / Core 的 [CommandRegistry](../core/commands/CommandRegistry.ts) 维护，CLI 其他对象不得再增加第二套命令名分派。
 - `exit` 或输入流 EOF 结束会话；结束前已经执行的命令不回滚。依据：[CommandLoop](session/CommandLoop.ts) 的 `run`。

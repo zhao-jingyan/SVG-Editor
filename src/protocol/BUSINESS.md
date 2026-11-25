@@ -45,16 +45,16 @@
 
 | 决策 | 原因与证据 | 来源 |
 |---|---|---|
-| 解析与执行通过 Command 对象交换 | CLI 只生产命令，Core 只消费命令，双方共享 Protocol 契约而不互相依赖 | [Command](commands/_common/Command.ts)、[Executor](execution/Executor.ts)、[CommandExecutor](../core/CommandExecutor.ts) |
+| 解析与执行通过 Command 对象交换 | CLI 只生产命令，Core 只消费命令，双方共享 Protocol 契约而不互相依赖 | [Command](commands/Command.ts)、[Executor](execution/Executor.ts)、[CommandExecutor](../core/CommandExecutor.ts) |
 | Receiver 按四类能力拆分再聚合 | 各命令只需要明确能力，聚合接口仍可统一执行 | commit `b06d06b`、[receivers](receivers/) |
-| 局部 Memento 而非整文档快照 | 每个编辑命令表达真实逆操作，失败和恢复边界更清晰 | [ShapePlacement](commands/_common/memento/ShapePlacement.ts)、[ShapeAttributeSnapshot](commands/_common/memento/ShapeAttributeSnapshot.ts) |
+| 局部 Memento 而非整文档快照 | 每个编辑命令表达真实逆操作，失败和恢复边界更清晰 | [ShapePlacement](commands/memento/ShapePlacement.ts)、[ShapeAttributeSnapshot](commands/memento/ShapeAttributeSnapshot.ts) |
 | 结果与错误使用运行时类层次并转换 DTO | 内部保留行为对象，边界保持可序列化 | commits `73db7e1`、`e6d451d`；[results](results/)、[errors](errors/) |
 
 ## 相关代码
 
 - 执行端口：[Executor](execution/Executor.ts)。
-- 命令流：[Command](commands/_common/Command.ts)、[UndoableCommand](commands/_common/UndoableCommand.ts)、具体命令族 [commands](commands/)。
-- 贡献契约：[CommandContribution](commands/_common/contribution/CommandContribution.ts)、[CommandHelp](commands/_common/contribution/CommandHelp.ts)、[CommandParameters](commands/_common/contribution/CommandParameters.ts)、[CommandCatalog](commands/_common/contribution/CommandCatalog.ts)。
+- 命令流：[Command](commands/Command.ts)、[UndoableCommand](commands/UndoableCommand.ts)、具体命令族 [commands](commands/)。
+- 贡献契约：[CommandContribution](commands/contribution/CommandContribution.ts)、[CommandHelp](commands/contribution/CommandHelp.ts)、[CommandParameters](commands/contribution/CommandParameters.ts)、[CommandCatalog](commands/contribution/CommandCatalog.ts)。
 - Receiver 契约：[CommandReceiver](receivers/CommandReceiver.ts) 及四个能力接口。
 - 结果：[CommandResult](results/CommandResult.ts)、[outcomes](results/outcomes/)、[CommandResultDto](results/dto/CommandResultDto.ts)。
 - 错误：[ProtocolError](errors/ProtocolError.ts)、[CommandErrorCode](errors/CommandErrorCode.ts)、[ErrorSource](errors/ErrorSource.ts)、[CommandErrorDto](errors/dto/CommandErrorDto.ts)。
