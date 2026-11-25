@@ -156,4 +156,41 @@ describe("PluginHost", () => {
       retainedContext?.commands.register(createRegistration("late")),
     ).toThrow("plugin context is no longer active");
   });
+
+  it("activateAll 在后续插件失败时保留先前成功插件", async () => {
+    const registry = new InMemoryCommandRegistry();
+    const host = new PluginHost({ commands: registry });
+    const successful: SvgPlugin = {
+      name: "successful",
+      activate(context: PluginContext): void {
+        context.commands.register(createRegistration("kept"));
+      },
+    };
+    const failing: SvgPlugin = {
+      name: "failing",
+      activate(context: PluginContext): void {
+        context.commands.register(createRegistration("discarded"));
+        throw new Error("失败");
+      },
+    };
+
+    await expect(
+      host.activateAll([successful, failing]),
+    ).rejects.toBeInstanceOf(PluginActivationError);
+    expect(
+      registry.getRegistrations().map((registration) => registration.getName()),
+    ).toEqual(["kept"]);
+  });
+
+  it("拒绝空插件名", async () => {
+    const registry = new InMemoryCommandRegistry();
+    const host = new PluginHost({ commands: registry });
+
+    await expect(
+      host.activate({
+        name: " ",
+        activate(): void {},
+      }),
+    ).rejects.toThrow("plugin name must not be empty");
+  });
 });

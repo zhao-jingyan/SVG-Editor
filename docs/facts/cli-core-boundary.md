@@ -3,12 +3,15 @@
 ## 目录职责
 
 - `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 持有 `Command` / `UndoableCommand` 基类、`CommandType` 和按语义族组织的具体命令；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol/plugins` 定义插件生命周期、Command 注册扩展点、只读命令目录和 help 文本端口；不包含插件实现或注册表存储。
+- `src/plugins` 存放与具体扩展点无关的插件宿主和暂存注册运行时，只依赖 Protocol；不包含 CLI、Core 或具体插件实现。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`tokenization`、`arguments`、`commands`、`definition`、`results` 分别承载切词、参数校验、命令构造、命令注册和解析结果。
+- `src/cli/plugins` 存放内置命令插件；它组合现有命令 Parser 并通过 Protocol 插件接口注册贡献。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
 - `src/protocol` 还存放应用入口端口 `Executor`；`src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display` 和 `io` 子系统。`EditorCommandReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面，`ShapeHierarchy` 与 `ShapeIndex` 是内部协作对象；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
 - `src/main.ts` 是组合根，只负责组装 CLI 适配器、解析器、Executor 与 CommandReceiver。
-- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次与图形测试。
+- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/plugins` 验证插件生命周期、暂存注册和回滚；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor 与 History 测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、动态 help 和树形格式测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令注册、命令类层次与图形测试。
 
 ```text
 src/protocol
@@ -16,6 +19,14 @@ src/protocol
 ├── errors
 ├── execution
 │   └── Executor.ts
+├── plugins
+│   ├── CommandCatalog.ts
+│   ├── CommandHelp.ts
+│   ├── CommandRegistrar.ts
+│   ├── CommandRegistration.ts
+│   ├── HelpTextProvider.ts
+│   ├── PluginContext.ts
+│   └── SvgPlugin.ts
 ├── receivers
 │   ├── CommandReceiver.ts
 │   ├── DocumentCommandReceiver.ts
@@ -43,7 +54,6 @@ src/cli
 │   ├── CommandParser.ts
 │   ├── commands
 │   │   ├── definition
-│   │   │   ├── CommandDefinition.ts
 │   │   │   └── CommandDefinitionRegistry.ts
 │   │   └── CommandsParser
 │   │       ├── doc
@@ -61,6 +71,8 @@ src/cli
 │   └── syntax
 │       ├── CommandArguments.ts
 │       └── CommandLineTokenizer.ts
+├── plugins
+│   └── BuiltinCommandPlugin.ts
 └── session
     ├── CommandLoop.ts
     ├── CommandSession.ts
@@ -88,9 +100,12 @@ export abstract class Command {
 - `UndoableCommand` 继承 `Command`，提供 `undo(receiver)`；九类图形编辑命令均已覆盖逆操作，基类默认实现仍作为未覆盖子类的安全兜底。
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandReceiver`，不再由 Executor 根据 `type` 分派。
-- `CommandDefinitionRegistry` 集中维护“命令名 → 命令定义”的唯一映射；`DocumentCommandParser`、`CreateCommandParser`、`ShapeCommandParser` 和 `ViewCommandParser` 只负责各自命令族的参数解释与对象构造。
-- `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、注册表查找和解析结果包装。
+- `CommandDefinitionRegistry` 保存“命令名 → 命令注册”的唯一映射和注册顺序；它不再构造内置命令。
+- `BuiltinCommandPlugin` 按现有顺序向 `PluginContext.commands` 注册全部内置命令；`DocumentCommandParser`、`CreateCommandParser`、`ShapeCommandParser` 和 `ViewCommandParser` 只负责各自命令族的参数解释与对象构造。
+- `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、注入命令目录查找和解析结果包装。
 - `CommandArguments` 统一处理元数、必填文本、数字转换和参数切片，解析器不再分散维护静态辅助函数。
+- `PluginHost` 为每个插件建立暂存注册，成功后才提交，失败则全部丢弃；`PluginContext` 激活结束后失效。
+- `HelpText` 根据命令目录生成完整帮助，`EditorCommandReceiver` 通过 `HelpTextProvider` 端口消费，不依赖 CLI 注册表实现。
 - `CommandReceiver` 是命令接收者接口，编辑方法统一返回 `Promise<CommandResult>`；另提供位置、子树和属性快照的同步捕获/恢复方法，供命令保存局部撤销状态。
 
 ## 结果模型
@@ -128,23 +143,28 @@ export abstract class Command {
 ```text
 src/main.ts -> src/cli
 src/main.ts -> src/core
+src/main.ts -> src/plugins
 src/cli -> src/protocol
 src/core -> src/protocol
+src/plugins -> src/protocol
 src/protocol -/-> src/cli
 src/protocol -/-> src/core
 src/core -/-> src/cli
+src/plugins -/-> src/cli
+src/plugins -/-> src/core
 ```
 
 - `CommandLoop` 依赖 `io` 的 `InputReader` / `OutputWriter` 端口和 `session` 内的 `CommandSession`，只负责提示符、逐行读取、会话状态和结束条件。
 - `CommandSession` 依赖 `parser` 的 `CommandParser` 接口、Protocol 的 `Executor` 接口和 `io` 的 `OutputWriter`；它把空输入、解析错误、命令结果和退出结果解释为终端反馈及继续/退出状态。
 - `CommandLoop` 接受可选启动提示；组合根传入 `svg-editor 0.1 — type 'help' for commands`，UI 文案不进入命令解析器。
-- `CommandDefinitionRegistry` 依赖协议层的具体命令类和图形工厂；`CommandLineParser` 只依赖 Tokenizer、注册表和参数对象。`parser` 不依赖 `session` 或 `io`。
+- `CommandDefinitionRegistry` 只保存协议层 `CommandRegistration`；内置命令由 CLI 插件在组合根装配时注册。`CommandLineParser` 只依赖 Tokenizer 和只读 `CommandCatalog`，不依赖图形工厂或具体命令类。`parser` 不依赖 `session` 或 `io`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
 - `CommandExecutor` 位于 Core，实现 `Executor`，依赖 `CommandReceiver` 与 `CommandHistory`；调用命令成功时直接记录 `UndoableCommand`，并转换 `ProtocolError`。
 - `EditorCommandReceiver` 位于 Core，实现聚合 `CommandReceiver`，把文档、图形和显示操作委托给 `EditorDocumentCommandReceiver`、`EditorShapeCommandReceiver`、`EditorViewCommandReceiver`，并与执行器共享 `CommandHistory`；它不持有文档状态或历史记录转发方法。
 - `EditorDocumentCommandReceiver` 通过 `SvgStorage` 接口访问文件；`FileSvgStorage` 是 Core 内唯一直接使用 Node `fs/promises` 的适配器，协议层不感知文件系统。
 - `CommandHistory` 由组合根创建并同时注入执行器与 EditorCommandReceiver，是真正的 Caretaker；命令栈和历史锁均由它维护。
 - `Document` 位于 `src/core/document`，是图形文档的聚合根门面；`ShapeHierarchy` 负责结构编辑，`ShapeIndex` 负责身份、父子索引和祖先判断。
+- `PluginHost` 位于 `src/plugins`，只依赖 Protocol 的插件与注册契约；具体插件和注册表由 `main.ts` 注入。
 
 ## 当前执行链路
 
@@ -155,6 +175,10 @@ ConsoleInputReader -> CommandLoop -> CommandSession -> CommandLineParser -> 具�
 CommandExecutor -> command.execute(CommandReceiver) -> Document / Shape 多态行为
        |
        +-> CommandHistory.record
+
+main.ts -> CommandDefinitionRegistry
+        -> PluginHost.activate(BuiltinCommandPlugin)
+        -> CommandLineParser(CommandDefinitionRegistry)
 ```
 
 - Parser 把空行和首个非空字符为 `#` 的注释行识别为 `empty`，把语法或参数失败识别为 `error`。
@@ -168,11 +192,13 @@ CommandExecutor -> command.execute(CommandReceiver) -> Document / Shape 多态�
 - `read` 成功替换文档、清空历史并锁定；`save` 成功只锁定历史，不主动清空历史；失败的 IO 操作不改变历史锁。
 - 未初始化文档时执行编辑、显示、撤销或画布命令返回 `no document. use 'init' or 'read' first`。
 - `help` 不依赖文档；`tree` 与 `show` 使用真实 Document 数据输出显示结果，但不进入历史栈。
+- 启动时内置命令插件必须先激活成功；插件注册失败不会留下部分命令，并终止启动。
+- 命令注册目录同时供 Parser 查找和 HelpText 渲染，二者不能各自维护命令表。
 
 ## 后续设计事实
 
 - `EditorCommandReceiver` 已接入 CLI 编辑链路，命令类本身保持与文档存储细节解耦。
 - undo/redo 采用命令自身逆操作和局部状态，不使用整文档快照。
-- `read/save` 已接入 SVG 子集与 IO 历史锁；插件注册表、复杂 SVG 特性和无损保留未知元素进入后续阶段。
+- `read/save` 已接入 SVG 子集与 IO 历史锁；Command 插件注册和暂存回滚已接入，ShapeProvider、AttributeHandler、TreeDecorator、配置加载器和复杂 SVG 特性进入后续阶段。
 - `Document`、`ShapeHierarchy` 与 `ShapeIndex` 已支持精确位置恢复和属性快照恢复，为命令撤销提供基础能力。
 - 真实 Core 的 Document、IO、History 错误在实现时继承 `ProtocolError`，并继续通过 `CommandErrorDto` 返回。

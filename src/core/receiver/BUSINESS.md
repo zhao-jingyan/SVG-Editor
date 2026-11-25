@@ -18,6 +18,7 @@
 - `canvas` 无参数只查询尺寸，不改变状态；同时提供宽高时 resize，并在成功后锁定历史。只提供一边属于参数错误。
 - 图形命令必须取得当前 Document；图形能力 Receiver 只负责调用 Document 和生成用户可见摘要，不保存第二份文档状态。
 - `tree`、`show` 需要当前文档；`help` 不依赖文档，可在 init/read 之前使用。
+- `help` 文本来自组合根注入的 `HelpTextProvider`，Receiver 不重新维护命令表。
 - `init`、`read` 清空历史并加锁；`save` 和修改尺寸的 `canvas` 只加锁；下一次成功编辑由 History 自动解锁。
 
 ## 状态与生命周期
@@ -42,6 +43,7 @@
 | 聚合门面 + 三个能力 Receiver | 避免单个 Receiver 同时管理文档、图形、显示和文件细节 | commits `b06d06b`、`faf50f7`、`43d93f5` |
 | 当前文档归文档 Receiver 所有 | Executor、图形和显示能力共享同一生命周期，但 CLI 不接触内部状态 | [EditorDocumentCommandReceiver](EditorDocumentCommandReceiver.ts) |
 | 执行与历史记录分离 | Executor 统一决定成功命令是否入栈，Receiver 只执行操作 | [CommandExecutor](../CommandExecutor.ts) |
+| help 文本通过端口注入 | 命令注册属于插件运行时，Receiver 只消费渲染能力，不依赖 CLI 注册表实现 | [EditorViewCommandReceiver](EditorViewCommandReceiver.ts)、[HelpTextProvider](../../protocol/plugins/HelpTextProvider.ts) |
 
 ## 相关代码
 

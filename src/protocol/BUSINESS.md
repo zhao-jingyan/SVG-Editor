@@ -11,6 +11,7 @@
 
 - `Command` 不是独立层或模块边界：它由 CLI Parser 构造，经 CLI Session 交给 Core Executor，再由 Executor 调用 `command.execute(receiver)` 进入 Core Receiver。
 - Protocol 是这些跨层对象的共同定义：Command、Shape、CommandResult、ProtocolError，以及 Executor 和 Receiver 能力端口。CLI 与 Core 都依赖 Protocol，Protocol 不依赖二者。
+- Protocol 的 `plugins` 子目录定义插件生命周期和 Command 注册扩展点。插件实现可依赖这些公开接口，但 Protocol 不导入插件、CLI 或 Core 实现。
 - `Executor` 接收已经解析好的 `Command`，返回 `CommandResult`；它不接收原始文本，也不负责命令名解析。
 - `CommandReceiver` 由文档、图形、显示、历史四个能力接口组合而成。能力拆分用于说明命令所需能力，但具体命令仍面对统一聚合接口。
 - 文档、显示、历史、会话命令只执行一次，不属于撤销单元；九类编辑命令继承 `UndoableCommand`，一条命令对应一个 undo 单元。
@@ -39,6 +40,7 @@
 - 不得把完整文档、图形树或 `ProtocolError` 直接放入 DTO。
 - 不得把 Command 描述为独立业务层，也不得让命令直接持有整份文档、历史栈或文件路径。
 - 不得在 Protocol 内读取文件、终端或运行时环境。
+- 插件注册对象可以携带命令构造行为，但不得直接执行命令或持有文档状态。
 
 ## 历史决策
 
@@ -48,6 +50,7 @@
 | Receiver 按四类能力拆分再聚合 | 各命令只需要明确能力，聚合接口仍可统一执行 | commit `b06d06b`、[receivers](receivers/) |
 | 局部 Memento 而非整文档快照 | 每个编辑命令表达真实逆操作，失败和恢复边界更清晰 | [ShapePlacement](commands/memento/ShapePlacement.ts)、[ShapeAttributeSnapshot](commands/memento/ShapeAttributeSnapshot.ts) |
 | 结果与错误使用运行时类层次并转换 DTO | 内部保留行为对象，边界保持可序列化 | commits `73db7e1`、`e6d451d`；[results](results/)、[errors](errors/) |
+| Command 扩展点使用注册对象而非开放命令名枚举 | 插件需要提供命令名、解析行为、usage 和 help，同时保持 `Command` 运行时对象与 Executor 不变 | [CommandRegistration](plugins/CommandRegistration.ts)、[CommandRegistrar](plugins/CommandRegistrar.ts) |
 
 ## 相关代码
 
@@ -56,4 +59,5 @@
 - Receiver 契约：[CommandReceiver](receivers/CommandReceiver.ts) 及四个能力接口。
 - 结果：[CommandResult](results/CommandResult.ts)、[outcomes](results/outcomes/)、[CommandResultDto](results/dto/CommandResultDto.ts)。
 - 错误：[ProtocolError](errors/ProtocolError.ts)、[CommandErrorCode](errors/CommandErrorCode.ts)、[ErrorSource](errors/ErrorSource.ts)、[CommandErrorDto](errors/dto/CommandErrorDto.ts)。
+- 插件 SPI：[SvgPlugin](plugins/SvgPlugin.ts)、[PluginContext](plugins/PluginContext.ts)、[CommandRegistration](plugins/CommandRegistration.ts)、[CommandCatalog](plugins/CommandCatalog.ts)。
 - 业务回归：[CommandHierarchy.test.ts](../../tests/protocol/CommandHierarchy.test.ts)、[CommandResults.test.ts](../../tests/protocol/CommandResults.test.ts)、[ProtocolErrors.test.ts](../../tests/protocol/ProtocolErrors.test.ts)、[EditorCommandReceiver.test.ts](../../tests/core/receiver/EditorCommandReceiver.test.ts)。
