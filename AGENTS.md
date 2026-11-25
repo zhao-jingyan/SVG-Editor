@@ -14,9 +14,10 @@
 - `src/_builtin`：内置命令与图形贡献包（`commands/XxxCommand/`、`shapes/XxxShape/`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
 - `src/_plugin`：可选命令/图形等插件包，依赖 `protocol`；不得依赖 `_builtin` / `core` 内部；由组合根注册。
 - `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `_builtin` / `_plugin`。
-- `src/main.ts`：只作为组合根，负责组装 CLI、Core、`_builtin` / `_plugin` 贡献注册与依赖实例。
-- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`_builtin -> protocol`、`_plugin -> protocol`、`main -> cli + core + _builtin + _plugin`。
-- `protocol` 不得依赖 `cli`、`core`、`_builtin`、`_plugin`、Node 或 DOM。
+- `src/host`：装配侧插件宿主与配置加载器（`PluginHost`、`loadPluginsFromConfig`）；不属于内核；加载器不得硬编码具体插件导入。
+- `src/main.ts`：只作为组合根，负责组装 CLI、Core、host、`_builtin` / `_plugin` 与方式 A/B 装入。
+- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`_builtin -> protocol`、`_plugin -> protocol`、`host -> protocol + core`（方式 A 装配可依赖 `_plugin`）、`main -> cli + core + host + _builtin + _plugin`。
+- `protocol` 不得依赖 `cli`、`core`、`host`、`_builtin`、`_plugin`、Node 或 DOM。
 - 禁止跨层直接访问、循环依赖，以及在 CLI 中实现编辑规则或文档状态。
 - 命令专用 API 不上 `CommandReceiver`；文档结构只读查询可用 `getRootShapes()`；文件系统经独立 `DirectoryListing` 端口，不经 Receiver。
 - 路径别名：`@/*` → `src/*`（`tsconfig` paths + vitest alias + `tests/tsconfig.json`；构建经 `resolve-tspaths` 回写相对路径）。指向 `src` 的导入统一用 `@/...`；同目录 `./X` 可保留相对路径。不是 npm package。

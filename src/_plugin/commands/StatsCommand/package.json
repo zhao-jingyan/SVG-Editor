@@ -1,0 +1,7 @@
+{
+  "name": "@svgframe/plugin-command-stats",
+  "main": "./index.js",
+  "contributes": {
+    "commands": ["stats"]
+  }
+}

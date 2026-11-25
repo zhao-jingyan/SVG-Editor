@@ -7,7 +7,7 @@
     "doc": "doc"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && resolve-tspaths -p tsconfig.json -s src -o dist",
+    "build": "tsc -p tsconfig.json && resolve-tspaths -p tsconfig.json -s src -o dist && node scripts/copy-plugin-manifests.mjs",
     "start": "node dist/main.js",
     "cli": "node dist/main.js",
     "lint": "node scripts/lint-layer-boundaries.mjs",

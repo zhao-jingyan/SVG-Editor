@@ -1,0 +1,7 @@
+{
+  "name": "@svgframe/plugin-tree-modified-star",
+  "main": "./ModifiedStarPlugin.js",
+  "contributes": {
+    "decorators": ["modified-star"]
+  }
+}

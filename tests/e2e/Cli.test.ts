@@ -18,8 +18,8 @@ interface CliRun {
   readonly stderr: string;
 }
 
-function runCli(input: string): CliRun {
-  const result = spawnSync(process.execPath, ["dist/main.js"], {
+function runCli(input: string, args: readonly string[] = []): CliRun {
+  const result = spawnSync(process.execPath, ["dist/main.js", ...args], {
     cwd: repositoryRoot,
     input,
     encoding: "utf8",
@@ -147,6 +147,29 @@ describe("CLI 进程级端到端", () => {
     expect(lines).toContain("└── g#markers *");
     expect(lines).toContain("circle#c1  parent=g#markers");
     expect(lines).toContain("  cx=100 cy=100 r=20");
+  });
+
+  it("方式 A 与 --config 方式 B 对同一会话输出一致", () => {
+    const script = [
+      "init 200 100",
+      "create box b1 10 10 80 40 \"hi\"",
+      "stats",
+      "tree",
+      "exit",
+    ].join("\n");
+
+    const wayA = runCli(script);
+    const wayB = runCli(script, ["--config", "plugins.config.json"]);
+
+    expect(wayA.status).toBe(0);
+    expect(wayB.status).toBe(0);
+    expect(wayA.stderr).toBe("");
+    expect(wayB.stderr).toBe("");
+    expect(wayB.stdout).toBe(wayA.stdout);
+    expect(wayA.stdout.split("\n")).toContain(
+      "rect: 1  text: 1  (total 2, containers 1)",
+    );
+    expect(wayA.stdout.split("\n")).toContain("└── g#b1 (box) *");
   });
 
   it("读取、编辑、保存 SVG 文件并锁定撤销", () => {
