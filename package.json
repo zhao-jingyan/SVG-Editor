@@ -7,7 +7,7 @@
     "doc": "doc"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && resolve-tspaths -p tsconfig.json -s src -o dist",
     "start": "node dist/main.js",
     "cli": "node dist/main.js",
     "test": "vitest run",
@@ -19,6 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "resolve-tspaths": "^0.8.23",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },

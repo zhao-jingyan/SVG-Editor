@@ -2,26 +2,23 @@
 
 ## 目录职责
 
-- `src/protocol` 存放 CLI 与 Core 共享的命令 API、图形领域模型、结果模型和错误模型：`commands` 持有 `_common`（基类、`contribution/`、`memento/`）与各 `XxxCommand/`；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、Node 或 DOM。
+- `src/protocol` 只存放契约：命令基类与贡献 API、图形领域模型、结果模型和错误模型。`commands` 仅持有 `_common`（基类、`contribution/`、`memento/`）；`receivers` 持有文档、图形、显示、历史四个能力接口及聚合 `CommandReceiver`；`execution` 持有 `Executor` 入口端口；`shapes` 持有图形类层次、`EditableAttribute` 和 `ShapeFactory`；`results` 与 `errors` 分别持有结果和错误模型。该目录不得依赖 `src/cli`、`src/core`、`src/builtin`、Node 或 DOM。
+- `src/builtin` 是内置命令包：按 `commands/XxxCommand/` 组织具体 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。只导出贡献，不统一注册；依赖方向为 `builtin -> protocol`。
 - `src/cli/io` 存放交互端口与终端适配器：`InputReader` / `OutputWriter` 定义端口，`ConsoleInputReader` / `ConsoleOutputWriter` 只负责标准输入输出。
 - `src/cli/parser` 根目录只保留 `CommandParser` 接口和 `CommandLineParser` 入口；`syntax` 负责切词，`results` 负责解析结果包装。命令目录查询与 Command 创建由注入的 `CommandCatalog` 完成。
 - `src/cli/session` 存放交互编排：`CommandLoop` 负责提示符、读取和终止，`CommandSession` 负责单次输入的反馈与继续/退出策略。
-- `src/protocol` 还存放应用入口端口 `Executor`；内置具体命令按 `builtin/XxxCommand/` 组织，同目录放置 `Command` 与对应 `*CommandContribution`（`front`/`back` 同属 `ReorderCommand/`）；`EditableAttributeParser` 仅服务 `set`。`src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry` / `BuiltinCommandContributions` 组装入口。`EditorCommandReceiver` 聚合文档、图形和显示能力，并与执行器共享历史栈；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。
-- `src/main.ts` 是组合根，只负责组装 CLI 适配器、命令目录、解析器、HelpText、Executor 与 CommandReceiver。
-- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor、History 与命令目录测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、树形格式和 help 测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/protocol` 存放命令类层次、贡献契约与图形测试。
+- `src/core` 存放真实 `CommandExecutor`、`EditorCommandReceiver`、`CommandHistory`、`receiver` 协作对象、`document`、`display`、`io` 以及运行时 `CommandRegistry`。`EditorCommandReceiver` 聚合文档、图形和显示能力，并通过构造器注入 `HelpText`（默认空目录，由组合根注入 builtin 目录）；`Document` 是聚合根门面；`display` 提供 tree/show/help 的格式化对象；`io` 提供 SVG 文件适配、解析和序列化。Core 不得依赖 `builtin`。
+- `src/main.ts` 是组合根，负责按 Phase 1 help 顺序将 builtin 贡献注册进 `CommandRegistry`，并组装 CLI 适配器、解析器、HelpText、Executor 与 CommandReceiver。
+- `tests/cli/parser` 和 `tests/cli/session` 分别镜像对应 CLI 子模块；`tests/core/receiver` 存放 EditorCommandReceiver 协作测试，`tests/core` 存放 Executor、History 与命令目录测试，`tests/core/document` 存放 Document、恢复能力和 ShapeIndex 测试，`tests/core/display` 存放摘要、明细、树形格式和 help 测试，`tests/core/io` 存放 SVG 解析、写出和 round-trip 测试，`tests/builtin` 存放内置命令辅助逻辑测试，`tests/protocol` 存放贡献契约与图形测试；`tests/support/createBuiltinCatalog` 是测试侧注册夹具，镜像 `main` 的注册清单。
 
 ```text
 src/protocol
 ├── commands
-│   ├── _common/
-│   │   ├── Command.ts
-│   │   ├── UndoableCommand.ts
-│   │   ├── contribution/
-│   │   └── memento/
-│   └── builtin/
-│       ├── MoveCommand/
-│       ├── ReorderCommand/
-│       └── ...（其余内置 XxxCommand/）
+│   └── _common/
+│       ├── Command.ts
+│       ├── UndoableCommand.ts
+│       ├── contribution/
+│       └── memento/
 ├── errors
 ├── execution
 │   └── Executor.ts
@@ -38,6 +35,14 @@ src/protocol
     ├── model
     │   └── EditableAttribute.ts
     └── visitor
+```
+
+```text
+src/builtin
+└── commands
+    ├── MoveCommand/
+    ├── ReorderCommand/
+    └── ...（其余内置 XxxCommand/）
 ```
 
 ```text
@@ -65,14 +70,13 @@ src/cli
 
 ```text
 src/core/commands
-├── BuiltinCommandContributions.ts  # 仅按 Phase 1 顺序组装 Protocol 贡献
 └── CommandRegistry.ts
 ```
 
 ## 文件命名
 
 - TypeScript 文件默认使用 `PascalCase`，并与主要类、接口或类型同名。
-- 每个主要类、接口和枚举单独成文件；具体命令按 `doc`、`shape`、`view`、`history`、`session` 语义族放在 `protocol/commands`，命令撤销快照放在 `protocol/commands/memento`；图形模型和值对象放在 `protocol/shapes/model`，具体图形放在 `concrete`，工厂与 Visitor 分别放在 `factory`、`visitor`；结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
+- 每个主要类、接口和枚举单独成文件；命令契约放在 `protocol/commands/_common`，具体内置命令放在 `builtin/commands`；命令撤销快照放在 `protocol/commands/_common/memento`；图形模型和值对象放在 `protocol/shapes/model`，具体图形放在 `concrete`，工厂与 Visitor 分别放在 `factory`、`visitor`；结果基类留在 `protocol/results` 根目录，具体结果放在 `outcomes`、结果 DTO 放在 `dto`；错误码与基类留在 `protocol/errors` 根目录，命令错误、领域错误和错误 DTO 分别放在 `command`、`domain`、`dto` 子目录。
 - 测试文件使用 `<Name>.test.ts` 命名。
 - 注释使用中文；提交信息使用中文 Conventional Commit。
 
@@ -90,7 +94,7 @@ export abstract class Command {
 - 文档、显示、历史和会话命令继承 `Command`；图形编辑命令继承 `UndoableCommand`。
 - 具体命令封装私有参数，`execute` 通过多态委托给 `CommandReceiver`，不再按命令名字段分派。
 - 命令身份由 `CommandContribution.getName()` 表达；`CommandCatalog` 是只读目录契约，`CommandRegistry` 是 Core 运行时实现。
-- 每条内置命令的 `Command` 与 `*CommandContribution` 同目录；`BuiltinCommandContributions` 只按 Phase 1 顺序组装。
+- 每条内置命令的 `Command` 与 `*CommandContribution` 同目录于 `src/builtin/commands/`；注册清单由组合根 `main`（测试侧为 `createBuiltinCatalog`）按 Phase 1 顺序写入 `CommandRegistry`。
 - `CommandLineParser` 不直接创建命令，也不维护命令名分支；它只负责词法、目录查找、`CommandParameters` 创建和解析结果包装。
 - `CommandParameters` 统一处理元数、必填文本、数字转换和参数切片（参数列表不含命令名）。
 - `HelpText` 从同一 `CommandCatalog` 读取帮助行；`front/back` 与 `undo/redo` 通过可选 help 合并输出。

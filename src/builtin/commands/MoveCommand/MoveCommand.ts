@@ -1,0 +1,48 @@
+import type { CommandReceiver } from "../../../protocol/receivers/CommandReceiver";
+import type { CommandResult } from "../../../protocol/results/CommandResult";
+import { CommandSuccessResult } from "../../../protocol/results/outcomes/CommandSuccessResult";
+import type { ShapeType } from "../../../protocol/shapes/model/ShapeType";
+import { UndoableCommand } from "../../../protocol/commands/_common/UndoableCommand";
+
+export class MoveCommand extends UndoableCommand {
+  private shapeType?: ShapeType;
+
+  public constructor(
+    private readonly shapeId: string,
+    private readonly dx: number,
+    private readonly dy: number,
+  ) {
+    super();
+  }
+
+  public execute(receiver: CommandReceiver): Promise<CommandResult> {
+    this.shapeType = receiver.capturePlacement(this.shapeId).getShape().getType();
+    return receiver.moveShape(this.shapeId, this.dx, this.dy);
+  }
+
+  public override async undo(receiver: CommandReceiver): Promise<CommandResult> {
+    const shapeType = this.shapeType;
+
+    if (shapeType === undefined) {
+      return this.notExecutedResult();
+    }
+
+    const result = await receiver.moveShape(this.shapeId, -this.dx, -this.dy);
+
+    if (!result.isSuccess()) {
+      return result;
+    }
+
+    const position = receiver.capturePlacement(this.shapeId).getShape().getPosition();
+
+    if (position !== undefined) {
+      return new CommandSuccessResult(
+        `${shapeType}#${this.shapeId} moved back to (${position.getX()},${position.getY()})`,
+      );
+    }
+
+    return new CommandSuccessResult(
+      `${shapeType}#${this.shapeId} moved back by (${-this.dx},${-this.dy})`,
+    );
+  }
+}

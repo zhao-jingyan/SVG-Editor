@@ -1,16 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { BuiltinCommandContributions } from "../../../src/core/commands/BuiltinCommandContributions";
 import { CommandRegistry } from "../../../src/core/commands/CommandRegistry";
 import { CommandContribution } from "../../../src/protocol/commands/_common/contribution/CommandContribution";
-import { HelpCommand } from "../../../src/protocol/commands/builtin/HelpCommand/HelpCommand";
-import { ShapeFactory } from "../../../src/protocol/shapes/factory/ShapeFactory";
+import { HelpCommand } from "../../../src/builtin/commands/HelpCommand/HelpCommand";
+import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
 
 describe("CommandRegistry", () => {
   it("按注册顺序查找并枚举贡献", () => {
-    const registry = new CommandRegistry();
-    registry.registerAll(
-      new BuiltinCommandContributions(new ShapeFactory()).create(),
-    );
+    const registry = createBuiltinCatalog();
 
     expect(registry.find("move")?.getName()).toBe("move");
     expect(registry.find("missing")).toBeUndefined();

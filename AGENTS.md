@@ -10,12 +10,14 @@
 ## 架构与依赖
 
 - `src/cli`：只负责输入输出、终端适配和文本到命令对象的解析，不承载业务规则。
-- `src/protocol`：存放 CLI 与 Core 共享的命令 API、图形领域模型和必要的边界 DTO。
-- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol` 中的图形领域模型。
-- `src/main.ts`：只作为组合根，负责组装 CLI、Core 和依赖实例。
-- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`main -> cli + core`。
-- `protocol` 不得依赖 `cli`、`core`、Node 或 DOM。
+- `src/protocol`：只存放契约——命令基类与贡献 API、图形领域模型、接收者接口、结果/错误模型与边界 DTO；不含具体内置命令实现。
+- `src/builtin`：内置命令包（具体 `XxxCommand` 与对应 `*CommandContribution`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
+- `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `builtin`。
+- `src/main.ts`：只作为组合根，负责组装 CLI、Core、builtin 贡献注册与依赖实例。
+- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`builtin -> protocol`、`main -> cli + core + builtin`。
+- `protocol` 不得依赖 `cli`、`core`、`builtin`、Node 或 DOM。
 - 禁止跨层直接访问、循环依赖，以及在 CLI 中实现编辑规则或文档状态。
+- 路径别名：`@/*` → `src/*`（`tsconfig` paths + vitest alias；构建经 `resolve-tspaths` 回写相对路径）。跨层导入可用 `@/builtin`、`@/protocol` 等，不是 npm package。
 
 ## 面向对象规则
 
@@ -51,7 +53,7 @@
 - 领域形状以 `Shape` 抽象类为根，具体类包括 `RectShape`、`CircleShape`、`EllipseShape`、`LineShape`、`TextShape`、`GroupShape`。
 - 容器形状通过 `GroupShape` 维护子节点，并递归实现统一操作。
 - `Command` 抽象类、`UndoableCommand` 和具体命令类继续作为命令模型；禁止退回命令联合类型。
-- 具体命令按 `protocol/commands/builtin/XxxCommand/` 目录组织，同目录放置 Command 与内置 `*CommandContribution`；`front`/`back` 同属 `ReorderCommand/`。
+- 具体内置命令在 `src/builtin/commands/XxxCommand/`，同目录放置 Command 与 `*CommandContribution`；`front`/`back` 同属 `ReorderCommand/`；由 `main`（及测试夹具）按 Phase 1 顺序注册进 `CommandRegistry`。
 - 命令共享基类、贡献契约与撤销快照放在 `protocol/commands/_common/`（`Command`、`UndoableCommand`、`contribution/`、`memento/`）。
 - 边界 DTO 必须使用 `*Dto` / `*Spec` 命名，并明确“不得直接进入 Core”的转换规则。
 
