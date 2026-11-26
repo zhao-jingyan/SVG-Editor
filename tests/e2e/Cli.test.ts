@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import {
   mkdtempSync,
   readFileSync,
@@ -7,7 +7,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const repositoryRoot = process.cwd();
 const startupMessage = "svg-editor 1.0.0 — type 'help' for commands";
@@ -40,13 +40,6 @@ function runCli(
 }
 
 describe("CLI 进程级端到端", () => {
-  beforeAll(() => {
-    execFileSync("npm", ["run", "build"], {
-      cwd: repositoryRoot,
-      stdio: "pipe",
-    });
-  });
-
   it("完成初始化、创建、编辑、撤销和重做", () => {
     const run = runCli(
       [
