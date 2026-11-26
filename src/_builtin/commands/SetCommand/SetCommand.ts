@@ -43,18 +43,10 @@ export class SetCommand extends UndoableCommand {
     const previous = snapshot.getValue(leafId);
     const attribute = snapshot.getAttribute();
 
-    if (attribute === "label") {
-      const text =
-        previous === undefined
-          ? ""
-          : typeof previous === "string"
-            ? previous
-            : `${previous}`;
-      return Promise.resolve(
-        new CommandSuccessResult(
-          `${snapshot.getShapeType()}#${this.shapeId} label restored: "${text}"`,
-        ),
-      );
+    const customMessage = snapshot.describeRestored(previous);
+
+    if (customMessage !== undefined) {
+      return Promise.resolve(new CommandSuccessResult(customMessage));
     }
 
     return Promise.resolve(

@@ -523,7 +523,7 @@ describe("EditorCommandReceiver", () => {
     );
   });
 
-  it("CommandExecutor 只转换协议错误，未知异常继续上抛", async () => {
+  it("CommandExecutor 将扩展抛出的非协议异常转为错误结果，不入历史", async () => {
     const { executor } = createReceiver();
 
     class ExplodingCommand extends Command {
@@ -532,6 +532,11 @@ describe("EditorCommandReceiver", () => {
       }
     }
 
-    await expect(executor.execute(new ExplodingCommand())).rejects.toThrow("boom");
+    expect(
+      (await executor.execute(new ExplodingCommand())).toCommandResultDto(),
+    ).toEqual({
+      type: "error",
+      error: { code: "command-failed", message: "command failed: boom" },
+    });
   });
 });

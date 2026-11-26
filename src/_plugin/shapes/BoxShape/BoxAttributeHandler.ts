@@ -41,6 +41,7 @@ export class BoxAttributeHandler extends AttributeHandler {
       "label",
       new Map([[label.getId(), label.getAttribute("text")]]),
       "text",
+      (previous) => `box#${box.getId()} label restored: "${previous ?? ""}"`,
     );
   }
 

@@ -63,7 +63,11 @@ describe("BoxAttributeHandler", () => {
     expect(body.getAttribute("fill")).toBe("#f5a623");
     expect(box.getChildren()[1].getAttribute("text")).toBe("处理数据 v2");
 
-    await executor.execute(new UndoCommand());
+    const undoLabel = await executor.execute(new UndoCommand());
+    expect(undoLabel.toCommandResultDto()).toEqual({
+      type: "success",
+      message: 'box#n1 label restored: "开始"',
+    });
     expect(box.getChildren()[1].getAttribute("text")).toBe("开始");
     expect(body.getAttribute("fill")).toBe("#f5a623");
 

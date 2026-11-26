@@ -1,6 +1,7 @@
 import type { CommandReceiver } from "@/protocol/receivers/CommandReceiver";
 import type { Command } from "@/protocol/commands/Command";
 import { UndoableCommand } from "@/protocol/commands/UndoableCommand";
+import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import type { Executor } from "@/protocol/execution/Executor";
 import { CommandErrorResult } from "@/protocol/results/outcomes/CommandErrorResult";
@@ -27,7 +28,15 @@ export class CommandExecutor implements Executor {
         return new CommandErrorResult(error);
       }
 
-      throw error;
+      // 扩展实现违约（抛出非 ProtocolError）：转为错误结果，会话继续；
+      // 命令未成功，故不入历史栈；已捕获快照的命令自行回滚后再抛出。
+      const reason = error instanceof Error ? error.message : String(error);
+      return new CommandErrorResult(
+        ProtocolError.commandExecution(
+          CommandErrorCode.CommandFailed,
+          `command failed: ${reason}`,
+        ),
+      );
     }
   }
 }

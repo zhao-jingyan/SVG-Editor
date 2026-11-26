@@ -14,4 +14,6 @@ export enum CommandErrorCode {
   IoWrite = "io-write",
   HistoryUnavailable = "history-unavailable",
   CommandNotImplemented = "command-not-implemented",
+  /** 扩展实现（命令/处理器）抛出非协议异常时，由执行器统一转换。 */
+  CommandFailed = "command-failed",
 }
