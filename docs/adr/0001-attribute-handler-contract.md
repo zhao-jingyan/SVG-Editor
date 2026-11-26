@@ -41,6 +41,7 @@ Phase 1 的 `set` 只允许叶子图形白名单属性。`box` 需要把 `fill` 
 - 契约：`src/protocol/attributes/AttributeHandler.ts`
 - 调用：`src/core/receiver/EditorShapeCommandReceiver.ts`（`setAttribute` / 撤销恢复）
 - 快照：`src/protocol/commands/memento/ShapeAttributeSnapshot.ts`
+- 失败回滚：`src/_builtin/commands/SetCommand/SetCommand.ts`（`execute`）
 - 异常兜底：`src/core/CommandExecutor.ts`
 - 实现：`src/_plugin/shapes/BoxShape/BoxAttributeHandler.ts`
 - 契约测试：`tests/core/attributes/AttributeHandlerContract.test.ts`（回滚、ambiguous）

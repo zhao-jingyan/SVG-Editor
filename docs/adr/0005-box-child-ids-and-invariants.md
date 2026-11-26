@@ -18,7 +18,7 @@
 
 1. **id 派生**：子部件 id 由 box 自身 id 派生，固定为 `<id>-rect` 与 `<id>-label`（`BoxShape.rectIdFor` / `labelIdFor`）。派生规则只存在于 `BoxShape` 一处，处理器与读回共用这两个方法。
 2. **创建期冲突**：`create box#<id>` 会一次性生成 `<id>`、`<id>-rect`、`<id>-label` 三个 id。任一已存在时，整条命令失败，文档不变。冲突检查复用文档全局唯一 id 检查（`ShapeIndex` / `ShapeHierarchy`），不为 box 单独开后门。
-3. **必要子部件保护**：`BoxShape.allowsRemovingChild(childId)` 对 `<id>-rect` 与 `<id>-label` 返回 `false`。`ShapeHierarchy` 在删除或移出子节点前调用该钩子，返回 `false` 时以 `cannot modify composite shape structure` 拒绝。
+3. **必要子部件保护**：`BoxShape.allowsRemovingChild(childId)` 对 `<id>-rect` 与 `<id>-label` 返回 `false`。`ShapeHierarchy` 在删除或移出子节点前调用该钩子，返回 `false` 时以 `cannot modify composite shape structure` 拒绝。`group` 收编多个成员时会在任何结构修改前先验证全部成员均可移出，避免先移走普通成员后才发现必要子部件受保护。
 4. **不可拆分**：`BoxShape.canUngroup()` 返回 `false`，`ungroup box#<id>` 直接拒绝，保证 box 身份不会被拆掉。
 5. **读回校验**：`BoxShape.fromChildren` 要求同时存在 `<id>-rect`（且为 `RectShape`）与 `<id>-label`（且为 `TextShape`）。缺失则整份 `read` 失败，保留原文档（见 ADR 0002）。
 6. **允许额外子节点**：box 内用户新增的普通子图形或嵌套 box 不影响不变量，不因“多余子节点”拒绝。

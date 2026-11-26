@@ -28,4 +28,4 @@
 - 钩子：`src/protocol/shapes/model/Shape.ts`（`getDataKind` / `canUngroup` / `allowsRemovingChild`）
 - 认领：`src/core/shapes/ShapeRegistry.ts`、`src/core/io/SvgDocumentParser.ts`
 - 插件：`src/_plugin/shapes/BoxShape/BoxShape.ts`、`BoxShapeContribution.ts`
-- 装配顺序：`src/main.ts`、`src/host/registerBuiltinContributions.ts`
+- 装配顺序：`src/main.ts`、`src/assembly/BuiltinContributionInstaller.ts`

@@ -213,7 +213,17 @@ function analyze(filePath, content) {
 }
 
 function countLines(content) {
-  return content.length === 0 ? 0 : content.split(/\r?\n/).length;
+  if (content.length === 0) {
+    return 0;
+  }
+
+  const lines = content.split(/\r?\n/);
+
+  if (lines.at(-1) === "") {
+    lines.pop();
+  }
+
+  return lines.length;
 }
 
 function measure(ref) {

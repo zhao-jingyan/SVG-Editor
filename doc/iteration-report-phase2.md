@@ -60,12 +60,14 @@ Phase 2 的目标是把 Phase 1 的固定 CLI 改造成可插拔的扩展架构�
 
 | 验证项 | 结果 |
 |---|---|
-| `npm test`（插件全部装入的 `install-plugin-*` 提交） | 213 / 213 通过 |
-| Phase 2 黑盒验收 `tests/e2e/Phase2Acceptance.test.ts` | 27 项，按 spec §2–§6 分组 |
+| `npm test` | 221 / 221 通过 |
+| Phase 2 黑盒验收 `tests/e2e/Phase2Acceptance.test.ts` | 31 项，按 spec §2–§6 分组 |
+| `npm run build` | 通过 |
 | `npm run verify:dual-assembly` | 方式 A 与方式 B 输出一致；与基线逐字节对照 |
 | `npm run lint` | 分层导入约束通过 |
-| VSCode 扩展单元测试（`vscode-extension`） | 4 / 4 通过 |
-| VSCode 扩展宿主集成测试 | 覆盖文件装饰、大纲层级、编辑后更新、损坏 XML；需 Electron 宿主运行 |
+| `npm run e2e` | Phase 1 编辑闭环、显示、SVG 读写与历史锁通过 |
+| VSCode 扩展单元测试（`vscode-extension`） | 5 / 5 通过 |
+| VSCode 扩展宿主集成测试 | 3 / 3 通过；覆盖装饰注册、大纲层级与源码范围、编辑更新、损坏 XML 和伪 id 属性值 |
 
 删除提交的失败测试逐条记录在 [`docs/facts/plugin-removal-demo.md`](../docs/facts/plugin-removal-demo.md)。删除后失败的测试是有意保留的：它们说明删除插件的影响面集中在共享测试与期望输出上，内核目录没有受影响。
 
@@ -90,6 +92,5 @@ Phase 2 的目标是把 Phase 1 的固定 CLI 改造成可插拔的扩展架构�
 
 - 标签 `p2` 尚未创建。按 spec，应在最终提交上打 `p2`，之后重新生成 metrics。
 - 尚未 push 到远程 `origin`，所有提交目前只在本地。
-- VSCode 扩展宿主集成测试未在本次迭代收尾时重跑，需要 Electron 窗口。
 - 两张 PNG 由 PlantUML 1.2024.8 渲染（`java -Djava.awt.headless=true -jar plantuml.jar -tpng -graphvizdot <dot> <puml>`）。源文件改动后需要重新渲染。
 - 拓展任务（选做）未实施。

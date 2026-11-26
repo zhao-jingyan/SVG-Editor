@@ -18,7 +18,7 @@
 - 四个扩展点：`ShapeContribution`（角色名 ShapeProvider）、`CommandContribution`、`AttributeHandler`、`TreeDecorator`；
 - 命令插件 `stats` / `dir`；图形插件 `box`；树标签 `(box)` 与 `modified-star`；
 - 方式 A（代码装配）与方式 B（`plugins.config.json` + `--config`）共用 `PluginHost` 注册路径；
-- VSCode 扩展：Explorer `[]` 标记与 Outline 大纲（见第 10 节）。
+- VSCode 扩展：Explorer `[]` 标记与 Outline 大纲（见第 13 节）。
 
 CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要或 `error:` 消息。暂不实现复杂 SVG 特性（`defs`、外部引用、复杂 `transform` 等）或独立 GUI 渲染器。
 
@@ -249,10 +249,10 @@ npm run verify:dual-assembly
 
 | 扩展点（角色名） | 接口 / 抽象类 | 职责 | 内核调用位置 | 已有实现 | 禁用可选扩展时 | 违约时报错（代码位置） |
 |---|---|---|---|---|---|---|
-| ShapeProvider（代码名 `ShapeContribution`） | 抽象类 `ShapeContribution` + `ShapeCatalog` | 按类型名创建；按 tag/`data-kind` 读回 | `CreateCommandContribution`；`SvgDocumentParser` → `ShapeRegistry.find` / `findForSvg` | `_builtin` 六种；`_plugin` `box` | 仅六种内置；带 `data-kind=box` 的 g 降级为普通 `GroupShape` | 类型名为空：`ShapeContribution` 构造器；重复类型名：`ShapeRegistry` 的 `duplicate shape type`；未知类型：`CreateCommandContribution` 的 `unknown shape type` |
-| Command | 抽象类 `CommandContribution`（模板方法 `createCommand` → `buildCommand`）+ `CommandCatalog` | 命令名、help、参数→Command | `CommandLineParser` → `CommandRegistry.find` | Phase 1 内置；`stats`、`dir` | help/执行无插件命令；`error: unknown command: <name>` | 名称/用法为空：`CommandContribution` 构造器；`buildCommand` 未返回 `Command`：`CommandContribution.createCommand`；重复名：`CommandRegistry` 的 `duplicate command`；执行期抛非协议异常：`CommandExecutor` 转 `command-failed` |
-| AttributeHandler | 抽象类 `AttributeHandler` + `AttributeCatalog` | 图形+属性领域语义 | `EditorShapeCommandReceiver.setAttribute` / 撤销恢复 → `AttributeRegistry.find` | `BoxAttributeHandler`（`fill`/`label`） | 仅 Phase 1 白名单；`label` 等扩展属性执行期失败 | 多处理器命中：`AttributeRegistry` 的 ambiguous；重名：`duplicate attribute handler`；`apply` 抛错：快照回滚且不入历史（`EditorShapeCommandReceiver`） |
-| TreeDecorator | 抽象类 `TreeDecorator` + `TreeDecoratorCatalog` | tree 行尾标签；IO 后同步基线 | `TreeDisplay` 拼接；`EditorDocumentCommandReceiver.syncTreeDecorators` | `box-type-label`、`modified-star` | tree 输出与 Phase 1 逐字节一致 | 重名：`TreeDecoratorRegistry` 的 `duplicate tree decorator` |
+| ShapeProvider（代码名 `ShapeContribution`） | 抽象类 `ShapeContribution` + `ShapeCatalog` | 按类型名创建；按 tag/`data-kind` 读回 | `CreateCommandContribution`；`SvgDocumentParser` → `ShapeRegistry.find` / `findForSvg` | `_builtin` 六种；`_plugin` `box` | 仅六种内置；带 `data-kind=box` 的 g 降级为普通 `GroupShape` | 类型名为空：`ShapeContribution` 构造器；直接重复注册：`ShapeRegistry` 的 `duplicate shape type`；经插件宿主重复注册：`duplicate registration: shapes/<name>`；未知类型：`CreateCommandContribution` 的 `unknown shape type` |
+| Command | 抽象类 `CommandContribution`（模板方法 `createCommand` → `buildCommand`）+ `CommandCatalog` | 命令名、help、参数→Command | `CommandLineParser` → `CommandRegistry.find` | Phase 1 内置；`stats`、`dir` | help/执行无插件命令；`error: unknown command: <name>` | 名称/用法为空：`CommandContribution` 构造器；`buildCommand` 未返回 `Command`：`CommandContribution.createCommand`；直接重复注册：`duplicate command`；经插件宿主重复注册：`duplicate registration: commands/<name>`；执行期抛非协议异常：`CommandExecutor` 转 `command-failed` |
+| AttributeHandler | 抽象类 `AttributeHandler` + `AttributeCatalog` | 图形+属性领域语义 | `EditorShapeCommandReceiver.setAttribute` / 撤销恢复 → `AttributeRegistry.find` | `BoxAttributeHandler`（`fill`/`label`） | 仅 Phase 1 白名单；`label` 等扩展属性执行期失败 | 多处理器命中：`AttributeRegistry` 的 ambiguous；直接重复注册：`duplicate attribute handler`；经插件宿主重复注册：`duplicate registration: attributes/<name>`；`apply` 抛错：`SetCommand.execute` 恢复快照，`CommandExecutor` 保证不入历史 |
+| TreeDecorator | 抽象类 `TreeDecorator` + `TreeDecoratorCatalog` | tree 行尾标签；IO 后同步基线 | `TreeDisplay` 拼接；`EditorDocumentCommandReceiver.syncTreeDecorators` | `box-type-label`、`modified-star` | tree 输出与 Phase 1 逐字节一致 | 直接重复注册：`duplicate tree decorator`；经插件宿主重复注册：`duplicate registration: decorators/<name>` |
 
 插件注册阶段的契约校验（清单与实际注册集合不一致、重复注册、模块缺失/无默认导出/激活失败）由 `PluginHost` / `PluginModuleLoader` 负责，见第 10 节。
 
@@ -314,12 +314,134 @@ Adapter 角色对应：Client = `DirCommand`；Target = `DirectoryListing`；Ada
 
 ## 13. VSCode 扩展（第一部分）
 
-源码：`vscode-extension/`。
+源码位于 `vscode-extension/`。扩展只提供 VSCode 界面附加信息，不修改 SVG 文件名或
+文件内容，也不实现完整 SVG 校验或图形预览。
 
-- A.1 Explorer 中 `.svg` 旁 `[]` 标记（不改文件名）。
-- A.2 原生 Outline 嵌套层级、定位与编辑更新；不完整 XML 不崩溃。
-- A.3 分析：[`docs/pj1-phase2-2/vscode-extension/analysis.md`](../docs/pj1-phase2-2/vscode-extension/analysis.md)；效果图：`outline-and-badge.png`。
+安装与启动：
 
-安装/调试见 `vscode-extension/README.md`（F5 启动 Extension Development Host）。
+```bash
+cd vscode-extension
+npm install
+npm run build
+```
 
-与 CLI 复用结论见 A.3：Outline 解析与 CLI 的 SVG 子集模型目标不同，本阶段未强行共用 Phase 1 Parser，而以轻量 Outline 解析 + Visitor 产出 `DocumentSymbol`。
+随后用 VSCode 打开 `vscode-extension/` 并按 F5，或执行：
+
+```bash
+code \
+  --extensionDevelopmentPath="$PWD" \
+  "$PWD/test-fixtures/workspace"
+```
+
+示例 SVG 为 [`vscode-extension/examples/example.svg`](../vscode-extension/examples/example.svg)。
+Extension Development Host 中的文件标记、Outline 层级和源码定位效果如下：
+
+![Explorer SVG 标记与原生 Outline](../docs/pj1-phase2-2/vscode-extension/outline-and-badge.png)
+
+### 13.1 VSCode 与扩展的职责
+
+VSCode 负责发现并启动扩展，管理 Explorer、编辑器与原生 Outline，在资源出现或文档
+变化时调用扩展注册的 Provider，并依据 Provider 返回值渲染装饰与大纲。用户点击大纲
+节点后，也由 VSCode 根据 `DocumentSymbol.selectionRange` 定位源码。
+
+实现前在 Extension Development Host 中观察到：未注册 DocumentSymbol Provider 时原生
+Outline 显示无信息；注册后，VSCode 会按 `DocumentSymbol.children` 渲染层级，按
+`selectionRange` 处理点击定位，并在活动文档文本变化后再次调用 Provider。因此本任务
+接入原生 Provider，而不是另建自定义 Tree View。
+
+本扩展负责判断普通 `.svg` 文件、解析当前文本、生成元素层级与源码偏移，并把结果适配
+为 VSCode 的 `FileDecoration` 与 `DocumentSymbol`。扩展入口在激活时向 VSCode 注册
+两个 Provider：
+
+```ts
+context.subscriptions.push(
+  vscode.window.registerFileDecorationProvider(fileDecorationProvider),
+  vscode.languages.registerDocumentSymbolProvider("*", documentSymbolProvider),
+);
+```
+
+`SvgDocumentSymbolProvider` 会再次检查扩展名，因此宽泛的 `"*"` 语言选择器不会使普通
+文件产生 SVG 大纲。注册后由 VSCode 主动回调，扩展不轮询 Explorer 或编辑器：
+
+```text
+文件资源
+  -> VSCode Explorer
+  -> SvgFileDecorationProvider.provideFileDecoration()
+  -> 返回 { badge: "[]", tooltip: "SVG 文件" }
+  -> VSCode 渲染标记
+
+打开或编辑 SVG
+  -> VSCode Outline
+  -> SvgDocumentSymbolProvider.provideDocumentSymbols()
+  -> SvgOutlineParser.parse()
+  -> SvgDocumentNode.accept(SvgOutlineVisitor)
+  -> 转换为 vscode.DocumentSymbol
+  -> VSCode 渲染大纲并处理点击定位
+```
+
+### 13.2 文件装饰、Decorator 与 Adapter
+
+文件装饰与经典 Decorator 的共同点是“不修改原对象内容，却为调用方呈现额外信息”。
+但二者对象关系和调用方式不同：
+
+| 角度 | 经典 Decorator | VSCode 文件装饰 |
+|---|---|---|
+| 对象组合 | 装饰器持有被装饰对象 | Provider 不持有 Explorer 文件对象 |
+| 接口关系 | 装饰器通常实现与被装饰对象相同的接口 | Provider 实现独立的 `FileDecorationProvider` |
+| 调用方式 | 调用进入装饰器后委托给内部对象 | VSCode 回调 Provider，扩展只返回装饰元数据 |
+| 渲染责任 | 装饰器参与原对象调用链 | Explorer 决定何时查询、如何渲染和刷新 |
+| 行为影响 | 可改变对象行为 | 只增加界面标记，不改变文件名或文件内容 |
+
+因此这里不应称为经典 Decorator，更准确的分类是“VSCode 扩展点 + Provider 回调 +
+数据适配”。
+
+Adapter 角色对应如下：
+
+- `SvgFileDecorationProvider` 将扩展的普通 SVG 文件判断适配为 VSCode
+  `FileDecorationProvider` 契约。
+- `SvgDocumentSymbolProvider` 将扩展树和 `SvgSymbolDto` 适配为
+  `vscode.DocumentSymbol`。
+- Parser、节点模型和 Visitor 不依赖 `vscode` 模块，可在普通 Node 单元测试中运行；
+  VSCode 类型只出现在 Provider 适配边界。
+
+### 13.3 SVG 树模型与 Visitor
+
+`SvgNode` 是统一节点入口，`SvgDocumentNode` 持有唯一根元素，`SvgElementNode` 封装
+标签名、id、源码范围和子元素。容器与叶子使用同一套访问方式，由子元素集合表达层级，
+避免调用方按标签名散落分支。
+
+`SvgNodeVisitor<T>` 与节点的 `accept` 构成双分派，`SvgOutlineVisitor` 递归生成中立
+的 `SvgSymbolDto` 后，再由 Provider 转换成 VSCode 类型。这样树结构保持稳定，“遍历
+后做什么”可以独立扩展。当前规模下只有一个 Outline 访问者，直接在 Provider 中递归
+也能实现，但会把解析模型与 VSCode 类型耦合，也不便于分离单元测试。
+
+### 13.4 Phase 1 代码复用评估
+
+| Phase 1 模块 | 能否直接复用 | 原因 |
+|---|---|---|
+| `CommandLineParser`、命令 Tokenizer | 否 | 解析 CLI 命令文本，不解析 SVG XML |
+| `SvgDocumentParser` | 否 | 只保留六种可编辑图形；会为无 id 元素分配 id；不保留源码偏移；损坏 XML 直接抛错 |
+| `Shape`、`GroupShape` | 否 | 包含移动、缩放、样式等编辑语义，只接受受支持图形；Outline 需要展示任意 SVG 标签 |
+| `ShapeFactory` | 否 | 按可编辑图形类型创建对象，没有通用 XML 节点和源码范围 |
+| `ShapeVisitor` | 否 | 接口方法绑定具体图形类，增加任意 SVG 标签会持续扩张接口 |
+| `fast-xml-parser` 配置 | 部分思路可参考 | 通用 XML 解析能力可借鉴，但现有配置丢弃源码位置和未知标签，不满足定位与容错要求 |
+
+最终使用独立的 `SvgOutlineParser`，保留任意标签名、完整节点偏移和开始标签选择范围，
+跳过注释、声明、DOCTYPE、CDATA，并在 XML 不完整时返回空结果而不让扩展崩溃。CLI 与
+VSCode 扩展共享 Composite + Visitor 的设计思路，但没有强行共享具体类，因为 CLI 关注
+可编辑图形，VSCode Outline 关注任意 SVG 语法元素及其源码位置。
+
+### 13.5 验证证据
+
+- Explorer 中 `example.svg` 显示 `[]`，普通文本文件和名为 `folder.svg` 的目录无标记。
+- Outline 展示 `svg -> g#flowchart -> rect#start/text` 的嵌套层级。
+- 点击 `rect#start` 后定位到对应开始标签源码。
+- Parser 单元测试覆盖嵌套、id、无 id、自闭合标签、注释、CDATA、属性值中的伪 `id`
+  文本和损坏 XML。
+- VSCode Extension Host 集成测试验证文件装饰、目录过滤、大纲层级、编辑后更新与
+  异常输入。
+
+更详细的过程分析见
+[`docs/pj1-phase2-2/vscode-extension/analysis.md`](../docs/pj1-phase2-2/vscode-extension/analysis.md)，
+扩展自身的安装与故障排查步骤见
+[`vscode-extension/README.md`](../vscode-extension/README.md)。

@@ -10,6 +10,11 @@ VSCode 负责：
 - 根据 Provider 返回值渲染 `[]` 和大纲树。
 - 处理大纲点击，并将光标移动到 Provider 给出的源码范围。
 
+实现前在 Extension Development Host 中观察到：没有 DocumentSymbol Provider 时原生
+Outline 显示无信息；注册后 VSCode 按 `DocumentSymbol.children` 展示层级，按
+`selectionRange` 处理点击定位，并在活动文档文本变化后重新调用 Provider。因此实现选择
+接入原生 Outline Provider，而不是创建自定义 Tree View。
+
 扩展负责：
 
 - 判断资源是否为普通 SVG 文件。
