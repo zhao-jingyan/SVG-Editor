@@ -219,11 +219,26 @@ npm run build
 npm run lint
 npm run test:e2e
 npm run e2e
+npm run e2e:phase2
 npm run metrics
 npm run verify:dual-assembly
 ```
 
 覆盖：Protocol/Document/History/CLI、插件单测（含 `dir` 替身与真实 FS）、加载器失败路径与回滚、进程级 A/B 一致性、黑盒 E2E。
+
+**Phase 2 黑盒验收**：`npm run e2e:phase2`（`tests/e2e/Phase2Acceptance.test.ts`，即 `p2` 验收）只经 `dist/main.js` 的进程边界运行，按 `phase_cli_2.md` 第 2–6 节的验收条目逐条断言：
+
+| 验收段 | 覆盖内容 |
+|---|---|
+| §2 stats / dir | help 列出与空配置隐藏；统计规则与首次出现排序；stats 不入 undo；dir 无文档可用、排序与隐藏项、符号链接按 `[FILE]`、空目录、读取失败后继续、有文档时 undo 不变、未加载时 unknown command |
+| §3 属性扩展点 | box 的 fill / label 各自是一个 undo 单元并可 undo/redo；普通矩形白名单与 `unknown attribute` |
+| §4 box | `in` 子句与整体 move、嵌套、ungroup 拒绝；id 冲突整条失败不留容器；必要子部件不可删除/移入；保存 `data-kind="box"`，装插件读回、未装降级为 `g`；缺子部件与重复 id 的读入整体拒绝 |
+| §5 树标签 | modified-star 的 init / 编辑 / undo 状态；保存后 undo 回保存点 `*` 消失；`(box) *` 并存 |
+| §6 双装配与基线 | 四个会话的方式 A / B 逐字节一致且等于 `expected/`；Phase 1 会话禁用插件后等于 `final` 录制输出；加载器四条失败路径与重复注册（stderr，主程序继续）；配置结构非法 |
+
+不在黑盒范围内、由单元/契约测试覆盖的项：处理器抛错回滚、多处理器 ambiguous（无法经 CLI 触发，见 `tests/core/attributes/`）；VSCode 扩展两项效果（另见 `vscode-extension/`）。
+
+`dist/` 只由 `tests/support/buildDist.ts`（vitest `globalSetup`）构建一次，避免多个进程级测试文件并行构建时竞争写入。
 
 ---
 
