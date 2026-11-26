@@ -13,10 +13,13 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const startupMessage = "svg-editor 0.1 — type 'help' for commands";
+const startupMessage = "svg-editor 1.0.0 — type 'help' for commands";
 
-function runCli(input) {
-  const result = spawnSync(process.execPath, ["dist/main.js"], {
+// Phase 1 基线：禁用全部新增插件，输出与 final 标签一致
+const baselineArgs = ["--config", "plugins.config.empty.json"];
+
+function runCli(input, args = baselineArgs) {
+  const result = spawnSync(process.execPath, ["dist/main.js", ...args], {
     cwd: repositoryRoot,
     input,
     encoding: "utf8",

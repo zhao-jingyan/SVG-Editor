@@ -1,9 +1,15 @@
-# stats / dir / 标签会话
-# dir 的工作目录由 verify 脚本注入为固定临时目录
+# stats / dir / 树标签会话（需要全部插件；dir 列出运行目录）
+dir
 init 200 100
 create rect r1 0 0 10 10
 create box b1 10 10 40 20 "x"
 stats
-tree
 dir
+tree
+move r1 1 1
+tree
+undo
+tree
+save out.svg
+tree
 exit

@@ -18,7 +18,13 @@ interface CliRun {
   readonly stderr: string;
 }
 
-function runCli(input: string, args: readonly string[] = []): CliRun {
+/** Phase 1 基线：禁用全部新增插件，输出须与 final 标签逐字一致。 */
+const baselineArgs: readonly string[] = ["--config", "plugins.config.empty.json"];
+
+function runCli(
+  input: string,
+  args: readonly string[] = baselineArgs,
+): CliRun {
   const result = spawnSync(process.execPath, ["dist/main.js", ...args], {
     cwd: repositoryRoot,
     input,
@@ -143,10 +149,21 @@ describe("CLI 进程级端到端", () => {
     expect(run.status).toBe(0);
     expect(lines[0]).toBe(startupMessage);
     expect(lines[1]).toBe("Commands:");
-    expect(lines).toContain("svg (800x600) *");
-    expect(lines).toContain("└── g#markers *");
+    expect(lines).toContain("svg (800x600)");
+    expect(lines).toContain("└── g#markers");
     expect(lines).toContain("circle#c1  parent=g#markers");
     expect(lines).toContain("  cx=100 cy=100 r=20");
+  });
+
+  it("默认装配（含插件）下 tree 带 * 标签，禁用插件后与 Phase 1 一致", () => {
+    const script = ["init 800 600", "create rect r1 0 0 1 1", "tree", "exit"].join("\n");
+
+    const withPlugins = runCli(script, []);
+    const baseline = runCli(script);
+
+    expect(withPlugins.stdout.split("\n")).toContain("svg (800x600) *");
+    expect(baseline.stdout.split("\n")).toContain("svg (800x600)");
+    expect(baseline.stdout).not.toContain(" *");
   });
 
   it("方式 A 与 --config 方式 B 对同一会话输出一致", () => {
@@ -158,7 +175,7 @@ describe("CLI 进程级端到端", () => {
       "exit",
     ].join("\n");
 
-    const wayA = runCli(script);
+    const wayA = runCli(script, []);
     const wayB = runCli(script, ["--config", "plugins.config.json"]);
 
     expect(wayA.status).toBe(0);
