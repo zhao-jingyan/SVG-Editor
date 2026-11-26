@@ -10,7 +10,7 @@
 
 ## 决策
 
-1. **唯一路径**：`PluginHost.activate` = 暂存注册 → 比对 `contributes` 名称集合 → `commit`；方式 A 的 `activateDefaultPlugins` 与方式 B 的 `loadPluginsFromConfig` 都经此路径。
+1. **唯一路径**：`PluginHost.activate` = 暂存注册 → 比对 `contributes` 名称集合 → `commit`；方式 A 的 `CodePluginInstaller` 与方式 B 的 `loadPluginsFromConfig` 都经此路径。
 2. **校验时机**：在 `activate` 返回之后、`commit` 之前比对声明与暂存名集合（顺序无关）。不一致则丢弃暂存并打印  
    `error: plugin manifest mismatch: <name> (declared: …, registered: …)`。
 3. **重复名**：暂存阶段相对正式表 + 本插件暂存查重；冲突抛 `DuplicateRegistrationError`，格式化为  

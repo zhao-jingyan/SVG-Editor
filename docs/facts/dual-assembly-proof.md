@@ -12,7 +12,7 @@ npm run verify:dual-assembly
 
 Phase 要求接入新插件的提交 `C`：
 
-- **方式 A**：`git diff --name-status C^ C` 只新增插件包，并只改一个顶层装配文件（如 `activateDefaultPlugins.ts`）；不改内核、加载器与既有插件。
+- **方式 A**：`git diff --name-status C^ C` 只新增插件包，并只改一个顶层装配文件（`src/assembly/CodePluginInstaller.ts`）；不改内核、加载器与既有插件。
 - **方式 B**：已有运行代码不动，只新增插件并改 `plugins.config.json`（及必要依赖元数据）。
 
 历史提交中，扩展点与首个插件有时同批落地，**不能**直接用早期 commit 当 `C`。验收时可用独立演示分支 tear-and-reattach：
@@ -25,6 +25,6 @@ Phase 要求接入新插件的提交 `C`：
 
 ## 当前仓库状态
 
-- 方式 A：`src/host/activateDefaultPlugins.ts`
+- 方式 A：`src/assembly/CodePluginInstaller.ts`
 - 方式 B：仓库根 `plugins.config.json` + `--config`
 - E2E：`tests/e2e/Cli.test.ts` 含 A/B 同会话断言

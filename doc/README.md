@@ -28,15 +28,16 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 
 | 模块 | 职责 | 依赖边界 |
 |---|---|---|
-| `src/main.ts` | 组合根；组装 CLI/Core，选择方式 A/B 装入插件，注册内置贡献 | 可依赖 `cli`、`core`、`host`、`protocol`、`_builtin`、`_plugin` |
-| `src/host` | 插件宿主与配置加载：`PluginHost`、`loadPluginsFromConfig`、方式 A `activateDefaultPlugins` | 依赖 `protocol` + `core` 注册表；方式 A 可依赖 `_plugin`；加载器不硬编码插件 |
+| `src/main.ts` | 组合根；组装 CLI/Core，选择方式 A/B 装入插件 | 可依赖 `cli`、`core`、`host`、`assembly`、`protocol` |
+| `src/assembly` | 装配：`BuiltinContributionInstaller`（内置命令/图形，`g` 最后注册）、`CodePluginInstaller`（方式 A 的插件清单） | 依赖 `host`、`core`、`protocol`、`_builtin`、`_plugin` |
+| `src/host` | 插件宿主与配置加载：`PluginHost`、`PluginModuleLoader`、`loadPluginsFromConfig` | 只依赖 `protocol` + `core`；不导入任何具体插件 |
 | `src/cli/io` | `InputReader` / `OutputWriter` 端口及控制台适配器 | 可用 Node `readline`；不依赖 Parser/Session/Core |
 | `src/cli/parser` | 切词、参数校验、按 `CommandCatalog` 构造 Command | 仅依赖自身与 `protocol` |
 | `src/cli/session` | REPL 与单次输入反馈 | 依赖 `cli/io`、`CommandParser`、`Executor` |
 | `src/protocol` | 命令/图形/结果/错误、扩展点契约（Contribution、AttributeHandler、TreeDecorator、SvgPlugin） | 不依赖 `cli`/`core`/`host`/插件/Node/DOM |
 | `src/core` | Executor、Receiver、Document、History、Display、SVG IO、各 Registry | 只依赖 `protocol` |
 | `src/_builtin` | Phase 1 内置命令与六种图形贡献 | 只依赖 `protocol` |
-| `src/_plugin` | 可选插件：stats、dir、box、树标签 | 只依赖 `protocol`（允许 `node:` 适配器） |
+| `src/_plugin` | 可选插件：stats、dir、box、modified-star（每个插件包独立，互不依赖） | 只依赖 `protocol` 与自身包目录（允许 `node:` 适配器）；由 lint 强制 |
 | `scripts` / `tests` | 回归、metrics、双装配校验、E2E | 按对象依赖公开接口 |
 
 实际目录结构如下。README、业务文档和实践说明随模块下沉，避免把全部知识堆在仓库根目录。
@@ -44,7 +45,8 @@ CLI 通过标准输入逐行读取命令，通过标准输出返回成功摘要�
 ```text
 src/
 ├── main.ts
-├── host/                            # 插件宿主、配置加载、方式 A 装配
+├── host/                            # 插件宿主、配置加载（不含具体插件）
+├── assembly/                        # 内置贡献装配、方式 A 插件清单
 ├── cli/                             # I/O · Parser · Session
 ├── protocol/                        # 契约与扩展点（含 attributes / tree / plugins）
 ├── core/                            # Executor · Receiver · Registries · IO
@@ -243,7 +245,7 @@ npm run verify:dual-assembly
 **方式 A（改代码）** — 默认启动：
 
 ```ts
-// src/host/activateDefaultPlugins.ts
+// src/assembly/CodePluginInstaller.ts
 await host.activate(new StatsCommandPlugin(), PluginContributes.of({ commands: ["stats"] }));
 // … dir、box、modified-star
 ```
@@ -276,6 +278,11 @@ node dist/main.js --config plugins.config.json
 - 端口：`protocol/io/DirectoryListing`（只描述列出目录条目）。
 - 适配器：`_plugin/commands/DirCommand/NodeDirectoryListing`（Node `fs`）。
 - `DirCommand` 只依赖端口；测试可注入替身。真实 FS 与替身测试见 `tests/_plugin/commands/DirCommand/`。
+- 排序：目录在前、文件在后，组内按 UTF-16 码元序（与区域设置无关，大写先于小写，`.` 先于字母）。
+- **符号链接规则**：不跟随链接目标；`Dirent.isDirectory()` 为假的条目（含指向目录的符号链接）一律以 `[FILE]` 列出。
+- 不接收参数；不读写文档、不入 undo 栈；读取失败返回 `error: cannot read directory: <path>`。
+
+Adapter 角色对应：Client = `DirCommand`；Target = `DirectoryListing`；Adapter = `NodeDirectoryListing`；Adaptee = `node:fs/promises.readdir`。
 
 这是 Adapter：插件命令面向稳定端口，文件系统细节留在适配器。
 

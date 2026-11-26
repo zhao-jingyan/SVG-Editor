@@ -4,7 +4,7 @@
 
 - protocol：`SvgPlugin` / `PluginContext` / `PluginContributes`
 - host：`PluginHost`（暂存→清单校验→commit）、`PluginModuleLoader`、`PluginConfigLoader`、`loadPluginsFromConfig`
-- 方式 A：`activateDefaultPlugins`；方式 B：`--config plugins.config.json`
+- 方式 A：`CodePluginInstaller`（`src/assembly`）；方式 B：`--config plugins.config.json`
 - 插件默认导出：stats / dir / box / modified-star；`package.json` contributes
 - 内置叶子图形先注册，插件后，最后注册 `g`（保证 box 认领 `data-kind`）
 

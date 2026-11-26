@@ -38,14 +38,8 @@ export class DirCommand extends Command {
       return "(empty directory)";
     }
 
-    const directories = entries
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.getName())
-      .sort((left, right) => left.localeCompare(right));
-    const files = entries
-      .filter((entry) => !entry.isDirectory())
-      .map((entry) => entry.getName())
-      .sort((left, right) => left.localeCompare(right));
+    const directories = this.sortedNames(entries, true);
+    const files = this.sortedNames(entries, false);
 
     const lines: string[] = [];
     for (const name of directories) {
@@ -55,5 +49,16 @@ export class DirCommand extends Command {
       lines.push(`[FILE] ${name}`);
     }
     return lines.join("\n");
+  }
+
+  /** 按 UTF-16 码元序排序（与区域设置无关）：大写字母先于小写，`.` 先于字母。 */
+  private sortedNames(
+    entries: readonly DirectoryEntry[],
+    directories: boolean,
+  ): string[] {
+    return entries
+      .filter((entry) => entry.isDirectory() === directories)
+      .map((entry) => entry.getName())
+      .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
   }
 }

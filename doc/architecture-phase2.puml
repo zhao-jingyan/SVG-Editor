@@ -11,7 +11,9 @@ title SVG Editor Phase 2 模块依赖
 
 rectangle "main.ts\n组合根 A/B 选择" as Main
 
-rectangle "host\nPluginHost · ConfigLoader\nModuleLoader · 方式 A 装配" as Host
+rectangle "host\nPluginHost · ConfigLoader\nModuleLoader（不含任何插件导入）" as Host
+
+rectangle "assembly\nBuiltinContributionInstaller\nCodePluginInstaller（方式 A）" as Assembly
 
 rectangle "CLI\nI/O · Parser · Session" as Cli
 
@@ -26,15 +28,20 @@ rectangle "_plugin\nstats · dir · box · tree 标签" as Plugin
 Main --> Cli
 Main --> Core
 Main --> Host
+Main --> Assembly
 Main --> Builtin
 Main --> Plugin
 Host --> Protocol
 Host --> Core
-Host ..> Plugin : 方式 A 显式导入
+Assembly --> Host
+Assembly --> Builtin
+Assembly --> Plugin : 方式 A 显式导入
+Assembly --> Core
 Cli --> Protocol
 Core --> Protocol
 Builtin --> Protocol
 Plugin --> Protocol
+Plugin ..> Plugin : 禁止（lint：包内隔离）
 
 note bottom of Host
   方式 B：plugins.config.json

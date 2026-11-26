@@ -8,6 +8,8 @@ import { CreateCommand } from "@/_builtin/commands/CreateCommand/CreateCommand";
 import { CommandExecutor } from "@/core/CommandExecutor";
 import { CommandHistory } from "@/core/history/CommandHistory";
 import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
+import { DirCommandContribution } from "@/_plugin/commands/DirCommand/DirCommandContribution";
+import { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
 import { DirCommand } from "@/_plugin/commands/DirCommand/DirCommand";
 import { NodeDirectoryListing } from "@/_plugin/commands/DirCommand/NodeDirectoryListing";
 import { DirectoryEntry } from "@/protocol/io/DirectoryEntry";
@@ -111,5 +113,80 @@ describe("DirCommand", () => {
       type: "success",
       message: "rect#r1 deleted",
     });
+  });
+
+  it("按码点序排序：大写先于小写，与区域设置无关", async () => {
+    const listing = new FakeDirectoryListing(
+      new Map([
+        [
+          "/tmp/case",
+          [
+            new DirectoryEntry(DirectoryEntryKind.File, "b.txt"),
+            new DirectoryEntry(DirectoryEntryKind.File, "B.txt"),
+            new DirectoryEntry(DirectoryEntryKind.File, "a.txt"),
+            new DirectoryEntry(DirectoryEntryKind.File, "_x"),
+            new DirectoryEntry(DirectoryEntryKind.Directory, "z"),
+            new DirectoryEntry(DirectoryEntryKind.Directory, "Z"),
+          ],
+        ],
+      ]),
+    );
+
+    const result = await new DirCommand(listing, "/tmp/case").execute(
+      new EditorCommandReceiver(),
+    );
+
+    expect(result.toCommandResultDto()).toEqual({
+      type: "success",
+      message: [
+        "[DIR]  Z",
+        "[DIR]  z",
+        "[FILE] B.txt",
+        "[FILE] _x",
+        "[FILE] a.txt",
+        "[FILE] b.txt",
+      ].join("\n"),
+    });
+  });
+
+  it("已有文档时读取失败：返回 io-read，文档与 undo 历史均不变", async () => {
+    const history = new CommandHistory();
+    const receiver = new EditorCommandReceiver(history);
+    const executor = new CommandExecutor(receiver, history);
+    await executor.execute(new InitCommand(100, 100));
+    await executor.execute(new CreateCommand(new RectShape("r1", 0, 0, 1, 1)));
+    const failing = new FakeDirectoryListing(new Map(), new Set(["/tmp/missing"]));
+
+    const failed = await executor.execute(new DirCommand(failing, "/tmp/missing"));
+
+    expect(failed.toCommandResultDto()).toMatchObject({
+      type: "error",
+      error: { code: "io-read" },
+    });
+    expect(receiver.getRootShapes().map((shape) => shape.getId())).toEqual(["r1"]);
+    expect((await executor.execute(new UndoCommand())).toCommandResultDto()).toEqual({
+      type: "success",
+      message: "rect#r1 deleted",
+    });
+  });
+
+  it("贡献的 directoryPath 选项决定列举目录；无参数以外的输入被拒绝", async () => {
+    const listing = new FakeDirectoryListing(
+      new Map([
+        ["/tmp/custom", [new DirectoryEntry(DirectoryEntryKind.File, "only.svg")]],
+      ]),
+    );
+    const contribution = DirCommandContribution.create(listing, "/tmp/custom");
+
+    const command = contribution.createCommand(new CommandParameters([], "dir"));
+    const result = await command.execute(new EditorCommandReceiver());
+
+    expect(result.toCommandResultDto()).toEqual({
+      type: "success",
+      message: "[FILE] only.svg",
+    });
+    expect(() =>
+      contribution.createCommand(new CommandParameters(["extra"], "dir")),
+    ).toThrow();
   });
 });
