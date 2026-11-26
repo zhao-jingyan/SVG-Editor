@@ -41,8 +41,6 @@ Cli --> Protocol
 Core --> Protocol
 Builtin --> Protocol
 Plugin --> Protocol
-Plugin ..> Plugin : 禁止（lint：包内隔离）
-
 note bottom of Host
   方式 B：plugins.config.json
   字符串模块加载，无硬编码插件表
@@ -51,6 +49,10 @@ end note
 note bottom of Protocol
   扩展点接口在此；实现在 _builtin/_plugin
   Protocol 不依赖 cli/core/host/插件
+end note
+
+note bottom of Plugin
+  禁止：插件包之间互相依赖（由 lint 强制包内隔离）
 end note
 
 @enduml
