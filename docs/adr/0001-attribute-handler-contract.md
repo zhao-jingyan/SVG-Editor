@@ -19,6 +19,17 @@ Phase 1 的 `set` 只允许叶子图形白名单属性。`box` 需要把 `fill` 
 7. 撤销提示文案由快照携带（可选的 `restoredMessageDescriber`，`describeRestored(previous)`），内核 `SetCommand` 不得出现任何具体属性名（如 `label`）的分支；box 的 `label restored: "…"` 由 `BoxAttributeHandler` 提供。
 8. 插件抛出的非协议异常由 `CommandExecutor` 统一转成 `command-failed` 错误结果，进程不崩溃，且失败命令不入历史。
 
+## 处理器如何访问目标图形
+
+处理器只通过公开接口与图形交互，不访问内核私有状态：
+
+1. **类型识别**：`handles` / `capture` / `apply` 收到的是 `Shape` 抽象类型。处理器先用 `instanceof` 判断是否为自己负责的具体类（如 `BoxShape`），不符合则 `handles` 返回 `false`，`apply` 抛 `InvalidArgument`。`instanceof` 只出现在插件处理器内，内核不做类型分派。
+2. **子部件定位**：子部件通过 `getChildren()` 遍历，并用类提供的派生规则匹配 id（如 `BoxShape.rectIdFor(id)`、`BoxShape.labelIdFor(id)`）。找不到或类型不符时抛错，不做静默降级。
+3. **修改范围**：只修改认领的叶子属性（`fill` → rect 的 `fill`；`label` → text 的 `text`），不改变父子结构。结构相关操作由 `Shape` 的钩子（如 `allowsRemovingChild`）和 ADR 0005 约束。
+4. **撤销快照**：`capture` 只记录被修改叶子的旧值（`ShapeAttributeSnapshot` 的 id → 旧值映射），`apply` 失败时由调用方按快照回滚。
+
+该做法让处理器只依赖 `Shape` 的读写接口和 `BoxShape` 的公开派生规则，内核无需知道 `fill`/`label` 的业务含义。替代方案是让内核按图形类型写 `if (box) …` 分支，会把插件语义拉回内核，不采用。
+
 ## 后果
 
 - 内核 set 路径稳定；新增属性语义只需注册处理器。
