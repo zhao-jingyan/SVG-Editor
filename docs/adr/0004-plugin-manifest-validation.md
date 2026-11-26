@@ -17,7 +17,9 @@
    `error: duplicate registration: <category>/<name>`，不 commit。
 4. **失败隔离**：任一插件失败只 `discard` 本插件暂存；已 commit 的插件保留；加载器继续下一项。
 5. **配置非法**：结构/JSON 错误只报 `error: invalid plugin config`，以已注册的内置能力启动（无可选插件）。
-6. **加载器位置**：`src/host`，不属于 `core`；模块名按字符串解析，无具体插件硬编码。
+6. **加载器位置**：`src/host`，不属于 `core`；模块名按字符串解析，无具体插件硬编码；方式 A 的插件清单位于 `src/assembly`，不在宿主内。
+7. **清单定位**：`contributes` 来自入口模块向上最近的 `package.json`（入口文件可在包的子目录）；找不到则视为空清单，此时只要插件注册了任何内容就会触发 mismatch。
+8. **包隔离**：插件包之间互不依赖（含 box 的树标签随 box 包），由 `npm run lint` 的 `scripts/lint-layer-boundaries.mjs` 强制；组合只发生在装配/配置层。
 
 ## 后果
 

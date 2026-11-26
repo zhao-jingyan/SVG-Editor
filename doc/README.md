@@ -229,12 +229,14 @@ npm run verify:dual-assembly
 
 ## 9. Phase 2 扩展点清单
 
-| 扩展点（角色名） | 接口 / 抽象类 | 职责 | 内核调用位置 | 已有实现 | 禁用可选扩展时 | 违约时报错 |
+| 扩展点（角色名） | 接口 / 抽象类 | 职责 | 内核调用位置 | 已有实现 | 禁用可选扩展时 | 违约时报错（代码位置） |
 |---|---|---|---|---|---|---|
-| ShapeProvider | `ShapeContribution` + `ShapeCatalog` | 按类型名创建；按 tag/`data-kind` 读回 | `CreateCommandContribution` 工厂；`SvgDocumentParser` → `ShapeRegistry.find` / `findForSvg` | `_builtin` 六种；`_plugin` `box` | 仅六种内置；带 `data-kind=box` 的 g 降级为普通 `GroupShape` | 未知类型：create/parse 报错；重复类型名：`duplicate shape type` |
-| Command | `CommandContribution` + `CommandCatalog` | 命令名、help、参数→Command | `CommandLineParser` → `CommandRegistry.find` | Phase 1 内置；`stats`、`dir` | help/执行无插件命令；未知命令 `error: unknown command` | 重复名：`duplicate command` / `duplicate registration: commands/…` |
-| AttributeHandler | `AttributeHandler` + `AttributeCatalog` | 图形+属性领域语义 | `EditorShapeCommandReceiver.setAttribute` / 撤销恢复 → `AttributeRegistry.find` | `BoxAttributeHandler`（`fill`/`label`） | 仅 Phase 1 白名单；`label` 等扩展属性执行期失败 | 多处理器命中：ambiguous；注册重名：`duplicate attribute handler` |
-| TreeDecorator | `TreeDecorator` + `TreeDecoratorCatalog` | tree 行尾标签；IO 后同步基线 | `TreeDisplay` 拼接；`EditorDocumentCommandReceiver.syncTreeDecorators` | `box-type-label`、`modified-star` | tree 输出与 Phase 1 逐字节一致 | 注册重名：`duplicate tree decorator` |
+| ShapeProvider（代码名 `ShapeContribution`） | 抽象类 `ShapeContribution` + `ShapeCatalog` | 按类型名创建；按 tag/`data-kind` 读回 | `CreateCommandContribution`；`SvgDocumentParser` → `ShapeRegistry.find` / `findForSvg` | `_builtin` 六种；`_plugin` `box` | 仅六种内置；带 `data-kind=box` 的 g 降级为普通 `GroupShape` | 类型名为空：`ShapeContribution` 构造器；重复类型名：`ShapeRegistry` 的 `duplicate shape type`；未知类型：`CreateCommandContribution` 的 `unknown shape type` |
+| Command | 抽象类 `CommandContribution`（模板方法 `createCommand` → `buildCommand`）+ `CommandCatalog` | 命令名、help、参数→Command | `CommandLineParser` → `CommandRegistry.find` | Phase 1 内置；`stats`、`dir` | help/执行无插件命令；`error: unknown command: <name>` | 名称/用法为空：`CommandContribution` 构造器；`buildCommand` 未返回 `Command`：`CommandContribution.createCommand`；重复名：`CommandRegistry` 的 `duplicate command`；执行期抛非协议异常：`CommandExecutor` 转 `command-failed` |
+| AttributeHandler | 抽象类 `AttributeHandler` + `AttributeCatalog` | 图形+属性领域语义 | `EditorShapeCommandReceiver.setAttribute` / 撤销恢复 → `AttributeRegistry.find` | `BoxAttributeHandler`（`fill`/`label`） | 仅 Phase 1 白名单；`label` 等扩展属性执行期失败 | 多处理器命中：`AttributeRegistry` 的 ambiguous；重名：`duplicate attribute handler`；`apply` 抛错：快照回滚且不入历史（`EditorShapeCommandReceiver`） |
+| TreeDecorator | 抽象类 `TreeDecorator` + `TreeDecoratorCatalog` | tree 行尾标签；IO 后同步基线 | `TreeDisplay` 拼接；`EditorDocumentCommandReceiver.syncTreeDecorators` | `box-type-label`、`modified-star` | tree 输出与 Phase 1 逐字节一致 | 重名：`TreeDecoratorRegistry` 的 `duplicate tree decorator` |
+
+插件注册阶段的契约校验（清单与实际注册集合不一致、重复注册、模块缺失/无默认导出/激活失败）由 `PluginHost` / `PluginModuleLoader` 负责，见第 10 节。
 
 插件以类实现扩展点，经 `SvgPlugin.activate(PluginContext)` 注册；不得依赖 `core`/`host` 内部。
 

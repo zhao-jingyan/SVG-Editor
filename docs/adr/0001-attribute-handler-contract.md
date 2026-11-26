@@ -16,6 +16,8 @@ Phase 1 的 `set` 只允许叶子图形白名单属性。`box` 需要把 `fill` 
 4. CLI 解析阶段放行任意属性名；未知属性在执行期失败，保证扩展属性不必改 Parser。
 5. 一次 `set` 一个 undo 单元：执行前 `capture` 快照；`apply` 抛错则回滚快照且不入历史。
 6. 快照仍用 `ShapeAttributeSnapshot`：`attribute` 保留命令侧名字（如 `label`），`restoreAttribute` 指向实际叶子属性（如 `text`）。
+7. 撤销提示文案由快照携带（可选的 `restoredMessageDescriber`，`describeRestored(previous)`），内核 `SetCommand` 不得出现任何具体属性名（如 `label`）的分支；box 的 `label restored: "…"` 由 `BoxAttributeHandler` 提供。
+8. 插件抛出的非协议异常由 `CommandExecutor` 统一转成 `command-failed` 错误结果，进程不崩溃，且失败命令不入历史。
 
 ## 后果
 
@@ -27,4 +29,7 @@ Phase 1 的 `set` 只允许叶子图形白名单属性。`box` 需要把 `fill` 
 
 - 契约：`src/protocol/attributes/AttributeHandler.ts`
 - 调用：`src/core/receiver/EditorShapeCommandReceiver.ts`（`setAttribute` / 撤销恢复）
+- 快照：`src/protocol/commands/memento/ShapeAttributeSnapshot.ts`
+- 异常兜底：`src/core/CommandExecutor.ts`
 - 实现：`src/_plugin/shapes/BoxShape/BoxAttributeHandler.ts`
+- 契约测试：`tests/core/attributes/AttributeHandlerContract.test.ts`（回滚、ambiguous）
