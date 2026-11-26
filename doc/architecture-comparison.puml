@@ -1,0 +1,60 @@
+@startuml
+skinparam shadowing false
+skinparam dpi 144
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam defaultFontName "Arial"
+skinparam linetype ortho
+left to right direction
+
+title SVG Editor：Phase 1（final）→ Phase 2（p2）架构对比
+
+package "Phase 1（标签 final）：固定的 CLI 分层" {
+  rectangle "main.ts\n手工组装 CLI 与 Core" as P1Main
+  rectangle "cli\nI/O · Parser · Session" as P1Cli
+  rectangle "core\nExecutor · Receiver · Document\nHistory · Display · SVG IO" as P1Core
+  rectangle "protocol\n命令 / 图形 / 结果 / 错误\n（命令与图形种类固定）" as P1Proto
+
+  P1Main --> P1Cli
+  P1Main --> P1Core
+  P1Cli --> P1Proto
+  P1Core --> P1Proto
+}
+
+package "Phase 2（标签 p2）：可插拔的扩展点" {
+  rectangle "main.ts\n组合根：A/B 装配选择" as P2Main
+  rectangle "cli\nI/O · Parser · Session" as P2Cli
+  rectangle "core\nExecutor · Receiver · Document\nRegistries（命令/图形/属性/树标签）" as P2Core
+  rectangle "protocol\n契约：Command · Shape\nContribution · AttributeHandler\nTreeDecorator · SvgPlugin" as P2Proto
+  rectangle "host\nPluginHost · 配置加载器\n（不导入具体插件）" as P2Host
+  rectangle "assembly\n内置安装 · 方式 A 清单" as P2Asm
+  rectangle "_builtin\n内置命令与图形贡献" as P2Builtin
+  rectangle "_plugin\nstats · dir · box · 树标签" as P2Plugin
+
+  P2Main --> P2Cli
+  P2Main --> P2Core
+  P2Main --> P2Host
+  P2Main --> P2Asm
+  P2Cli --> P2Proto
+  P2Core --> P2Proto
+  P2Host --> P2Core
+  P2Host --> P2Proto
+  P2Asm --> P2Host
+  P2Asm --> P2Builtin
+  P2Asm --> P2Plugin
+  P2Builtin --> P2Proto
+  P2Plugin --> P2Proto
+}
+
+note bottom of P1Proto
+  Phase 1：新增图形需修改 SvgDocumentParser 的 tag switch
+  与 ShapeFactory；没有统一的注册入口
+end note
+
+note bottom of P2Proto
+  Phase 2：新增能力只需实现扩展点并经
+  方式 A（CodePluginInstaller）或方式 B（配置）装入
+  Core 不出现 box、stats 等具体名字
+end note
+
+@enduml
