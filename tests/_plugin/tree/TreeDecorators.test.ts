@@ -9,6 +9,8 @@ import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
 import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
 import { CreateCommand } from "@/_builtin/commands/CreateCommand/CreateCommand";
 import { InitCommand } from "@/_builtin/commands/InitCommand/InitCommand";
+import { DeleteCommand } from "@/_builtin/commands/DeleteCommand/DeleteCommand";
+import { ReorderCommand } from "@/_builtin/commands/ReorderCommand/ReorderCommand";
 import { MoveCommand } from "@/_builtin/commands/MoveCommand/MoveCommand";
 import { SaveCommand } from "@/_builtin/commands/SaveCommand/SaveCommand";
 import { UndoCommand } from "@/_builtin/commands/UndoCommand/UndoCommand";
@@ -95,5 +97,59 @@ describe("TreeDecorator 插件", () => {
     };
     expect(tree.message).not.toContain(" *");
     expect(tree.message).toContain("g#n1 (box)");
+  });
+
+  describe("modified-star 根层结构变化", () => {
+    async function createSavedEditor(): Promise<{
+      executor: CommandExecutor;
+      render: () => Promise<string>;
+    }> {
+      const shapeCatalog = createPluginShapeCatalog();
+      const treeDecorators = new TreeDecoratorRegistry();
+      treeDecorators.register(new ModifiedStarDecorator());
+      const history = new CommandHistory();
+      const receiver = new EditorCommandReceiver(
+        history,
+        new InMemorySvgStorage(),
+        new HelpText(createBuiltinCatalog(shapeCatalog)),
+        shapeCatalog,
+        undefined,
+        treeDecorators,
+      );
+      const executor = new CommandExecutor(receiver, history);
+      await executor.execute(new InitCommand(50, 50));
+      await executor.execute(new CreateCommand(new RectShape("a", 0, 0, 1, 1)));
+      await executor.execute(new CreateCommand(new RectShape("b", 0, 0, 1, 1)));
+      await executor.execute(new SaveCommand("s.svg"));
+      const render = async (): Promise<string> =>
+        (
+          (await receiver.tree()).toCommandResultDto() as {
+            type: "success";
+            message: string;
+          }
+        ).message;
+      return { executor, render };
+    }
+
+    it("保存后删除根层图形：画布行带 *，undo 回保存点后消失", async () => {
+      const { executor, render } = await createSavedEditor();
+      expect(await render()).not.toContain("*");
+
+      await executor.execute(new DeleteCommand("b"));
+      expect((await render()).split("\n")[0]).toBe("svg (50x50) *");
+
+      await executor.execute(new UndoCommand());
+      expect(await render()).not.toContain("*");
+    });
+
+    it("保存后根层 front 重排：画布行带 *，undo 回保存点后消失", async () => {
+      const { executor, render } = await createSavedEditor();
+
+      await executor.execute(new ReorderCommand("b", "front"));
+      expect((await render()).split("\n")[0]).toBe("svg (50x50) *");
+
+      await executor.execute(new UndoCommand());
+      expect(await render()).not.toContain("*");
+    });
   });
 });

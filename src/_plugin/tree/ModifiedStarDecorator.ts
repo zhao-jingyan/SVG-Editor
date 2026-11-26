@@ -7,7 +7,8 @@ import {
 
 /**
  * 相对上次 init/read/save 的内容指纹比较；不一致则行尾追加 ` *`。
- * 指纹含子树，故改叶子时祖先也会带 *。
+ * 指纹含子树，故改叶子时祖先也会带 *；画布行另含根层子节点的 id 序列，
+ * 因此根层删除、front/back 重排也会让画布行带 *。
  */
 export class ModifiedStarDecorator extends TreeDecorator {
   private baselineCanvas = "";
@@ -68,8 +69,13 @@ export class ModifiedStarDecorator extends TreeDecorator {
     return this.fingerprint(shape) !== baseline;
   }
 
+  /** 画布尺寸 + 根层子节点的 id 序列（覆盖根层的增删与 front/back 顺序变化）。 */
   private canvasFingerprint(snapshot: TreeDocumentSnapshot): string {
-    return `${snapshot.getWidth()}x${snapshot.getHeight()}`;
+    const rootOrder = snapshot
+      .getRootShapes()
+      .map((shape) => shape.getId())
+      .join(",");
+    return `${snapshot.getWidth()}x${snapshot.getHeight()}|${rootOrder}`;
   }
 
   private fingerprint(shape: Shape): string {
