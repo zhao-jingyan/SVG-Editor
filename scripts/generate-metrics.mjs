@@ -334,8 +334,10 @@ const cliDelta = bucketKeys.reduce(
 
 const summary = `# CLI Metrics（自动生成）
 
-> 由 \`npm run metrics\`（\`scripts/generate-metrics.mjs\`）从 git 对象生成，不接受手填。  
-> 基线：\`${baseRef}\` → 对比：\`${headRef}\`${headRef === "HEAD" ? "（标签 \`p2\` 尚未创建，打标签后重新运行即以 \`p2\` 为终点）" : ""}  
+> 由 \`npm run metrics\`（\`scripts/generate-metrics.mjs\`）从 git 对象生成，不接受手填。
+>
+> 基线：\`${baseRef}\` → 对比：\`${headRef}\`${headRef === "HEAD" ? "（标签 \`p2\` 尚未创建，打标签后重新运行即以 \`p2\` 为终点）" : ""}
+>
 > 生成时间：${generatedAt}
 
 ## 分类与口径
