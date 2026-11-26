@@ -1,6 +1,7 @@
 {
   "plugins": [
     { "module": "./dist/_plugin/commands/StatsCommand" },
+    { "module": "./dist/_plugin/commands/DirCommand" },
     { "module": "./dist/_plugin/shapes/BoxShape" },
     { "module": "./dist/_plugin/tree/ModifiedStarPlugin" }
   ]

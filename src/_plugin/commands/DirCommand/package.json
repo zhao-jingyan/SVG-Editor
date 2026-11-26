@@ -1,0 +1,7 @@
+{
+  "name": "@svgframe/plugin-command-dir",
+  "main": "./index.js",
+  "contributes": {
+    "commands": ["dir"]
+  }
+}
