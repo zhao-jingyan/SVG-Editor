@@ -142,6 +142,9 @@ Shape
 | Caretaker | `CommandHistory` | 管理 undo/redo 两栈和历史锁，只保存命令引用 | 把历史栈塞进 Document 会混淆聚合根与操作历史职责，不采用 |
 | Adapter / Port | `Executor`、`CommandReceiver`、`InputReader` / `OutputWriter`、`SvgStorage`、`DirectoryListing` + `NodeDirectoryListing` | 隔离 CLI、Core、终端、文件与目录访问 | 层直接依赖具体类会破坏依赖方向，不采用 |
 | Plugin Host | `SvgPlugin`、`PluginContext`、`PluginHost`、配置加载器 | 统一 A/B 装入、清单校验与失败回滚 | 在 main 里直接 `register` 绕过校验会破坏双装配一致性，不采用 |
+| Template Method | `CommandContribution` 的 `createCommand`（固定流程：校验命令名、调用工厂、校验返回值为 `Command`）与抽象钩子 `buildCommand`；由 `CreateCommandContribution` 等具体贡献实现 | 所有命令贡献共享身份校验与失败语义，具体贡献只关心如何解析参数并构造命令 | 每个贡献各自实现 `createCommand` 会复制校验逻辑，且容易漏掉返回值检查，不采用；让基类持有命令工厂函数表会退化为按名字的大分支 |
+| Decorator（行标签） | `TreeDecorator`（抽象类）、`TreeDecoratorRegistry`；`ModifiedStarDecorator` 与 `BoxTypeLabelDecorator` 为具体装饰器；`TreeDisplay` 按注册顺序拼接行尾标签 | 在不修改图形对象和 tree 显示主流程的前提下，为行追加标签（`*`、`(box)`），并支持多个标签叠加 | 修改 `ShapeSummaryVisitor` 内的字符串拼接会把所有标签规则堆进显示层，不采用；与经典包装式 Decorator 不同，这里不包装图形对象，而是向显示流程提供标签片段，因此更接近“可叠加的行标签扩展点”，与 VSCode 文件装饰的分析口径一致 |
+| Strategy（属性处理器） | `AttributeHandler`（抽象类）、`AttributeCatalog`、`AttributeRegistry`；`BoxAttributeHandler` 为具体策略 | 同一个 `set` 命令按图形与属性选择不同的修改算法，内核只负责路由和撤销 | 在 `EditorShapeCommandReceiver` 中按图形类型写 `if` 会把插件语义拉回内核，不采用；多处理器同时命中时直接报 ambiguous 错误，而不是按优先级覆盖（见 ADR 0001） |
 
 按名字分派集中在 Registry：命令名、图形类型名、属性处理器名、树装饰器名。Phase 2 角色名 `ShapeProvider` 对应 `ShapeContribution`。
 
