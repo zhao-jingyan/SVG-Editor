@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { LambdaCommandContribution } from "../../support/LambdaCommandContribution";
 import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 import { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
 import { MoveCommand } from "@/_builtin/commands/MoveCommand/MoveCommand";
@@ -8,7 +8,7 @@ describe("CommandContribution", () => {
   it("校验名称和 usage 非空", () => {
     expect(
       () =>
-        new CommandContribution(
+        new LambdaCommandContribution(
           "",
           "move <id> <dx> <dy>",
           undefined,
@@ -18,7 +18,7 @@ describe("CommandContribution", () => {
 
     expect(
       () =>
-        new CommandContribution(
+        new LambdaCommandContribution(
           "move",
           "  ",
           undefined,
@@ -29,7 +29,7 @@ describe("CommandContribution", () => {
 
   it("暴露名称、usage 与可选 help", () => {
     const help = new CommandHelp("move <id> <dx> <dy>", "move a shape");
-    const contribution = new CommandContribution(
+    const contribution = new LambdaCommandContribution(
       "move",
       "move <id> <dx> <dy>",
       help,
@@ -49,7 +49,7 @@ describe("CommandContribution", () => {
   });
 
   it("根据参数创建 Command 子类实例", () => {
-    const contribution = new CommandContribution(
+    const contribution = new LambdaCommandContribution(
       "move",
       "move <id> <dx> <dy>",
       undefined,

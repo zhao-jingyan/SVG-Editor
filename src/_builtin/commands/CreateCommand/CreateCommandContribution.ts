@@ -1,4 +1,5 @@
 import { CreateCommand } from "./CreateCommand";
+import type { Command } from "@/protocol/commands/Command";
 import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
 import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 import type { CommandParameters } from "@/protocol/commands/contribution/CommandParameters";
@@ -6,31 +7,27 @@ import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 
-export class CreateCommandContribution {
+/** create 命令：图形类型名经 ShapeCatalog 查找，本类不含任何类型 switch。 */
+export class CreateCommandContribution extends CommandContribution {
   public static create(shapeCatalog: ShapeCatalog): CommandContribution {
-    return new CommandContribution(
+    return new CreateCommandContribution(shapeCatalog);
+  }
+
+  private constructor(private readonly shapeCatalog: ShapeCatalog) {
+    super(
       "create",
       "create <type> <id> [params...] [in <containerId>]",
-      new CommandHelp(
-        "create <type> <id> [params...]",
-        "create a shape",
-      ),
-      (parameters) =>
-        CreateCommandContribution.parseCreate(shapeCatalog, parameters),
+      new CommandHelp("create <type> <id> [params...]", "create a shape"),
     );
   }
 
-  private static parseCreate(
-    shapeCatalog: ShapeCatalog,
-    parameters: CommandParameters,
-  ): CreateCommand {
+  protected override buildCommand(parameters: CommandParameters): Command {
     parameters.expectMinimumLength(2);
 
     const shapeType = parameters.text(0, "shape type");
     const shapeId = parameters.text(1, "shape id");
-    const parsedArguments =
-      CreateCommandContribution.parseCreateArguments(parameters);
-    const contribution = shapeCatalog.find(shapeType);
+    const parsedArguments = this.parseCreateArguments(parameters);
+    const contribution = this.shapeCatalog.find(shapeType);
 
     if (contribution === undefined) {
       throw ProtocolError.shape(
@@ -39,11 +36,11 @@ export class CreateCommandContribution {
       );
     }
 
-    const shape = contribution.create(shapeId, parsedArguments.values);
+    const shape = contribution.createShape(shapeId, parsedArguments.values);
     return new CreateCommand(shape, parsedArguments.parentId);
   }
 
-  private static parseCreateArguments(parameters: CommandParameters): {
+  private parseCreateArguments(parameters: CommandParameters): {
     values: readonly string[];
     parentId?: string;
   } {

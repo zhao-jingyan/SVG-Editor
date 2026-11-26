@@ -6,50 +6,58 @@ import { ShapeContribution } from "@/protocol/shapes/contribution/ShapeContribut
 import type { ShapeSvgReadInput } from "@/protocol/shapes/contribution/ShapeSvgReadInput";
 import { ShapeType } from "@/protocol/shapes/model/ShapeType";
 
-export class EllipseShapeContribution {
+export class EllipseShapeContribution extends ShapeContribution {
   public static create(
     parser: ShapeArgumentParser = new ShapeArgumentParser(),
   ): ShapeContribution {
-    const create = (id: string, args: readonly string[]): EllipseShape => {
-      parser.requireArgumentCount(
-        args,
-        4,
-        5,
-        "create ellipse <id> <cx> <cy> <rx> <ry> [fill]",
-      );
-      const numbers = parser.parseNumbers(args, 4);
-      return new EllipseShape(
-        id,
-        numbers[0],
-        numbers[1],
-        numbers[2],
-        numbers[3],
-        parser.optionalStyle(args[4]),
-      );
-    };
+    return new EllipseShapeContribution(parser);
+  }
 
-    return new ShapeContribution(
-      ShapeType.Ellipse,
-      create,
-      (tag) => tag === ShapeType.Ellipse,
-      (input) =>
-        create(input.getId(), [
-          EllipseShapeContribution.requireAttr(input, "cx"),
-          EllipseShapeContribution.requireAttr(input, "cy"),
-          EllipseShapeContribution.requireAttr(input, "rx"),
-          EllipseShapeContribution.requireAttr(input, "ry"),
-        ]),
+  private constructor(private readonly parser: ShapeArgumentParser) {
+    super(ShapeType.Ellipse);
+  }
+
+  public createShape(id: string, args: readonly string[]): EllipseShape {
+    this.parser.requireArgumentCount(
+      args,
+      4,
+      5,
+      "create ellipse <id> <cx> <cy> <rx> <ry> [fill]",
+    );
+    const numbers = this.parser.parseNumbers(args, 4);
+    return new EllipseShape(
+      id,
+      numbers[0],
+      numbers[1],
+      numbers[2],
+      numbers[3],
+      this.parser.optionalStyle(args[4]),
     );
   }
 
-  private static requireAttr(input: ShapeSvgReadInput, name: string): string {
+  public matchesSvg(tag: string): boolean {
+    return tag === ShapeType.Ellipse;
+  }
+
+  public readFromSvg(input: ShapeSvgReadInput): EllipseShape {
+    return this.createShape(input.getId(), [
+      this.requireAttr(input, "cx"),
+      this.requireAttr(input, "cy"),
+      this.requireAttr(input, "rx"),
+      this.requireAttr(input, "ry"),
+    ]);
+  }
+
+  private requireAttr(input: ShapeSvgReadInput, name: string): string {
     const value = input.getAttribute(name);
+
     if (value === undefined) {
       throw ProtocolError.document(
         CommandErrorCode.InvalidArgument,
         `invalid <ellipse>: missing attribute ${name}`,
       );
     }
+
     return value;
   }
 }

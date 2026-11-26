@@ -26,7 +26,7 @@ function createShape(
       `unknown shape type: ${typeName} (is the plugin loaded?)`,
     );
   }
-  return contribution.create(id, args);
+  return contribution.createShape(id, args);
 }
 
 function expectShapeProtocolError(

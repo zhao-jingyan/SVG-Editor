@@ -7,7 +7,8 @@ import { PluginHost } from "@/host/PluginHost";
 import { PluginContributes } from "@/protocol/plugins/PluginContributes";
 import type { PluginContext } from "@/protocol/plugins/PluginContext";
 import type { SvgPlugin } from "@/protocol/plugins/SvgPlugin";
-import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { LambdaCommandContribution } from "../support/LambdaCommandContribution";
+import type { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
 import { CommandHelp } from "@/protocol/commands/contribution/CommandHelp";
 import { TreeDecorator } from "@/protocol/tree/TreeDecorator";
 import { StatsCommand } from "@/_plugin/commands/StatsCommand/StatsCommand";
@@ -35,7 +36,7 @@ function createHost(errors: string[]): PluginHost {
 }
 
 function commandContribution(name: string): CommandContribution {
-  return new CommandContribution(
+  return new LambdaCommandContribution(
     name,
     name,
     new CommandHelp(name, name),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
-import { CommandContribution } from "@/protocol/commands/contribution/CommandContribution";
+import { LambdaCommandContribution } from "../../support/LambdaCommandContribution";
 import { HelpCommand } from "@/_builtin/commands/HelpCommand/HelpCommand";
 import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
 
@@ -38,7 +38,7 @@ describe("CommandRegistry", () => {
 
   it("拒绝同名命令", () => {
     const registry = new CommandRegistry();
-    const contribution = new CommandContribution(
+    const contribution = new LambdaCommandContribution(
       "help",
       "help",
       undefined,
