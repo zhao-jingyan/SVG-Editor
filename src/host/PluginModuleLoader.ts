@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
 import { PluginContributes } from "@/protocol/plugins/PluginContributes";
@@ -92,16 +92,40 @@ export class PluginModuleLoader {
     return null;
   }
 
+  /**
+   * 自入口文件所在目录起向上查找最近的 package.json（与 Node 包解析一致：
+   * 入口常在 dist/ 等子目录，清单位于包根）。找不到则视为空清单。
+   */
   private readContributes(resolvedPath: string): PluginContributes {
-    const packageJsonPath = join(dirname(resolvedPath), "package.json");
-    let text: string;
-    try {
-      text = readFileSync(packageJsonPath, "utf8");
-    } catch {
+    const packageJsonPath = this.findNearestPackageJson(dirname(resolvedPath));
+
+    if (packageJsonPath === undefined) {
       return PluginContributes.empty();
     }
 
-    const pkg = JSON.parse(text) as { contributes?: unknown };
+    const pkg = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
+      contributes?: unknown;
+    };
     return PluginContributes.fromUnknown(pkg.contributes);
+  }
+
+  private findNearestPackageJson(startDirectory: string): string | undefined {
+    let current = startDirectory;
+
+    for (;;) {
+      const candidate = join(current, "package.json");
+
+      if (existsSync(candidate)) {
+        return candidate;
+      }
+
+      const parent = dirname(current);
+
+      if (parent === current) {
+        return undefined;
+      }
+
+      current = parent;
+    }
   }
 }

@@ -65,4 +65,37 @@ describe("PluginModuleLoader", () => {
     }
     expect(loaded.kind).toBe("load_failed");
   });
+
+  it("入口在 dist/ 子目录时向上找到包根的 package.json 清单", () => {
+    const dir = mkdtempSync(join(tmpdir(), "svg-plugin-mod-"));
+    const pkg = join(dir, "node_modules", "@svgframe", "plugin-demo");
+    mkdirSync(join(pkg, "dist"), { recursive: true });
+    writeFileSync(
+      join(pkg, "package.json"),
+      JSON.stringify({
+        name: "@svgframe/plugin-demo",
+        main: "dist/index.js",
+        contributes: { shapes: ["demo"], decorators: ["demo-label"] },
+      }),
+    );
+    writeFileSync(
+      join(pkg, "dist", "index.js"),
+      [
+        '"use strict";',
+        "class DemoPlugin { constructor() { this.name = '@svgframe/plugin-demo'; } activate() {} }",
+        "module.exports = { default: DemoPlugin };",
+        "",
+      ].join("\n"),
+    );
+
+    // 按包名解析（运行环境的模块解析规则），而不是相对路径
+    const loaded = new PluginModuleLoader().load("@svgframe/plugin-demo", dir);
+
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) {
+      return;
+    }
+    expect(loaded.contributes.getShapes()).toEqual(["demo"]);
+    expect(loaded.contributes.getDecorators()).toEqual(["demo-label"]);
+  });
 });
