@@ -1,487 +1,864 @@
 {
-  "generatedAt": "2026-11-25T17:14:46.987Z",
+  "generatedAt": "2026-11-26T03:36:45.163Z",
   "baseRef": "final",
   "headRef": "HEAD",
   "classification": {
     "kernel": "src/protocol, src/core, src/cli, src/_builtin",
-    "assembly": "src/main.ts, src/host",
-    "plugin": "src/_plugin"
+    "assembly": "src/main.ts, src/host, src/assembly",
+    "plugin": "src/_plugin",
+    "vscode": "vscode-extension/**/*.ts（单独列出）"
   },
-  "note": "VSCode 扩展不计入本 CLI metrics；依赖包与 dist 排除。圈复杂度为脚本估计值，非工具厂商标准实现。",
+  "complexityDefinition": "每个函数 1 + 判定点（if/for/for-in/for-of/while/do/case/catch/?:/&&/||/??）；文件值为其内函数之和",
   "base": {
     "kernel": {
       "lines": 5055,
-      "complexity": 526,
+      "complexity": 801,
       "files": [
         {
           "path": "src/cli/io/ConsoleInputReader.ts",
           "lines": 67,
-          "complexity": 6
+          "functions": 6,
+          "complexity": 11,
+          "maxComplexity": 4,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/ConsoleOutputWriter.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/InputReader.ts",
           "lines": 4,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/OutputWriter.ts",
           "lines": 5,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/CommandLineParser.ts",
           "lines": 58,
-          "complexity": 5
+          "functions": 2,
+          "complexity": 6,
+          "maxComplexity": 5,
+          "responsibility": "CLI 命令解析入口，只负责词法、命令查找和结果包装。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/CommandParser.ts",
           "lines": 9,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "把一行 CLI 输入解释为命令、空输入或语法错误。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/commands/CommandsParser/doc/DocumentCommandParser.ts",
           "lines": 45,
-          "complexity": 4
+          "functions": 4,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "构造文档生命周期命令。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/commands/CommandsParser/shape/CreateCommandParser.ts",
           "lines": 42,
-          "complexity": 3
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "构造 create 命令并解析可选的 in 尾缀。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/commands/CommandsParser/shape/ShapeCommandParser.ts",
           "lines": 133,
-          "complexity": 4
+          "functions": 9,
+          "complexity": 12,
+          "maxComplexity": 2,
+          "responsibility": "构造除 create 以外的图形编辑命令。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/commands/CommandsParser/view/ViewCommandParser.ts",
           "lines": 47,
-          "complexity": 2
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "构造显示、历史和会话命令。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/commands/definition/CommandDefinition.ts",
           "lines": 8,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/commands/definition/CommandDefinitionRegistry.ts",
           "lines": 98,
-          "complexity": 1
+          "functions": 23,
+          "complexity": 23,
+          "maxComplexity": 1,
+          "responsibility": "集中维护命令名与参数构造器的唯一映射。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/results/CommandParseEmptyResult.ts",
           "lines": 11,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/results/CommandParseErrorResult.ts",
           "lines": 19,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/results/CommandParseResult.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/results/CommandParseSuccessResult.ts",
           "lines": 19,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/syntax/CommandArguments.ts",
           "lines": 106,
-          "complexity": 10
+          "functions": 12,
+          "complexity": 20,
+          "maxComplexity": 3,
+          "responsibility": "封装命令参数的元数校验和类型转换。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/syntax/CommandLineTokenizer.ts",
           "lines": 58,
-          "complexity": 10
+          "functions": 2,
+          "complexity": 11,
+          "maxComplexity": 8,
+          "responsibility": "把一行 CLI 文本切分为带引号感知的参数。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/session/CommandLoop.ts",
           "lines": 40,
-          "complexity": 7
+          "functions": 2,
+          "complexity": 7,
+          "maxComplexity": 6,
+          "responsibility": "CLI 的交互控制循环，只负责提示、读取和终止。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/session/CommandSession.ts",
           "lines": 50,
-          "complexity": 5
+          "functions": 3,
+          "complexity": 7,
+          "maxComplexity": 5,
+          "responsibility": "处理一次交互输入，并决定会话是否继续。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/session/CommandSessionStatus.ts",
           "lines": 5,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "REPL 会话循环",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/CommandExecutor.ts",
           "lines": 34,
-          "complexity": 5
+          "functions": 2,
+          "complexity": 6,
+          "maxComplexity": 5,
+          "responsibility": "命令执行与编排",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/display/HelpText.ts",
           "lines": 26,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/display/ShapeDetailVisitor.ts",
           "lines": 65,
-          "complexity": 3
+          "functions": 7,
+          "complexity": 9,
+          "maxComplexity": 3,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/display/ShapeSummaryVisitor.ts",
           "lines": 82,
-          "complexity": 4
+          "functions": 8,
+          "complexity": 11,
+          "maxComplexity": 3,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/display/TreeDisplay.ts",
           "lines": 97,
-          "complexity": 12
+          "functions": 10,
+          "complexity": 20,
+          "maxComplexity": 4,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/document/Document.ts",
           "lines": 169,
-          "complexity": 10
+          "functions": 26,
+          "complexity": 33,
+          "maxComplexity": 4,
+          "responsibility": "文档状态与图形层级",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/document/ShapeHierarchy.ts",
           "lines": 575,
-          "complexity": 81
+          "functions": 37,
+          "complexity": 115,
+          "maxComplexity": 14,
+          "responsibility": "文档状态与图形层级",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/document/ShapeIndex.ts",
           "lines": 101,
-          "complexity": 12
+          "functions": 10,
+          "complexity": 21,
+          "maxComplexity": 4,
+          "responsibility": "文档状态与图形层级",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/history/CommandHistory.ts",
           "lines": 86,
-          "complexity": 7
+          "functions": 8,
+          "complexity": 14,
+          "maxComplexity": 4,
+          "responsibility": "undo/redo 历史栈",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/FileSvgStorage.ts",
           "lines": 13,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/ParsedSvgDocument.ts",
           "lines": 22,
-          "complexity": 1
+          "functions": 4,
+          "complexity": 4,
+          "maxComplexity": 1,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgDocumentParser.ts",
           "lines": 353,
-          "complexity": 48
+          "functions": 20,
+          "complexity": 67,
+          "maxComplexity": 9,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgDocumentWriter.ts",
           "lines": 47,
-          "complexity": 4
+          "functions": 8,
+          "complexity": 9,
+          "maxComplexity": 2,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgShapeIdAllocator.ts",
           "lines": 39,
-          "complexity": 7
+          "functions": 2,
+          "complexity": 7,
+          "maxComplexity": 6,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgShapeWriter.ts",
           "lines": 113,
-          "complexity": 22
+          "functions": 13,
+          "complexity": 34,
+          "maxComplexity": 5,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgStorage.ts",
           "lines": 5,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/XmlEscaper.ts",
           "lines": 15,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorCommandReceiver.ts",
           "lines": 148,
-          "complexity": 8
+          "functions": 24,
+          "complexity": 24,
+          "maxComplexity": 1,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorDocumentCommandReceiver.ts",
           "lines": 121,
-          "complexity": 17
+          "functions": 6,
+          "complexity": 17,
+          "maxComplexity": 5,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorShapeCommandReceiver.ts",
           "lines": 155,
-          "complexity": 6
+          "functions": 16,
+          "complexity": 20,
+          "maxComplexity": 2,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorViewCommandReceiver.ts",
           "lines": 40,
-          "complexity": 3
+          "functions": 5,
+          "complexity": 6,
+          "maxComplexity": 2,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/Command.ts",
           "lines": 10,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/CommandType.ts",
           "lines": 21,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/doc/CanvasCommand.ts",
-          "lines": 19,
-          "complexity": 3
-        },
-        {
-          "path": "src/protocol/commands/doc/InitCommand.ts",
-          "lines": 19,
-          "complexity": 3
-        },
-        {
-          "path": "src/protocol/commands/doc/ReadCommand.ts",
-          "lines": 16,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/doc/SaveCommand.ts",
-          "lines": 16,
-          "complexity": 2
-        },
-        {
-          "path": "src/protocol/commands/history/RedoCommand.ts",
-          "lines": 12,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/history/UndoCommand.ts",
-          "lines": 12,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/memento/ShapeAttributeSnapshot.ts",
-          "lines": 42,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/memento/ShapePlacement.ts",
-          "lines": 35,
-          "complexity": 4
-        },
-        {
-          "path": "src/protocol/commands/session/ExitCommand.ts",
-          "lines": 13,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/shape/AddToCommand.ts",
-          "lines": 41,
-          "complexity": 4
-        },
-        {
-          "path": "src/protocol/commands/shape/CreateCommand.ts",
-          "lines": 24,
-          "complexity": 2
-        },
-        {
-          "path": "src/protocol/commands/shape/DeleteCommand.ts",
-          "lines": 36,
-          "complexity": 4
-        },
-        {
-          "path": "src/protocol/commands/shape/GroupCommand.ts",
-          "lines": 42,
-          "complexity": 4
-        },
-        {
-          "path": "src/protocol/commands/shape/MoveCommand.ts",
-          "lines": 50,
-          "complexity": 5
-        },
-        {
-          "path": "src/protocol/commands/shape/ReorderCommand.ts",
-          "lines": 39,
-          "complexity": 3
-        },
-        {
-          "path": "src/protocol/commands/shape/ScaleCommand.ts",
-          "lines": 42,
-          "complexity": 4
-        },
-        {
-          "path": "src/protocol/commands/shape/SetCommand.ts",
-          "lines": 51,
-          "complexity": 5
-        },
-        {
-          "path": "src/protocol/commands/shape/UngroupCommand.ts",
-          "lines": 33,
-          "complexity": 3
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/UndoableCommand.ts",
           "lines": 27,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/doc/CanvasCommand.ts",
+          "lines": 19,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/doc/InitCommand.ts",
+          "lines": 19,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/doc/ReadCommand.ts",
+          "lines": 16,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/doc/SaveCommand.ts",
+          "lines": 16,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/history/RedoCommand.ts",
+          "lines": 12,
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/history/UndoCommand.ts",
+          "lines": 12,
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapeAttributeSnapshot.ts",
+          "lines": 42,
+          "functions": 6,
+          "complexity": 6,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapePlacement.ts",
+          "lines": 35,
+          "functions": 4,
+          "complexity": 6,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/session/ExitCommand.ts",
+          "lines": 13,
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/AddToCommand.ts",
+          "lines": 41,
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/CreateCommand.ts",
+          "lines": 24,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/DeleteCommand.ts",
+          "lines": 36,
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/GroupCommand.ts",
+          "lines": 42,
+          "functions": 4,
+          "complexity": 6,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/MoveCommand.ts",
+          "lines": 50,
+          "functions": 3,
+          "complexity": 6,
+          "maxComplexity": 4,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/ReorderCommand.ts",
+          "lines": 39,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/ScaleCommand.ts",
+          "lines": 42,
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/SetCommand.ts",
+          "lines": 51,
+          "functions": 4,
+          "complexity": 7,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/shape/UngroupCommand.ts",
+          "lines": 33,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/view/HelpCommand.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/view/ShowCommand.ts",
           "lines": 16,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/view/TreeCommand.ts",
           "lines": 16,
-          "complexity": 2
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/errors/CommandErrorCode.ts",
           "lines": 18,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/errors/dto/CommandErrorDto.ts",
-          "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/errors/ErrorSource.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/errors/ProtocolError.ts",
           "lines": 60,
-          "complexity": 1
+          "functions": 8,
+          "complexity": 8,
+          "maxComplexity": 1,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/errors/dto/CommandErrorDto.ts",
+          "lines": 7,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/execution/Executor.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "执行器接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/CommandReceiver.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "聚合命令执行所需的全部编辑能力。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/receivers/DocumentCommandReceiver.ts",
           "lines": 9,
-          "complexity": 6
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/HistoryCommandReceiver.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/ShapeCommandReceiver.ts",
           "lines": 30,
-          "complexity": 2
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/ViewCommandReceiver.ts",
           "lines": 8,
-          "complexity": 2
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/CommandResult.ts",
           "lines": 8,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/dto/CommandResultDto.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/outcomes/CommandErrorResult.ts",
           "lines": 21,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/outcomes/CommandExitResult.ts",
           "lines": 13,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/outcomes/CommandSuccessResult.ts",
           "lines": 20,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/CircleShape.ts",
           "lines": 85,
-          "complexity": 10
+          "functions": 8,
+          "complexity": 14,
+          "maxComplexity": 4,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/EllipseShape.ts",
           "lines": 94,
-          "complexity": 12
+          "functions": 8,
+          "complexity": 16,
+          "maxComplexity": 5,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/GroupShape.ts",
           "lines": 137,
-          "complexity": 20
+          "functions": 15,
+          "complexity": 34,
+          "maxComplexity": 7,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/LineShape.ts",
           "lines": 96,
-          "complexity": 12
+          "functions": 8,
+          "complexity": 16,
+          "maxComplexity": 5,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/RectShape.ts",
           "lines": 94,
-          "complexity": 12
+          "functions": 8,
+          "complexity": 16,
+          "maxComplexity": 5,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/TextShape.ts",
           "lines": 84,
-          "complexity": 10
+          "functions": 8,
+          "complexity": 14,
+          "maxComplexity": 4,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/factory/ShapeFactory.ts",
           "lines": 184,
-          "complexity": 17
+          "functions": 11,
+          "complexity": 25,
+          "maxComplexity": 7,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/EditableAttribute.ts",
           "lines": 20,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "可通过命令修改的图形属性。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/shapes/model/Shape.ts",
           "lines": 97,
-          "complexity": 8
+          "functions": 6,
+          "complexity": 13,
+          "maxComplexity": 3,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/ShapePosition.ts",
           "lines": 15,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/ShapeType.ts",
           "lines": 9,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/StyledShape.ts",
           "lines": 92,
-          "complexity": 20
+          "functions": 5,
+          "complexity": 15,
+          "maxComplexity": 4,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/visitor/ShapeVisitor.ts",
           "lines": 16,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         }
       ]
     },
@@ -492,7 +869,11 @@
         {
           "path": "src/main.ts",
           "lines": 39,
-          "complexity": 2
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "组合根：组装 CLI、Core、宿主与装配",
+          "responsibilitySource": "目录"
         }
       ]
     },
@@ -500,865 +881,1679 @@
       "lines": 0,
       "complexity": 0,
       "files": []
+    },
+    "vscode": {
+      "lines": 0,
+      "complexity": 0,
+      "files": []
     }
   },
   "head": {
     "kernel": {
-      "lines": 6147,
-      "complexity": 619,
+      "lines": 6335,
+      "complexity": 975,
       "files": [
         {
           "path": "src/_builtin/commands/AddToCommand/AddToCommand.ts",
           "lines": 40,
-          "complexity": 4
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/AddToCommand/AddToCommandContribution.ts",
-          "lines": 21,
-          "complexity": 1
+          "lines": 28,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/CanvasCommand/CanvasCommand.ts",
           "lines": 17,
-          "complexity": 3
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/CanvasCommand/CanvasCommandContribution.ts",
-          "lines": 26,
-          "complexity": 2
+          "lines": 33,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/CreateCommand/CreateCommand.ts",
           "lines": 22,
-          "complexity": 2
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/CreateCommand/CreateCommandContribution.ts",
-          "lines": 62,
-          "complexity": 5
+          "lines": 59,
+          "functions": 4,
+          "complexity": 6,
+          "maxComplexity": 2,
+          "responsibility": "create 命令：图形类型名经 ShapeCatalog 查找，本类不含任何类型 switch。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_builtin/commands/DeleteCommand/DeleteCommand.ts",
           "lines": 35,
-          "complexity": 4
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/DeleteCommand/DeleteCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ExitCommand/ExitCommand.ts",
           "lines": 11,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ExitCommand/ExitCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/GroupCommand/GroupCommand.ts",
           "lines": 41,
-          "complexity": 4
+          "functions": 4,
+          "complexity": 6,
+          "maxComplexity": 3,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/GroupCommand/GroupCommandContribution.ts",
-          "lines": 28,
-          "complexity": 2
+          "lines": 35,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/HelpCommand/HelpCommand.ts",
           "lines": 10,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/HelpCommand/HelpCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/InitCommand/InitCommand.ts",
           "lines": 17,
-          "complexity": 3
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/InitCommand/InitCommandContribution.ts",
-          "lines": 26,
-          "complexity": 2
+          "lines": 33,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/MoveCommand/MoveCommand.ts",
           "lines": 48,
-          "complexity": 5
+          "functions": 3,
+          "complexity": 6,
+          "maxComplexity": 4,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/MoveCommand/MoveCommandContribution.ts",
-          "lines": 20,
-          "complexity": 1
+          "lines": 27,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ReadCommand/ReadCommand.ts",
           "lines": 14,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ReadCommand/ReadCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/RedoCommand/RedoCommand.ts",
           "lines": 10,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/RedoCommand/RedoCommandContribution.ts",
-          "lines": 17,
-          "complexity": 1
+          "lines": 24,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ReorderCommand/BackCommandContribution.ts",
-          "lines": 20,
-          "complexity": 1
+          "lines": 27,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ReorderCommand/FrontCommandContribution.ts",
-          "lines": 21,
-          "complexity": 1
+          "lines": 28,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ReorderCommand/ReorderCommand.ts",
           "lines": 38,
-          "complexity": 3
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/SaveCommand/SaveCommand.ts",
           "lines": 14,
-          "complexity": 2
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/SaveCommand/SaveCommandContribution.ts",
-          "lines": 22,
-          "complexity": 2
+          "lines": 29,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ScaleCommand/ScaleCommand.ts",
           "lines": 40,
-          "complexity": 4
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ScaleCommand/ScaleCommandContribution.ts",
-          "lines": 21,
-          "complexity": 1
+          "lines": 28,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/SetCommand/EditableAttributeParser.ts",
           "lines": 31,
-          "complexity": 2
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "set 命令用的属性名辅助；白名单本体在 protocol EditableAttributeRules。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_builtin/commands/SetCommand/SetCommand.ts",
-          "lines": 81,
-          "complexity": 10
+          "lines": 73,
+          "functions": 4,
+          "complexity": 10,
+          "maxComplexity": 4,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/SetCommand/SetCommandContribution.ts",
-          "lines": 30,
-          "complexity": 2
+          "lines": 34,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ShowCommand/ShowCommand.ts",
           "lines": 14,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/ShowCommand/ShowCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/TreeCommand/TreeCommand.ts",
           "lines": 14,
-          "complexity": 2
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/TreeCommand/TreeCommandContribution.ts",
-          "lines": 22,
-          "complexity": 2
+          "lines": 29,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/UndoCommand/UndoCommand.ts",
           "lines": 10,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/UndoCommand/UndoCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/UngroupCommand/UngroupCommand.ts",
           "lines": 32,
-          "complexity": 3
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/commands/UngroupCommand/UngroupCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 25,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "Phase 1 内置命令及其贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/shapes/CircleShape/CircleShapeContribution.ts",
-          "lines": 54,
-          "complexity": 2
+          "lines": 62,
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置图形贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/shapes/EllipseShape/EllipseShapeContribution.ts",
-          "lines": 56,
-          "complexity": 2
+          "lines": 64,
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置图形贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/shapes/GroupShape/GroupShapeContribution.ts",
-          "lines": 29,
-          "complexity": 2
+          "lines": 38,
+          "functions": 5,
+          "complexity": 6,
+          "maxComplexity": 2,
+          "responsibility": "普通 g：认领任意 `<g>`；装配时须排在带 data-kind 的复合图形之后。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_builtin/shapes/LineShape/LineShapeContribution.ts",
-          "lines": 56,
-          "complexity": 2
+          "lines": 64,
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置图形贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/shapes/RectShape/RectShapeContribution.ts",
-          "lines": 56,
-          "complexity": 2
+          "lines": 64,
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置图形贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_builtin/shapes/TextShape/TextShapeContribution.ts",
-          "lines": 48,
-          "complexity": 2
+          "lines": 56,
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 内置图形贡献",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/ConsoleInputReader.ts",
           "lines": 67,
-          "complexity": 6
+          "functions": 6,
+          "complexity": 11,
+          "maxComplexity": 4,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/ConsoleOutputWriter.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/InputReader.ts",
           "lines": 4,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/io/OutputWriter.ts",
           "lines": 5,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "输入输出端口与控制台适配",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/CommandLineParser.ts",
           "lines": 53,
-          "complexity": 5
+          "functions": 2,
+          "complexity": 6,
+          "maxComplexity": 5,
+          "responsibility": "CLI 命令解析入口，只负责词法、目录查询和结果包装。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/CommandParser.ts",
           "lines": 9,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "把一行 CLI 输入解释为命令、空输入或语法错误。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/parser/results/CommandParseEmptyResult.ts",
           "lines": 11,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/results/CommandParseErrorResult.ts",
           "lines": 19,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/results/CommandParseResult.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/results/CommandParseSuccessResult.ts",
           "lines": 19,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "文本到命令对象的解析",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/cli/parser/syntax/CommandLineTokenizer.ts",
           "lines": 58,
-          "complexity": 10
+          "functions": 2,
+          "complexity": 11,
+          "maxComplexity": 8,
+          "responsibility": "把一行 CLI 文本切分为带引号感知的参数。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/session/CommandLoop.ts",
           "lines": 40,
-          "complexity": 7
+          "functions": 2,
+          "complexity": 7,
+          "maxComplexity": 6,
+          "responsibility": "CLI 的交互控制循环，只负责提示、读取和终止。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/session/CommandSession.ts",
           "lines": 50,
-          "complexity": 5
+          "functions": 3,
+          "complexity": 7,
+          "maxComplexity": 5,
+          "responsibility": "处理一次交互输入，并决定会话是否继续。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/cli/session/CommandSessionStatus.ts",
           "lines": 5,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "REPL 会话循环",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/core/CommandExecutor.ts",
+          "lines": 43,
+          "functions": 2,
+          "complexity": 7,
+          "maxComplexity": 6,
+          "responsibility": "命令执行与编排",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/attributes/AttributeRegistry.ts",
           "lines": 50,
-          "complexity": 4
-        },
-        {
-          "path": "src/core/CommandExecutor.ts",
-          "lines": 34,
-          "complexity": 5
+          "functions": 6,
+          "complexity": 9,
+          "maxComplexity": 2,
+          "responsibility": "运行时属性处理器注册表；同名拒绝；多处理器同时命中则报错。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/core/commands/CommandRegistry.ts",
           "lines": 36,
-          "complexity": 3
+          "functions": 4,
+          "complexity": 6,
+          "maxComplexity": 2,
+          "responsibility": "运行时命令注册表：维护插入顺序并拒绝同名命令。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/core/display/HelpText.ts",
           "lines": 29,
-          "complexity": 3
+          "functions": 2,
+          "complexity": 4,
+          "maxComplexity": 3,
+          "responsibility": "从命令目录渲染 Phase 1 help 文本。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/core/display/ShapeDetailVisitor.ts",
           "lines": 65,
-          "complexity": 3
+          "functions": 7,
+          "complexity": 9,
+          "maxComplexity": 3,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/display/ShapeSummaryVisitor.ts",
           "lines": 83,
-          "complexity": 4
+          "functions": 8,
+          "complexity": 11,
+          "maxComplexity": 3,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/display/TreeDisplay.ts",
           "lines": 122,
-          "complexity": 12
+          "functions": 15,
+          "complexity": 25,
+          "maxComplexity": 4,
+          "responsibility": "tree/show/help 展示",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/document/Document.ts",
           "lines": 169,
-          "complexity": 10
+          "functions": 26,
+          "complexity": 33,
+          "maxComplexity": 4,
+          "responsibility": "文档状态与图形层级",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/document/ShapeHierarchy.ts",
           "lines": 590,
-          "complexity": 83
+          "functions": 37,
+          "complexity": 117,
+          "maxComplexity": 14,
+          "responsibility": "文档状态与图形层级",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/document/ShapeIndex.ts",
           "lines": 101,
-          "complexity": 12
+          "functions": 10,
+          "complexity": 21,
+          "maxComplexity": 4,
+          "responsibility": "文档状态与图形层级",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/history/CommandHistory.ts",
           "lines": 86,
-          "complexity": 7
+          "functions": 8,
+          "complexity": 14,
+          "maxComplexity": 4,
+          "responsibility": "undo/redo 历史栈",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/FileSvgStorage.ts",
           "lines": 13,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/ParsedSvgDocument.ts",
           "lines": 22,
-          "complexity": 1
+          "functions": 4,
+          "complexity": 4,
+          "maxComplexity": 1,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgDocumentParser.ts",
           "lines": 318,
-          "complexity": 44
+          "functions": 20,
+          "complexity": 64,
+          "maxComplexity": 7,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgDocumentWriter.ts",
           "lines": 47,
-          "complexity": 4
+          "functions": 8,
+          "complexity": 9,
+          "maxComplexity": 2,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgShapeIdAllocator.ts",
           "lines": 39,
-          "complexity": 7
+          "functions": 2,
+          "complexity": 7,
+          "maxComplexity": 6,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgShapeWriter.ts",
           "lines": 120,
-          "complexity": 23
+          "functions": 13,
+          "complexity": 35,
+          "maxComplexity": 5,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/SvgStorage.ts",
           "lines": 5,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/io/XmlEscaper.ts",
           "lines": 15,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "SVG 读写与存储",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorCommandReceiver.ts",
           "lines": 175,
-          "complexity": 8
+          "functions": 25,
+          "complexity": 25,
+          "maxComplexity": 1,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorDocumentCommandReceiver.ts",
           "lines": 142,
-          "complexity": 18
+          "functions": 8,
+          "complexity": 20,
+          "maxComplexity": 5,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorShapeCommandReceiver.ts",
           "lines": 178,
-          "complexity": 8
+          "functions": 16,
+          "complexity": 22,
+          "maxComplexity": 2,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/receiver/EditorViewCommandReceiver.ts",
           "lines": 45,
-          "complexity": 3
+          "functions": 5,
+          "complexity": 6,
+          "maxComplexity": 2,
+          "responsibility": "命令接收者实现",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/core/shapes/ShapeRegistry.ts",
           "lines": 43,
-          "complexity": 3
+          "functions": 6,
+          "complexity": 8,
+          "maxComplexity": 2,
+          "responsibility": "运行时图形贡献注册表：拒绝重复类型名；SVG 匹配按注册顺序取首个命中。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/core/tree/TreeDecoratorRegistry.ts",
           "lines": 30,
-          "complexity": 3
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 2,
+          "responsibility": "运行时树标签注册表；拒绝重复名称。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/attributes/AttributeCatalog.ts",
           "lines": 9,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "只读属性处理器目录。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/attributes/AttributeHandler.ts",
           "lines": 30,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "属性扩展点：定义「对某类图形设置某属性」的领域语义。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/attributes/EditableAttributeRules.ts",
           "lines": 63,
-          "complexity": 2
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "Phase 1 属性白名单：无 AttributeHandler 命中时的回退规则。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/commands/Command.ts",
           "lines": 7,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/contribution/CommandCatalog.ts",
-          "lines": 10,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/contribution/CommandContribution.ts",
-          "lines": 50,
-          "complexity": 4
-        },
-        {
-          "path": "src/protocol/commands/contribution/CommandHelp.ts",
-          "lines": 26,
-          "complexity": 3
-        },
-        {
-          "path": "src/protocol/commands/contribution/CommandParameters.ts",
-          "lines": 106,
-          "complexity": 10
-        },
-        {
-          "path": "src/protocol/commands/memento/ShapeAttributeSnapshot.ts",
-          "lines": 48,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/commands/memento/ShapePlacement.ts",
-          "lines": 35,
-          "complexity": 4
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/commands/UndoableCommand.ts",
           "lines": 27,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandCatalog.ts",
+          "lines": 10,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "只读命令目录：按名称查找贡献对象，并按注册顺序枚举。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandContribution.ts",
+          "lines": 53,
+          "functions": 5,
+          "complexity": 8,
+          "maxComplexity": 3,
+          "responsibility": "命令扩展点（抽象类）：一条命令的名称、usage、可选 help，以及参数 → Command 的工厂。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandHelp.ts",
+          "lines": 26,
+          "functions": 3,
+          "complexity": 5,
+          "maxComplexity": 3,
+          "responsibility": "封装单条命令在 help 输出中的 usage 与描述。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/protocol/commands/contribution/CommandParameters.ts",
+          "lines": 106,
+          "functions": 12,
+          "complexity": 20,
+          "maxComplexity": 3,
+          "responsibility": "封装命令参数（不含命令名）的元数校验和类型转换。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapeAttributeSnapshot.ts",
+          "lines": 64,
+          "functions": 8,
+          "complexity": 8,
+          "maxComplexity": 1,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/commands/memento/ShapePlacement.ts",
+          "lines": 35,
+          "functions": 4,
+          "complexity": 6,
+          "maxComplexity": 3,
+          "responsibility": "命令基类、贡献契约与撤销快照",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/errors/CommandErrorCode.ts",
-          "lines": 18,
-          "complexity": 1
-        },
-        {
-          "path": "src/protocol/errors/dto/CommandErrorDto.ts",
-          "lines": 7,
-          "complexity": 1
+          "lines": 20,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/errors/ErrorSource.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/errors/ProtocolError.ts",
           "lines": 60,
-          "complexity": 1
+          "functions": 8,
+          "complexity": 8,
+          "maxComplexity": 1,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/protocol/errors/dto/CommandErrorDto.ts",
+          "lines": 7,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "错误模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/execution/Executor.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "执行器接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/io/DirectoryEntry.ts",
           "lines": 34,
-          "complexity": 6
+          "functions": 5,
+          "complexity": 10,
+          "maxComplexity": 6,
+          "responsibility": "目录直接子项的领域对象；名称不含路径分隔符。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/io/DirectoryEntryKind.ts",
           "lines": 6,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "目录列举项类型（不含符号链接等特殊项的细分约定由适配器文档说明）。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/io/DirectoryListing.ts",
           "lines": 11,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "目录列举端口（Adapter Target）。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/plugins/PluginContext.ts",
           "lines": 22,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "插件激活上下文：唯一注册入口。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/plugins/PluginContributes.ts",
           "lines": 139,
-          "complexity": 22
+          "functions": 17,
+          "complexity": 34,
+          "maxComplexity": 5,
+          "responsibility": "插件清单：来自 package.json 的 contributes，进入宿主前归一化。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/plugins/SvgPlugin.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "可装入的 SVG 编辑器插件。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/receivers/CommandReceiver.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "聚合命令执行所需的全部编辑能力。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/receivers/DocumentCommandReceiver.ts",
           "lines": 16,
-          "complexity": 6
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/HistoryCommandReceiver.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/ShapeCommandReceiver.ts",
           "lines": 26,
-          "complexity": 2
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/receivers/ViewCommandReceiver.ts",
           "lines": 8,
-          "complexity": 2
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "接收者接口",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/CommandResult.ts",
           "lines": 8,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/dto/CommandResultDto.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/outcomes/CommandErrorResult.ts",
           "lines": 21,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/outcomes/CommandExitResult.ts",
           "lines": 13,
-          "complexity": 1
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/results/outcomes/CommandSuccessResult.ts",
           "lines": 20,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "命令结果模型",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/CircleShape.ts",
           "lines": 85,
-          "complexity": 10
+          "functions": 8,
+          "complexity": 14,
+          "maxComplexity": 4,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/EllipseShape.ts",
           "lines": 94,
-          "complexity": 12
+          "functions": 8,
+          "complexity": 16,
+          "maxComplexity": 5,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/GroupShape.ts",
           "lines": 147,
-          "complexity": 20
+          "functions": 17,
+          "complexity": 36,
+          "maxComplexity": 7,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/LineShape.ts",
           "lines": 96,
-          "complexity": 12
+          "functions": 8,
+          "complexity": 16,
+          "maxComplexity": 5,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/RectShape.ts",
           "lines": 94,
-          "complexity": 12
+          "functions": 8,
+          "complexity": 16,
+          "maxComplexity": 5,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/concrete/TextShape.ts",
           "lines": 84,
-          "complexity": 10
+          "functions": 8,
+          "complexity": 14,
+          "maxComplexity": 4,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/contribution/ShapeArgumentParser.ts",
           "lines": 69,
-          "complexity": 9
+          "functions": 4,
+          "complexity": 12,
+          "maxComplexity": 4,
+          "responsibility": "供各 ShapeContribution 复用的参数校验与数字解析。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/shapes/contribution/ShapeCatalog.ts",
           "lines": 12,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "只读图形贡献目录。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/shapes/contribution/ShapeContribution.ts",
-          "lines": 39,
-          "complexity": 2
+          "lines": 29,
+          "functions": 2,
+          "complexity": 3,
+          "maxComplexity": 2,
+          "responsibility": "图形扩展点（抽象类；Phase 2 角色名 ShapeProvider）：",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/shapes/contribution/ShapeSvgReadInput.ts",
           "lines": 38,
-          "complexity": 2
+          "functions": 6,
+          "complexity": 7,
+          "maxComplexity": 2,
+          "responsibility": "SVG 读回边界输入：Parser 已抽出属性与子树，不携带 XML 库类型。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/shapes/model/EditableAttribute.ts",
           "lines": 20,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "可通过命令修改的图形属性。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/shapes/model/Shape.ts",
           "lines": 107,
-          "complexity": 8
+          "functions": 8,
+          "complexity": 15,
+          "maxComplexity": 3,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/ShapePosition.ts",
           "lines": 15,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/ShapeType.ts",
           "lines": 9,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/model/StyledShape.ts",
           "lines": 92,
-          "complexity": 20
+          "functions": 5,
+          "complexity": 15,
+          "maxComplexity": 4,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/shapes/visitor/ShapeVisitor.ts",
           "lines": 16,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "图形领域模型与贡献契约",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/protocol/tree/TreeDecorator.ts",
           "lines": 30,
-          "complexity": 1
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "树行标签扩展点：为 tree 行尾追加文案。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/protocol/tree/TreeDecoratorCatalog.ts",
           "lines": 7,
-          "complexity": 1
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "只读树标签目录。",
+          "responsibilitySource": "注释"
         }
       ]
     },
     "assembly": {
-      "lines": 726,
-      "complexity": 77,
+      "lines": 758,
+      "complexity": 123,
       "files": [
         {
-          "path": "src/host/activateDefaultPlugins.ts",
-          "lines": 34,
-          "complexity": 1
+          "path": "src/assembly/BuiltinContributionInstaller.ts",
+          "lines": 82,
+          "functions": 4,
+          "complexity": 4,
+          "maxComplexity": 1,
+          "responsibility": "组合根侧：把 Phase 1 内置命令与六种图形装入注册表。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/assembly/CodePluginInstaller.ts",
+          "lines": 39,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "方式 A（改代码）：组合根显式实例化并装入插件；新增插件只改本文件。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/host/DuplicateRegistrationError.ts",
           "lines": 11,
-          "complexity": 1
-        },
-        {
-          "path": "src/host/loadPluginsFromConfig.ts",
-          "lines": 56,
-          "complexity": 7
-        },
-        {
-          "path": "src/host/parseConfigArg.ts",
-          "lines": 26,
-          "complexity": 7
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "同类扩展名冲突；宿主格式化为 error: duplicate registration: category/name。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/host/PluginActivationContext.ts",
           "lines": 134,
-          "complexity": 14
+          "functions": 23,
+          "complexity": 36,
+          "maxComplexity": 5,
+          "responsibility": "一次 activate 的暂存注册；commit 前不写入正式表。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/host/PluginConfig.ts",
           "lines": 26,
-          "complexity": 5
+          "functions": 4,
+          "complexity": 8,
+          "maxComplexity": 5,
+          "responsibility": "根级 plugins.config.json。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/host/PluginConfigEntry.ts",
           "lines": 56,
-          "complexity": 13
+          "functions": 5,
+          "complexity": 17,
+          "maxComplexity": 13,
+          "responsibility": "配置文件中单条插件项（边界结构，进入宿主前校验）。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/host/PluginConfigLoader.ts",
           "lines": 28,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 4,
+          "maxComplexity": 4,
+          "responsibility": "读取并解析 plugins.config.json；结构非法时抛错。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/host/PluginHost.ts",
           "lines": 86,
-          "complexity": 5
+          "functions": 3,
+          "complexity": 7,
+          "maxComplexity": 5,
+          "responsibility": "插件宿主、配置与模块加载",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/host/PluginModuleLoader.ts",
-          "lines": 108,
-          "complexity": 19
+          "lines": 132,
+          "functions": 4,
+          "complexity": 25,
+          "maxComplexity": 12,
+          "responsibility": "插件宿主、配置与模块加载",
+          "responsibilitySource": "目录"
         },
         {
-          "path": "src/host/registerBuiltinContributions.ts",
-          "lines": 75,
-          "complexity": 1
+          "path": "src/host/loadPluginsFromConfig.ts",
+          "lines": 56,
+          "functions": 2,
+          "complexity": 9,
+          "maxComplexity": 8,
+          "responsibility": "插件宿主、配置与模块加载",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "src/host/parseConfigArg.ts",
+          "lines": 26,
+          "functions": 1,
+          "complexity": 7,
+          "maxComplexity": 7,
+          "responsibility": "从 argv 解析 `--config <path>`；缺省返回 undefined（方式 A）。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/main.ts",
-          "lines": 86,
-          "complexity": 3
+          "lines": 82,
+          "functions": 2,
+          "complexity": 3,
+          "maxComplexity": 2,
+          "responsibility": "组合根：组装 CLI、Core、宿主与装配",
+          "responsibilitySource": "目录"
         }
       ]
     },
     "plugin": {
-      "lines": 650,
-      "complexity": 62,
+      "lines": 683,
+      "complexity": 111,
       "files": [
         {
           "path": "src/_plugin/commands/DirCommand/DirCommand.ts",
-          "lines": 60,
-          "complexity": 4
+          "lines": 65,
+          "functions": 7,
+          "complexity": 13,
+          "maxComplexity": 4,
+          "responsibility": "命令插件包",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_plugin/commands/DirCommand/DirCommandContribution.ts",
-          "lines": 23,
-          "complexity": 3
+          "lines": 33,
+          "functions": 3,
+          "complexity": 4,
+          "maxComplexity": 2,
+          "responsibility": "dir 命令贡献：目录访问经 DirectoryListing 端口注入（适配器模式的 Target）。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/commands/DirCommand/DirCommandPlugin.ts",
           "lines": 20,
-          "complexity": 2
-        },
-        {
-          "path": "src/_plugin/commands/DirCommand/index.ts",
-          "lines": 3,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 2,
+          "maxComplexity": 2,
+          "responsibility": "dir 命令插件；options.directoryPath 可覆盖工作目录。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/commands/DirCommand/NodeDirectoryListing.ts",
           "lines": 30,
-          "complexity": 5
+          "functions": 1,
+          "complexity": 5,
+          "maxComplexity": 5,
+          "responsibility": "DirectoryListing 的 Node 适配器（Adapter）。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/_plugin/commands/DirCommand/index.ts",
+          "lines": 3,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令插件包",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_plugin/commands/StatsCommand/DocumentShapeStats.ts",
           "lines": 49,
-          "complexity": 6
-        },
-        {
-          "path": "src/_plugin/commands/StatsCommand/index.ts",
-          "lines": 3,
-          "complexity": 1
+          "functions": 4,
+          "complexity": 9,
+          "maxComplexity": 4,
+          "responsibility": "画布形状统计结果：叶子按首次出现类型顺序计数，容器单独累计。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/commands/StatsCommand/StatsCommand.ts",
           "lines": 13,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "命令插件包",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_plugin/commands/StatsCommand/StatsCommandContribution.ts",
-          "lines": 18,
-          "complexity": 1
+          "lines": 21,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "命令插件包",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_plugin/commands/StatsCommand/StatsCommandPlugin.ts",
           "lines": 15,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "stats 命令插件。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/_plugin/commands/StatsCommand/index.ts",
+          "lines": 3,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "命令插件包",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_plugin/shapes/BoxShape/BoxAttributeHandler.ts",
-          "lines": 109,
-          "complexity": 9
+          "lines": 110,
+          "functions": 10,
+          "complexity": 19,
+          "maxComplexity": 3,
+          "responsibility": "box 的 fill → 内部 rect；label → 内部 text。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/shapes/BoxShape/BoxShape.ts",
           "lines": 102,
-          "complexity": 6
+          "functions": 12,
+          "complexity": 17,
+          "maxComplexity": 3,
+          "responsibility": "带标题的矩形框：插件领域对象，放在 `_plugin` 而非 protocol/concrete。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/shapes/BoxShape/BoxShapeContribution.ts",
-          "lines": 37,
-          "complexity": 2
+          "lines": 45,
+          "functions": 5,
+          "complexity": 6,
+          "maxComplexity": 2,
+          "responsibility": "box 图形扩展点实现：创建模板、`g[data-kind=box]` 认领与读回校验。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/shapes/BoxShape/BoxShapePlugin.ts",
           "lines": 22,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "box 图形插件：形状 + 属性处理器 + (box) 树标签。",
+          "responsibilitySource": "注释"
+        },
+        {
+          "path": "src/_plugin/shapes/BoxShape/BoxTypeLabelDecorator.ts",
+          "lines": 14,
+          "functions": 2,
+          "complexity": 3,
+          "maxComplexity": 2,
+          "responsibility": "在 data-kind=box 的容器行追加 ` (box)`。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/shapes/BoxShape/index.ts",
           "lines": 3,
-          "complexity": 1
-        },
-        {
-          "path": "src/_plugin/tree/BoxTypeLabelDecorator.ts",
-          "lines": 14,
-          "complexity": 2
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "图形插件包",
+          "responsibilitySource": "目录"
         },
         {
           "path": "src/_plugin/tree/ModifiedStarDecorator.ts",
-          "lines": 114,
-          "complexity": 15
+          "lines": 120,
+          "functions": 12,
+          "complexity": 26,
+          "maxComplexity": 6,
+          "responsibility": "相对上次 init/read/save 的内容指纹比较；不一致则行尾追加 ` *`。",
+          "responsibilitySource": "注释"
         },
         {
           "path": "src/_plugin/tree/ModifiedStarPlugin.ts",
           "lines": 15,
-          "complexity": 1
+          "functions": 1,
+          "complexity": 1,
+          "maxComplexity": 1,
+          "responsibility": "modified-star 树标签插件。",
+          "responsibilitySource": "注释"
+        }
+      ]
+    },
+    "vscode": {
+      "lines": 924,
+      "complexity": 140,
+      "files": [
+        {
+          "path": "vscode-extension/src/extension.ts",
+          "lines": 19,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/file/SvgFileDecorationProvider.ts",
+          "lines": 34,
+          "functions": 1,
+          "complexity": 5,
+          "maxComplexity": 5,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/model/SvgDocumentNode.ts",
+          "lines": 18,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/model/SvgElementNode.ts",
+          "lines": 44,
+          "functions": 6,
+          "complexity": 8,
+          "maxComplexity": 2,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/model/SvgNode.ts",
+          "lines": 6,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/model/SvgOffsetRange.ts",
+          "lines": 24,
+          "functions": 3,
+          "complexity": 7,
+          "maxComplexity": 5,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/outline/SvgDocumentSymbolProvider.ts",
+          "lines": 66,
+          "functions": 4,
+          "complexity": 7,
+          "maxComplexity": 4,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/parser/SvgOutlineParser.ts",
+          "lines": 366,
+          "functions": 16,
+          "complexity": 76,
+          "maxComplexity": 13,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/test/integration/index.ts",
+          "lines": 154,
+          "functions": 6,
+          "complexity": 10,
+          "maxComplexity": 4,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/test/runTest.ts",
+          "lines": 34,
+          "functions": 2,
+          "complexity": 5,
+          "maxComplexity": 4,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/test/unit/SvgOutlineParser.test.ts",
+          "lines": 72,
+          "functions": 7,
+          "complexity": 7,
+          "maxComplexity": 1,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/test/unit/SvgOutlineVisitor.test.ts",
+          "lines": 27,
+          "functions": 2,
+          "complexity": 2,
+          "maxComplexity": 1,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/visitor/SvgNodeVisitor.ts",
+          "lines": 9,
+          "functions": 0,
+          "complexity": 0,
+          "maxComplexity": 0,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/visitor/SvgOutlineVisitor.ts",
+          "lines": 20,
+          "functions": 3,
+          "complexity": 3,
+          "maxComplexity": 1,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
+        },
+        {
+          "path": "vscode-extension/src/visitor/SvgSymbolDto.ts",
+          "lines": 31,
+          "functions": 5,
+          "complexity": 5,
+          "maxComplexity": 1,
+          "responsibility": "VSCode 扩展",
+          "responsibilitySource": "目录"
         }
       ]
     }
   },
   "delta": {
     "kernel": {
-      "lines": 1092,
-      "complexity": 93
+      "files": 41,
+      "lines": 1280,
+      "complexity": 174
     },
     "assembly": {
-      "lines": 687,
-      "complexity": 75
+      "files": 11,
+      "lines": 719,
+      "complexity": 121
     },
     "plugin": {
-      "lines": 650,
-      "complexity": 62
+      "files": 18,
+      "lines": 683,
+      "complexity": 111
+    },
+    "vscode": {
+      "files": 15,
+      "lines": 924,
+      "complexity": 140
     }
   }
 }

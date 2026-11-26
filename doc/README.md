@@ -289,7 +289,7 @@ Adapter 角色对应：Client = `DirCommand`；Target = `DirectoryListing`；Ada
 ## 12. ADR 与指标
 
 - ADR：[`docs/adr/`](../docs/adr/)（属性契约、box 降级、dirty 语义、清单校验时机）。
-- Metrics：`npm run metrics` → [`docs/metrics/summary.md`](../docs/metrics/summary.md)（相对 `final` 的内核/装配/插件行数与复杂度增量，脚本生成、禁止手填）。
+- Metrics：`npm run metrics` → [`docs/metrics/summary.md`](../docs/metrics/summary.md)（相对 `final`（终点为标签 `p2`，未创建时用 `HEAD`）的内核/装配/插件行数与圈复杂度增量，复杂度由 TypeScript AST 逐函数计算；含文件职责清单，VSCode 扩展单独列出；脚本生成、禁止手填）。
 
 ## 13. VSCode 扩展（第一部分）
 
