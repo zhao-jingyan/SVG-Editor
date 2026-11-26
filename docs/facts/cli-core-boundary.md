@@ -162,7 +162,7 @@ src/core -/-> src/cli
 - `CommandLoop` 依赖 `io` 的 `InputReader` / `OutputWriter` 端口和 `session` 内的 `CommandSession`，只负责提示符、逐行读取、会话状态和结束条件。
 - `CommandSession` 依赖 `parser` 的 `CommandParser` 接口、Protocol 的 `Executor` 接口和 `io` 的 `OutputWriter`；它把空输入、解析错误、命令结果和退出结果解释为终端反馈及继续/退出状态。
 - `CommandLoop` 接受可选启动提示；组合根传入 `svg-editor 0.1 — type 'help' for commands`，UI 文案不进入命令解析器。
-- `CommandRegistry` 与内置贡献位于 Core；`CommandLineParser` 只依赖 Tokenizer、`CommandCatalog` 和 `CommandParameters`。`parser` 不依赖 `session` 或 `io`。
+- `CommandRegistry` 位于 Core，内置贡献位于 `_builtin`，注册由 `assembly/BuiltinContributionInstaller` 完成；`CommandLineParser` 只依赖 Tokenizer、`CommandCatalog` 和 `CommandParameters`。`parser` 不依赖 `session` 或 `io`。
 - `main.ts` 组装同一个 `CommandRegistry`，分别注入 `CommandLineParser` 与 `HelpText`，再把 `HelpText` 注入 `EditorCommandReceiver`。
 - `cli/io` 不依赖 `parser` 或 `session`；终端适配器只知道输入输出端口。
 - `CommandExecutor` 位于 Core，实现 `Executor`，依赖 `CommandReceiver` 与 `CommandHistory`；调用命令成功时直接记录 `UndoableCommand`，并转换 `ProtocolError`。

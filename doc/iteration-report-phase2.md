@@ -77,7 +77,12 @@ Phase 2 的目标是把 Phase 1 的固定 CLI 改造成可插拔的扩展架构�
 - [ADR 0002](../docs/adr/0002-box-svg-read-degradation.md)：box 的 SVG 读回与无插件降级；
 - [ADR 0003](../docs/adr/0003-tree-dirty-semantics.md)：modified-star 的 dirty 语义；
 - [ADR 0004](../docs/adr/0004-plugin-manifest-validation.md)：配置清单校验时机与回滚；
-- [ADR 0005](../docs/adr/0005-box-child-ids-and-invariants.md)：box 子部件 id 派生与结构不变量。
+- [ADR 0005](../docs/adr/0005-box-child-ids-and-invariants.md)：box 子部件 id 派生与结构不变量；
+- [ADR 0006](../docs/adr/0006-layering-and-builtin-split.md)：分层边界与 `_builtin` / `protocol` 拆分；
+- [ADR 0007](../docs/adr/0007-command-aggregation.md)：命令按目录聚拢与名字分派集中；
+- [ADR 0008](../docs/adr/0008-shape-contribution-replaces-factory.md)：图形贡献替代 `ShapeFactory`；
+- [ADR 0009](../docs/adr/0009-extension-points-as-abstract-classes.md)：扩展点用抽象类，能力协议用接口；
+- [ADR 0010](../docs/adr/0010-directory-listing-port.md)：文件系统访问经 `DirectoryListing` 端口。
 
 各模式的参与者、解决的问题与替代方案见 [`doc/README.md`](./README.md) §3。
 
