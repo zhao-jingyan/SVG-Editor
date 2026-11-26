@@ -9,6 +9,17 @@
 
 基线为 `5d0b570`（`docs: 登记 Phase 2 验收 e2e 命令与覆盖范围`）。删除提交允许变红（测试与期望输出仍引用该插件，未修改），失败的测试逐条记录如下。
 
+## 演示脚本
+
+步骤由 `scripts/demo/demo_step.py` 完成，每次删除或加回后依次执行构建、`npm test`（输出 JSON 报告）、`npm run lint`、`npm run verify:dual-assembly`、`npm run e2e`，并把结果写入提交正文。
+
+```bash
+python3 scripts/demo/demo_step.py delete <名>   # <名> ∈ stats | dir | box | modified-star
+python3 scripts/demo/demo_step.py install <名>
+```
+
+注意：脚本会创建提交并打 `delete-plugin-<名>` / `install-plugin-<名>` 标签，且 `delete` 会删除插件文件。只能在可丢弃的演示分支上运行，不要在 `main` 上直接执行。日志与提交信息临时文件位于系统临时目录下的 `svg-editor-demo/`。
+
 ## 提交与标签
 
 | 插件 | delete 提交 | 标签 | install 提交 | 标签 |
