@@ -5,6 +5,7 @@ import { HelpText } from "@/core/display/HelpText";
 import { CommandHistory } from "@/core/history/CommandHistory";
 import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
 import { CreateCommand } from "@/_builtin/commands/CreateCommand/CreateCommand";
+import { GroupCommand } from "@/_builtin/commands/GroupCommand/GroupCommand";
 import { InitCommand } from "@/_builtin/commands/InitCommand/InitCommand";
 import { RedoCommand } from "@/_builtin/commands/RedoCommand/RedoCommand";
 import { SetCommand } from "@/_builtin/commands/SetCommand/SetCommand";
@@ -13,6 +14,7 @@ import { AttributeHandler } from "@/protocol/attributes/AttributeHandler";
 import { CommandErrorCode } from "@/protocol/errors/CommandErrorCode";
 import { ProtocolError } from "@/protocol/errors/ProtocolError";
 import { ShapeAttributeSnapshot } from "@/protocol/commands/memento/ShapeAttributeSnapshot";
+import { GroupShape } from "@/protocol/shapes/concrete/GroupShape";
 import { RectShape } from "@/protocol/shapes/concrete/RectShape";
 import type { Shape } from "@/protocol/shapes/model/Shape";
 import { createBuiltinCatalog } from "../../support/createBuiltinCatalog";
@@ -58,6 +60,64 @@ class TwoStepHandler extends AttributeHandler {
   }
 }
 
+class MultiShapeHandler extends AttributeHandler {
+  public constructor(private readonly failAfterApply: boolean = false) {
+    super();
+  }
+
+  public getName(): string {
+    return "multi-shape";
+  }
+
+  public handles(shape: Shape, attribute: string): boolean {
+    return shape instanceof GroupShape && attribute === "fill-all";
+  }
+
+  public capture(shape: Shape, _attribute: string): ShapeAttributeSnapshot {
+    if (!(shape instanceof GroupShape)) {
+      throw ProtocolError.shape(
+        CommandErrorCode.InvalidArgument,
+        `not a group: ${shape.getId()}`,
+      );
+    }
+
+    const values = new Map<string, string | number | undefined>();
+    for (const child of shape.getChildren()) {
+      values.set(child.getId(), child.getAttribute("fill"));
+    }
+
+    return new ShapeAttributeSnapshot(
+      shape.getId(),
+      shape.getType(),
+      "fill-all",
+      values,
+      "fill",
+    );
+  }
+
+  public apply(shape: Shape, _attribute: string, value: string): string {
+    if (!(shape instanceof GroupShape)) {
+      throw ProtocolError.shape(
+        CommandErrorCode.InvalidArgument,
+        `not a group: ${shape.getId()}`,
+      );
+    }
+
+    for (const child of shape.getChildren()) {
+      child.setAttribute("fill", value);
+    }
+
+    if (this.failAfterApply) {
+      throw ProtocolError.shape(
+        CommandErrorCode.InvalidArgument,
+        "multi-shape failed",
+      );
+    }
+
+    return `g#${shape.getId()} fill-all=${value}`;
+  }
+}
+
 async function createEditor(
   handlers: readonly AttributeHandler[],
 ): Promise<{
@@ -97,6 +157,60 @@ describe("AttributeHandler 契约", () => {
 
     await executor.execute(new RedoCommand());
     expect(receiver.getRootShapes()[0].getAttribute("fill")).toBe("blue");
+  });
+
+  it("一次 set 修改多个子部件后仍作为一个 undo 单元", async () => {
+    const { executor, receiver } = await createEditor([
+      new MultiShapeHandler(),
+    ]);
+    await executor.execute(
+      new CreateCommand(new RectShape("r2", 0, 0, 10, 10, "red")),
+    );
+    await executor.execute(new GroupCommand("group", ["r1", "r2"]));
+
+    await executor.execute(new SetCommand("group", "fill-all", "blue"));
+    const group = receiver.getRootShapes()[0] as GroupShape;
+    expect(group.getChildren().map((shape) => shape.getAttribute("fill"))).toEqual([
+      "blue",
+      "blue",
+    ]);
+
+    await executor.execute(new UndoCommand());
+    expect(group.getChildren().map((shape) => shape.getAttribute("fill"))).toEqual([
+      "red",
+      "red",
+    ]);
+
+    await executor.execute(new RedoCommand());
+    expect(group.getChildren().map((shape) => shape.getAttribute("fill"))).toEqual([
+      "blue",
+      "blue",
+    ]);
+  });
+
+  it("多子部件修改后抛错：整次 set 回滚且不入历史", async () => {
+    const { executor, receiver } = await createEditor([
+      new MultiShapeHandler(true),
+    ]);
+    await executor.execute(
+      new CreateCommand(new RectShape("r2", 0, 0, 10, 10, "red")),
+    );
+    await executor.execute(new GroupCommand("group", ["r1", "r2"]));
+
+    const result = await executor.execute(new SetCommand("group", "fill-all", "blue"));
+    const group = receiver.getRootShapes()[0] as GroupShape;
+
+    expect(result.toCommandResultDto()).toEqual({
+      type: "error",
+      error: { code: "invalid-argument", message: "multi-shape failed" },
+    });
+    expect(group.getChildren().map((shape) => shape.getAttribute("fill"))).toEqual([
+      "red",
+      "red",
+    ]);
+
+    await executor.execute(new UndoCommand());
+    expect(receiver.getRootShapes()).toHaveLength(2);
   });
 
   it("处理器部分修改后抛 ProtocolError：文档回滚，历史不变", async () => {

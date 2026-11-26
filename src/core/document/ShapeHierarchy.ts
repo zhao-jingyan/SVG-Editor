@@ -209,6 +209,10 @@ export class ShapeHierarchy {
     const orderedMembers = this.collectShapesInOrder().filter((shape) =>
       memberIdSet.has(shape.getId()),
     );
+    for (const member of orderedMembers) {
+      this.assertCanDetachShape(member);
+    }
+
     const group = new GroupShape(containerId, orderedMembers);
 
     for (const member of orderedMembers) {
@@ -571,13 +575,26 @@ export class ShapeHierarchy {
     }
 
     if (!parent.allowsRemovingChild(shapeId)) {
-      throw ProtocolError.document(
-        CommandErrorCode.InvalidArgument,
-        `cannot modify composite shape structure: ${shapeId}`,
-      );
+      this.throwCompositeStructureError(shapeId);
     }
 
     parent.removeChild(shapeId);
+  }
+
+  private assertCanDetachShape(shape: Shape): void {
+    const shapeId = shape.getId();
+    const parent = this.shapeIndex.getParent(shapeId);
+
+    if (parent !== undefined && !parent.allowsRemovingChild(shapeId)) {
+      this.throwCompositeStructureError(shapeId);
+    }
+  }
+
+  private throwCompositeStructureError(shapeId: string): never {
+    throw ProtocolError.document(
+      CommandErrorCode.InvalidArgument,
+      `cannot modify composite shape structure: ${shapeId}`,
+    );
   }
 
   private groupDescendantError(containerId: string): ProtocolError {

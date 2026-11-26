@@ -106,12 +106,39 @@ describe("BoxShape 插件", () => {
     );
   });
 
+  it("group 收编受保护子部件失败时不移除其他成员", () => {
+    const document = new Document(100, 100);
+    document.addShape(new RectShape("other", 0, 0, 1, 1));
+    document.addShape(BoxShape.create("n1", 0, 0, 40, 20, "t"));
+
+    expect(() =>
+      document.groupShapes("cluster", ["other", "n1-rect"]),
+    ).toThrow(/cannot modify composite shape structure: n1-rect/);
+
+    expect(document.findShape("other")).toBeInstanceOf(RectShape);
+    expect(document.findShape("n1-rect")).toBeInstanceOf(RectShape);
+    expect(document.findShape("cluster")).toBeUndefined();
+  });
+
   it("残缺 box SVG 在装插件时拒绝读入", () => {
     const parser = new SvgDocumentParser(createPluginShapeCatalog());
     expect(() =>
       parser.parse(`<svg width="10" height="10">
   <g id="n1" data-kind="box">
     <rect id="n1-rect" x="0" y="0" width="1" height="1"/>
+  </g>
+</svg>`),
+    ).toThrow(/invalid box#n1/);
+  });
+
+  it("必要子部件类型错误时拒绝整个 box 读入", () => {
+    const parser = new SvgDocumentParser(createPluginShapeCatalog());
+
+    expect(() =>
+      parser.parse(`<svg width="10" height="10">
+  <g id="n1" data-kind="box">
+    <text id="n1-rect" x="0" y="0">wrong</text>
+    <rect id="n1-label" x="0" y="0" width="1" height="1"/>
   </g>
 </svg>`),
     ).toThrow(/invalid box#n1/);

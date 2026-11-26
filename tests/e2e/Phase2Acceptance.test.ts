@@ -189,6 +189,57 @@ describe("验收 §2 命令插件 stats / dir", () => {
     expect(run.lines.some((line) => line.startsWith("error:"))).toBe(false);
   });
 
+  it("dir 成功或读取失败都不改变 modified-star 的 dirty 状态", () => {
+    const success = runCli(["init", "dir", "tree"], { cwd: makeFixtureDir() });
+    const successTrees = success.lines.filter((line) => line.startsWith("svg ("));
+    expect(successTrees).toEqual(["svg (800x600)"]);
+
+    const dir = makeWorkDir();
+    const configPath = join(dir, "plugins.json");
+    writeFileSync(
+      configPath,
+      JSON.stringify({
+        plugins: [
+          {
+            module: join(repositoryRoot, "dist", "_plugin", "commands", "DirCommand"),
+            options: { directoryPath: join(dir, "missing") },
+          },
+          {
+            module: join(repositoryRoot, "dist", "_plugin", "tree", "ModifiedStarPlugin"),
+          },
+        ],
+      }),
+    );
+    const failed = runCli(["init", "dir", "tree"], {
+      args: ["--config", configPath],
+      cwd: makeFixtureDir(),
+    });
+
+    expect(failed.lines).toContain(`error: cannot read directory: ${join(dir, "missing")}`);
+    expect(failed.lines.filter((line) => line.startsWith("svg ("))).toEqual([
+      "svg (800x600)",
+    ]);
+  });
+
+  it("read 与 save 不改变 dir 使用的当前工作目录", () => {
+    const workingDirectory = makeFixtureDir();
+    const outputFile = join(makeWorkDir(), "saved.svg");
+    const run = runCli(
+      ["dir", "read other.svg", "dir", `save ${outputFile}`, "dir", "exit"],
+      { cwd: workingDirectory },
+    );
+    const directoryLines = run.lines.filter(
+      (line) =>
+        line.startsWith("[DIR] ") ||
+        line.startsWith("[FILE] ") ||
+        line === "(empty directory)",
+    );
+
+    expect(directoryLines).toHaveLength(15);
+    expect(directoryLines.slice(0, 5)).toEqual(directoryLines.slice(5, 10));
+    expect(directoryLines.slice(0, 5)).toEqual(directoryLines.slice(10, 15));
+  });
+
   it.skipIf(isRoot)("dir 读取失败：输出 error 后仍可执行其他命令", () => {
     const dir = makeWorkDir();
     // 可进入、不可读：chdir 成功，readdir 返回 EACCES
@@ -296,6 +347,20 @@ describe("验收 §4 图形插件 box", () => {
     expect(run.lines.at(-1)).toBe("error: cannot ungroup composite shape: n1");
   });
 
+  it("box 可以嵌套 box，并随祖先整体移动", () => {
+    const run = runCli([
+      "init",
+      'create box outer 0 0 40 20 "outer"',
+      'create box inner 0 0 4 4 "inner" in outer',
+      "move outer 2 3",
+      "tree",
+    ]);
+
+    expect(run.lines).toContain("box#outer moved by (2,3)");
+    expect(run.lines.some((line) => line.includes("g#inner (box)"))).toBe(true);
+    expect(run.lines.some((line) => /rect#inner-rect\s+x=2 y=3/.test(line))).toBe(true);
+  });
+
   it("子部件 id 与文档已有 id 冲突：整条命令失败，不留下容器", () => {
     const run = runCli([
       "init",
@@ -325,6 +390,21 @@ describe("验收 §4 图形插件 box", () => {
     expect(run.lines).toContain("error: cannot modify composite shape structure: n1-label");
     expect(run.lines.some((line) => line.startsWith("box#n1  parent=svg"))).toBe(true);
     expect(run.lines).toContain("  children=2");
+  });
+
+  it("group 收编必要子部件失败时，不改变文档中的其他成员", () => {
+    const run = runCli([
+      "init",
+      "create rect other 0 0 1 1",
+      'create box n1 0 0 40 20 "a"',
+      "group cluster other n1-rect",
+      "tree",
+    ]);
+
+    expect(run.lines).toContain("error: cannot modify composite shape structure: n1-rect");
+    expect(run.lines.some((line) => /^[├└]── rect#other\s+x=/.test(line))).toBe(true);
+    expect(run.lines.some((line) => line.includes("g#n1 (box)"))).toBe(true);
+    expect(run.lines.some((line) => line.includes("g#cluster"))).toBe(false);
   });
 
   it("保存为 data-kind=box；装有插件时读回为 box，未装时降级为普通 g", () => {
