@@ -21,4 +21,4 @@
 ## 未做/待用户决定
 
 - 不创建标签 `p2`、不推送。
-- §6 方式 B 的 git-diff 判据需要“仅新增插件包 + 仅改 `plugins.config.json`”的演示提交，见 `docs/facts/dual-assembly-proof.md`。
+- §6 的 git-diff 判据已用本地演示分支 `demo/plugin-via-code`（A）与 `demo/plugin-via-config`（B）证明，见 `docs/facts/dual-assembly-proof.md`；分支不合并、不推送。
