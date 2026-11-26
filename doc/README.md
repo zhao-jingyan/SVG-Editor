@@ -13,7 +13,7 @@
 - `rect`、`circle`、`ellipse`、`line`、`text`、`g` 六种图形及嵌套容器；
 - SVG 子集读写、缺失 id 自动分配与 IO 后的历史锁。
 
-**Phase 2（交付完成后打 tag `p2`，当前未打）**
+**Phase 2（tag `p2`）**
 
 - 四个扩展点：`ShapeContribution`（角色名 ShapeProvider）、`CommandContribution`、`AttributeHandler`、`TreeDecorator`；
 - 命令插件 `stats` / `dir`；图形插件 `box`；树标签 `(box)` 与 `modified-star`；
@@ -212,7 +212,7 @@ protocol -/-> cli | core | host | _builtin | _plugin | Node | DOM
 - `npm run lint` 检查 `_builtin` / `_plugin` 分层导入。
 - 扩展点调用只经 Catalog/Registry；显示与 SVG 写出经 Visitor。
 - `CommandExecutor` 是成功命令入栈点；`CommandHistory` 独占撤销栈与历史锁。
-- Phase 1 行为由 `final` 标记；Phase 2 文档与校验就绪后再打 `p2`（见 metrics 与双装配校验）。
+- Phase 1 行为由 `final` 标记；Phase 2 交付由 `p2` 标记（见 metrics 与双装配校验）。
 
 ## 8. 质量保证
 
@@ -310,7 +310,7 @@ Adapter 角色对应：Client = `DirCommand`；Target = `DirectoryListing`；Ada
 
 - ADR：[`docs/adr/`](../docs/adr/)（属性契约、box 降级、dirty 语义、清单校验时机、box 子部件 id 与结构不变量；以及分层与 `_builtin` / `protocol` 拆分、命令聚拢、图形贡献替代 `ShapeFactory`、扩展点抽象类、目录端口）。
 - 迭代报告：[`iteration-report-phase2.md`](./iteration-report-phase2.md)（Phase 1 → Phase 2 的过程、架构对比图与指标变化）。
-- Metrics：`npm run metrics` → [`docs/metrics/summary.md`](../docs/metrics/summary.md)（相对 `final`（终点为标签 `p2`，未创建时用 `HEAD`）的内核/装配/插件行数与圈复杂度增量，复杂度由 TypeScript AST 逐函数计算；含文件职责清单，VSCode 扩展单独列出；脚本生成、禁止手填）。
+- Metrics：`npm run metrics` → [`docs/metrics/summary.md`](../docs/metrics/summary.md)（相对 `final` 到标签 `p2` 的内核/装配/插件行数与圈复杂度增量，复杂度由 TypeScript AST 逐函数计算；含文件职责清单，VSCode 扩展单独列出；脚本生成、禁止手填）。
 
 ## 13. VSCode 扩展（第一部分）
 

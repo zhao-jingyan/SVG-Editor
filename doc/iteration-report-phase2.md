@@ -13,7 +13,7 @@ Phase 2 的目标是把 Phase 1 的固定 CLI 改造成可插拔的扩展架构�
 
 ## 2. 迭代过程
 
-基线为标签 `final`（Phase 1 结束）。Phase 2 的主要迭代如下（提交号以 `git log final..HEAD` 为准）：
+基线为标签 `final`（Phase 1 结束）。Phase 2 的主要迭代如下（提交号以 `git log final..p2` 为准）：
 
 | 阶段 | 主要内容 | 代表提交 |
 |---|---|---|
@@ -46,15 +46,15 @@ Phase 2 的目标是把 Phase 1 的固定 CLI 改造成可插拔的扩展架构�
 
 ## 4. 指标变化
 
-由 `npm run metrics`（`scripts/generate-metrics.mjs`）从 git 对象生成，口径见 [`docs/metrics/summary.md`](../docs/metrics/summary.md)。下表基线为 `final`，终点为 `HEAD`；打 `p2` 标签后需重新生成，终点以 `p2` 为准。
+由 `npm run metrics`（`scripts/generate-metrics.mjs`）从 git 对象生成，口径见 [`docs/metrics/summary.md`](../docs/metrics/summary.md)。下表基线为 `final`，终点为 `p2`。
 
 | 类别 | 文件数 | 行数 | 圈复杂度 |
 |---|---:|---:|---:|
-| Phase 1 CLI 合计（`final`） | 95 | 5094 | 803 |
-| Phase 2 CLI 合计（`HEAD`） | 165 | 7776 | 1209 |
-| 增量 | +70 | +2682 | +406 |
+| Phase 1 CLI 合计（`final`） | 95 | 4999 | 803 |
+| Phase 2 CLI 合计（`p2`） | 165 | 7628 | 1214 |
+| 增量 | +70 | +2629 | +411 |
 
-增量中，`_plugin` 为 18 个文件、683 行、复杂度 111，约占行数增量的四分之一；装配处（`main.ts`、`host`、`assembly`）为 12 个文件、758 行、复杂度 123；其余增量为内核（`protocol`、`core`、`cli`、`_builtin`）中的扩展点契约、注册表、命令贡献化和 `box` 相关的内核钩子。
+增量中，`_plugin` 为 18 个文件、665 行、复杂度 111，约占行数增量的四分之一；装配处（`main.ts`、`host`、`assembly`）为 12 个文件、746 行、复杂度 123；其余增量为内核（`protocol`、`core`、`cli`、`_builtin`）中的扩展点契约、注册表、命令贡献化和 `box` 相关的内核钩子。
 
 ## 5. 验证结果
 
@@ -90,7 +90,7 @@ Phase 2 的目标是把 Phase 1 的固定 CLI 改造成可插拔的扩展架构�
 
 ## 7. 已知限制与后续事项
 
-- 标签 `p2` 尚未创建。按 spec，应在最终提交上打 `p2`，之后重新生成 metrics。
-- 尚未 push 到远程 `origin`，所有提交目前只在本地。
+- `p2` 标记最终代码与文档提交；metrics 按交付约定在其后以 `p2` 为终点重新生成并单独提交。
+- 发布步骤会将 `main` 与 `p2` 推送至远程 `origin`。
 - 两张 PNG 由 PlantUML 1.2024.8 渲染（`java -Djava.awt.headless=true -jar plantuml.jar -tpng -graphvizdot <dot> <puml>`）。源文件改动后需要重新渲染。
 - 拓展任务（选做）未实施。
