@@ -3,24 +3,22 @@ import { AttributeRegistry } from "@/core/attributes/AttributeRegistry";
 import { CommandRegistry } from "@/core/commands/CommandRegistry";
 import { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
 import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
-import { activateDefaultPlugins } from "@/host/activateDefaultPlugins";
+import { BuiltinContributionInstaller } from "@/assembly/BuiltinContributionInstaller";
+import { CodePluginInstaller } from "@/assembly/CodePluginInstaller";
 import { PluginHost } from "@/host/PluginHost";
-import {
-  registerBuiltinGroupShape,
-  registerBuiltinLeafShapes,
-} from "@/host/registerBuiltinContributions";
 
-describe("activateDefaultPlugins", () => {
+describe("CodePluginInstaller（方式 A）", () => {
   it("经同一 Host 路径装入默认插件集合", async () => {
     const commands = new CommandRegistry();
     const shapes = new ShapeRegistry();
     const attributes = new AttributeRegistry();
     const decorators = new TreeDecoratorRegistry();
-    registerBuiltinLeafShapes(shapes);
+    const builtins = new BuiltinContributionInstaller(shapes, commands);
+    builtins.installLeafShapes();
 
     const host = new PluginHost(commands, shapes, attributes, decorators);
-    await activateDefaultPlugins(host);
-    registerBuiltinGroupShape(shapes);
+    await new CodePluginInstaller(host).install();
+    builtins.installGroupShape();
 
     expect(commands.find("stats")).toBeDefined();
     expect(commands.find("dir")).toBeDefined();

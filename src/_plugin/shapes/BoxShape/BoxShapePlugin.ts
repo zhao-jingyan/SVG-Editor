@@ -1,6 +1,6 @@
 import type { PluginContext } from "@/protocol/plugins/PluginContext";
 import type { SvgPlugin } from "@/protocol/plugins/SvgPlugin";
-import { BoxTypeLabelDecorator } from "@/_plugin/tree/BoxTypeLabelDecorator";
+import { BoxTypeLabelDecorator } from "./BoxTypeLabelDecorator";
 import { BoxAttributeHandler } from "./BoxAttributeHandler";
 import { BoxShapeContribution } from "./BoxShapeContribution";
 

@@ -25,50 +25,57 @@ import { LineShapeContribution } from "@/_builtin/shapes/LineShape/LineShapeCont
 import { RectShapeContribution } from "@/_builtin/shapes/RectShape/RectShapeContribution";
 import { TextShapeContribution } from "@/_builtin/shapes/TextShape/TextShapeContribution";
 import type { CommandRegistry } from "@/core/commands/CommandRegistry";
-import type { ShapeCatalog } from "@/protocol/shapes/contribution/ShapeCatalog";
 import type { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
 
-/** 注册叶子内置图形；不含 g，以便插件 box 可插在 g 之前。 */
-export function registerBuiltinLeafShapes(shapeCatalog: ShapeRegistry): void {
-  shapeCatalog.registerAll([
-    RectShapeContribution.create(),
-    CircleShapeContribution.create(),
-    EllipseShapeContribution.create(),
-    LineShapeContribution.create(),
-    TextShapeContribution.create(),
-  ]);
-}
+/**
+ * 组合根侧：把 Phase 1 内置命令与六种图形装入注册表。
+ * 图形分两步：叶子先注册，普通 g 在插件之后注册，保证 data-kind=box 先被 box 认领。
+ */
+export class BuiltinContributionInstaller {
+  public constructor(
+    private readonly shapes: ShapeRegistry,
+    private readonly commands: CommandRegistry,
+  ) {}
 
-/** 插件装入后再注册 g，保证 data-kind=box 优先于普通 g。 */
-export function registerBuiltinGroupShape(shapeCatalog: ShapeRegistry): void {
-  shapeCatalog.register(GroupShapeContribution.create());
-}
+  /** 注册叶子内置图形；不含 g，以便插件 box 可插在 g 之前。 */
+  public installLeafShapes(): void {
+    this.shapes.registerAll([
+      RectShapeContribution.create(),
+      CircleShapeContribution.create(),
+      EllipseShapeContribution.create(),
+      LineShapeContribution.create(),
+      TextShapeContribution.create(),
+    ]);
+  }
 
-/** Phase 1 内置命令（不含插件命令）。 */
-export function registerBuiltinCommands(
-  registry: CommandRegistry,
-  shapeCatalog: ShapeCatalog,
-): void {
-  registry.registerAll([
-    InitCommandContribution.create(),
-    ReadCommandContribution.create(),
-    SaveCommandContribution.create(),
-    CanvasCommandContribution.create(),
-    CreateCommandContribution.create(shapeCatalog),
-    DeleteCommandContribution.create(),
-    MoveCommandContribution.create(),
-    ScaleCommandContribution.create(),
-    SetCommandContribution.create(),
-    GroupCommandContribution.create(),
-    UngroupCommandContribution.create(),
-    AddToCommandContribution.create(),
-    FrontCommandContribution.create(),
-    BackCommandContribution.create(),
-    TreeCommandContribution.create(),
-    ShowCommandContribution.create(),
-    UndoCommandContribution.create(),
-    RedoCommandContribution.create(),
-    HelpCommandContribution.create(),
-    ExitCommandContribution.create(),
-  ]);
+  /** 插件装入后再注册 g，保证 data-kind=box 优先于普通 g。 */
+  public installGroupShape(): void {
+    this.shapes.register(GroupShapeContribution.create());
+  }
+
+  /** Phase 1 内置命令（不含插件命令）。 */
+  public installCommands(): void {
+    this.commands.registerAll([
+      InitCommandContribution.create(),
+      ReadCommandContribution.create(),
+      SaveCommandContribution.create(),
+      CanvasCommandContribution.create(),
+      CreateCommandContribution.create(this.shapes),
+      DeleteCommandContribution.create(),
+      MoveCommandContribution.create(),
+      ScaleCommandContribution.create(),
+      SetCommandContribution.create(),
+      GroupCommandContribution.create(),
+      UngroupCommandContribution.create(),
+      AddToCommandContribution.create(),
+      FrontCommandContribution.create(),
+      BackCommandContribution.create(),
+      TreeCommandContribution.create(),
+      ShowCommandContribution.create(),
+      UndoCommandContribution.create(),
+      RedoCommandContribution.create(),
+      HelpCommandContribution.create(),
+      ExitCommandContribution.create(),
+    ]);
+  }
 }

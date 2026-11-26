@@ -12,11 +12,12 @@
 - `src/cli`：只负责输入输出、终端适配和文本到命令对象的解析，不承载业务规则。
 - `src/protocol`：只存放契约——命令基类与贡献 API、图形领域模型、接收者接口、IO 端口（如 `DirectoryListing`）、结果/错误模型与边界 DTO；不含具体内置/插件命令实现。
 - `src/_builtin`：内置命令与图形贡献包（`commands/XxxCommand/`、`shapes/XxxShape/`），只导出命令/贡献，不负责统一注册；依赖 `protocol`。
-- `src/_plugin`：可选命令/图形等插件包，依赖 `protocol`；不得依赖 `_builtin` / `core` 内部；由组合根注册。
+- `src/_plugin`：可选命令/图形等插件包（含 `package.json` 的目录即一个包），依赖 `protocol`；不得依赖 `_builtin` / `core` 内部，**也不得依赖其他插件包**；由组合根注册。
 - `src/core`：存放执行器、文档状态和业务编排，消费 `protocol`；不得依赖 `_builtin` / `_plugin`。
-- `src/host`：装配侧插件宿主与配置加载器（`PluginHost`、`loadPluginsFromConfig`）；不属于内核；加载器不得硬编码具体插件导入。
-- `src/main.ts`：只作为组合根，负责组装 CLI、Core、host、`_builtin` / `_plugin` 与方式 A/B 装入。
-- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`_builtin -> protocol`、`_plugin -> protocol`、`host -> protocol + core`（方式 A 装配可依赖 `_plugin`）、`main -> cli + core + host + _builtin + _plugin`。
+- `src/host`：插件宿主与配置加载器（`PluginHost`、`loadPluginsFromConfig`、`PluginModuleLoader`）；不属于内核；只依赖 `protocol` + `core`，**不得 import 任何具体插件或内置贡献**。
+- `src/assembly`：组合根侧的具体装配代码（`BuiltinContributionInstaller` 装入内置贡献，`CodePluginInstaller` 即方式 A 的插件清单）；新增插件的方式 A 只改 `CodePluginInstaller`。
+- `src/main.ts`：只作为组合根，负责组装 CLI、Core、host、assembly 与方式 A/B 选择。
+- 固定依赖方向：`cli -> protocol`、`core -> protocol`、`_builtin -> protocol`、`_plugin -> protocol`、`host -> protocol + core`、`assembly -> host + core + protocol + _builtin + _plugin`、`main -> cli + core + host + assembly`。
 - `protocol` 不得依赖 `cli`、`core`、`host`、`_builtin`、`_plugin`、Node 或 DOM。
 - 禁止跨层直接访问、循环依赖，以及在 CLI 中实现编辑规则或文档状态。
 - 命令专用 API 不上 `CommandReceiver`；文档结构只读查询可用 `getRootShapes()`；文件系统经独立 `DirectoryListing` 端口，不经 Receiver。
@@ -48,7 +49,7 @@
 - 每次实现先给出计划，再小步提交；禁止一次性大提交。
 - 修改架构或依赖方向时，同步更新 `docs/facts/`、`docs/plans/` 和相关说明。
 - 验证命令固定为 `npm test`、`npm run build` 和 `npm run lint`。
-- `npm run lint` 检查分层导入：`src/_builtin` / `src/_plugin` 仅可依赖 `protocol` 与自身（`_plugin` 允许 `node:` 适配器）。
+- `npm run lint` 检查分层导入：`protocol` 仅自身且无外部模块；`core`/`cli`/`host` 不得依赖 `_builtin`/`_plugin`；`_builtin` 仅可依赖 `protocol` 与自身；每个 `_plugin` 包仅可依赖 `protocol` 与自身包（允许 `node:` 适配器）。
 - 新增领域类层次时，测试必须覆盖多态行为、`instanceof` 关系和关键错误分支。
 - 提交只暂存本任务文件，禁止使用 `git add -A`；commit hook 已覆盖的检查不重复执行。
 

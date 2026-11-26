@@ -12,15 +12,11 @@ import { FileSvgStorage } from "@/core/io/FileSvgStorage";
 import { EditorCommandReceiver } from "@/core/receiver/EditorCommandReceiver";
 import { ShapeRegistry } from "@/core/shapes/ShapeRegistry";
 import { TreeDecoratorRegistry } from "@/core/tree/TreeDecoratorRegistry";
-import { activateDefaultPlugins } from "@/host/activateDefaultPlugins";
+import { BuiltinContributionInstaller } from "@/assembly/BuiltinContributionInstaller";
+import { CodePluginInstaller } from "@/assembly/CodePluginInstaller";
 import { loadPluginsFromConfig } from "@/host/loadPluginsFromConfig";
 import { parseConfigArg } from "@/host/parseConfigArg";
 import { PluginHost } from "@/host/PluginHost";
-import {
-  registerBuiltinCommands,
-  registerBuiltinGroupShape,
-  registerBuiltinLeafShapes,
-} from "@/host/registerBuiltinContributions";
 
 async function main(): Promise<void> {
   const configPath = parseConfigArg(process.argv.slice(2));
@@ -28,10 +24,10 @@ async function main(): Promise<void> {
   const outputWriter = new ConsoleOutputWriter();
   const history = new CommandHistory();
   const shapeCatalog = new ShapeRegistry();
-  registerBuiltinLeafShapes(shapeCatalog);
-
   const registry = new CommandRegistry();
-  registerBuiltinCommands(registry, shapeCatalog);
+  const builtins = new BuiltinContributionInstaller(shapeCatalog, registry);
+  builtins.installLeafShapes();
+  builtins.installCommands();
 
   const attributeCatalog = new AttributeRegistry();
   const treeDecorators = new TreeDecoratorRegistry();
@@ -45,11 +41,11 @@ async function main(): Promise<void> {
   if (configPath !== undefined) {
     await loadPluginsFromConfig(host, configPath);
   } else {
-    await activateDefaultPlugins(host);
+    await new CodePluginInstaller(host).install();
   }
 
   // box 插件须先于普通 g
-  registerBuiltinGroupShape(shapeCatalog);
+  builtins.installGroupShape();
 
   const helpText = new HelpText(registry);
   const editorCommandReceiver = new EditorCommandReceiver(

@@ -11,11 +11,43 @@ const srcRoot = path.join(repositoryRoot, "src");
  *   root: string;
  *   allow: readonly string[];
  *   allowExternalPrefixes?: readonly string[];
+ *   allowAnyExternal?: boolean;
+ *   isolatePackages?: boolean;
  * }} LayerRule
+ *
+ * isolatePackages：root 下含 package.json 的目录视为一个独立插件包，
+ * 文件只能导入自己的包与 allow 中的目录（即插件不得依赖其他插件）。
  */
 
 /** @type {readonly LayerRule[]} */
 const layers = [
+  {
+    name: "protocol",
+    root: path.join(srcRoot, "protocol"),
+    allow: [path.join(srcRoot, "protocol")],
+  },
+  {
+    name: "core",
+    root: path.join(srcRoot, "core"),
+    allow: [path.join(srcRoot, "core"), path.join(srcRoot, "protocol")],
+    allowAnyExternal: true,
+  },
+  {
+    name: "cli",
+    root: path.join(srcRoot, "cli"),
+    allow: [path.join(srcRoot, "cli"), path.join(srcRoot, "protocol")],
+    allowExternalPrefixes: ["node:"],
+  },
+  {
+    name: "host",
+    root: path.join(srcRoot, "host"),
+    allow: [
+      path.join(srcRoot, "host"),
+      path.join(srcRoot, "protocol"),
+      path.join(srcRoot, "core"),
+    ],
+    allowExternalPrefixes: ["node:"],
+  },
   {
     name: "_builtin",
     root: path.join(srcRoot, "_builtin"),
@@ -27,11 +59,9 @@ const layers = [
   {
     name: "_plugin",
     root: path.join(srcRoot, "_plugin"),
-    allow: [
-      path.join(srcRoot, "_plugin"),
-      path.join(srcRoot, "protocol"),
-    ],
+    allow: [path.join(srcRoot, "protocol")],
     allowExternalPrefixes: ["node:"],
+    isolatePackages: true,
   },
 ];
 
@@ -95,6 +125,31 @@ function resolveSpecifier(fromFile, specifier) {
 }
 
 /**
+ * 自文件所在目录向上，找到 layerRoot 内最近的含 package.json 的目录。
+ * @param {string} filePath
+ * @param {string} layerRoot
+ * @returns {Promise<string>}
+ */
+async function findPackageRoot(filePath, layerRoot) {
+  let current = path.dirname(filePath);
+
+  while (current.startsWith(layerRoot)) {
+    try {
+      await readFile(path.join(current, "package.json"), "utf8");
+      return current;
+    } catch {
+      // 继续向上
+    }
+    if (current === layerRoot) {
+      break;
+    }
+    current = path.dirname(current);
+  }
+
+  return path.dirname(filePath);
+}
+
+/**
  * @param {string} candidate
  * @param {readonly string[]} allowedRoots
  */
@@ -145,26 +200,29 @@ async function main() {
     for (const filePath of files) {
       const source = await readFile(filePath, "utf8");
       const relativeFile = path.relative(repositoryRoot, filePath);
+      const allowedRoots = layer.isolatePackages
+        ? [...layer.allow, await findPackageRoot(filePath, layer.root)]
+        : layer.allow;
 
       for (const specifier of collectSpecifiers(filePath, source)) {
         const resolved = resolveSpecifier(filePath, specifier);
 
         if (resolved.kind === "external") {
           const allowedPrefixes = layer.allowExternalPrefixes ?? [];
-          const externalAllowed = allowedPrefixes.some((prefix) =>
-            specifier.startsWith(prefix),
-          );
+          const externalAllowed =
+            layer.allowAnyExternal === true ||
+            allowedPrefixes.some((prefix) => specifier.startsWith(prefix));
           if (!externalAllowed) {
             violations.push(
-              `${relativeFile}: 禁止外部依赖 "${specifier}"（${layer.name} 仅可依赖 protocol 与自身）`,
+              `${relativeFile}: 禁止外部依赖 "${specifier}"（${layer.name} 不允许该外部模块）`,
             );
           }
           continue;
         }
 
-        if (!isAllowedLocal(resolved.target, layer.allow)) {
+        if (!isAllowedLocal(resolved.target, allowedRoots)) {
           violations.push(
-            `${relativeFile}: 禁止导入 "${specifier}"（${layer.name} 仅可依赖 protocol 与自身）`,
+            `${relativeFile}: 禁止导入 "${specifier}"（${layer.name} 越过了允许的依赖边界）`,
           );
         }
       }
