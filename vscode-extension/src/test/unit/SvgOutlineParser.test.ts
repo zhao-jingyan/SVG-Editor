@@ -62,6 +62,14 @@ describe("SvgOutlineParser", () => {
     assert.equal(group.getChildren()[0].getLabel(), "rect");
   });
 
+  it("不会把其他属性值中的 id 文本识别为 id 属性", () => {
+    const root = parseRoot(
+      '<svg><rect data-note="node id=wrong" id="right"/></svg>',
+    );
+
+    assert.equal(root.getChildren()[0].getLabel(), "rect#right");
+  });
+
   it("不完整 XML 返回空结果", () => {
     assert.equal(parser.parse("<svg><g>"), undefined);
     assert.equal(parser.parse("<svg><g></svg>"), undefined);

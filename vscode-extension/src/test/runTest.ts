@@ -11,11 +11,12 @@ async function main(): Promise<void> {
     "workspace",
   );
   const configuredExecutable = process.env.VSCODE_EXECUTABLE_PATH;
-  const defaultExecutable =
-    "/Applications/Visual Studio Code.app/Contents/MacOS/Electron";
+  const defaultExecutable = [
+    "/Applications/Visual Studio Code.app/Contents/MacOS/Code",
+    "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+  ].find((executable) => existsSync(executable));
   const executablePath =
-    configuredExecutable ??
-    (existsSync(defaultExecutable) ? defaultExecutable : undefined);
+    configuredExecutable ?? defaultExecutable;
 
   await runTests({
     ...(executablePath === undefined

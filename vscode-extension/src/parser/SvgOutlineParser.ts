@@ -223,11 +223,93 @@ export class SvgOutlineParser {
   }
 
   private readIdAttribute(attributes: string): string | undefined {
-    const match = attributes.match(
-      /(?:^|\s)id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/,
-    );
+    let cursor = 0;
 
-    return match?.[1] ?? match?.[2] ?? match?.[3];
+    while (cursor < attributes.length) {
+      while (
+        cursor < attributes.length &&
+        this.isWhitespace(attributes[cursor])
+      ) {
+        cursor += 1;
+      }
+
+      if (cursor >= attributes.length || attributes[cursor] === "/") {
+        return undefined;
+      }
+
+      const nameStart = cursor;
+
+      while (
+        cursor < attributes.length &&
+        !this.isWhitespace(attributes[cursor]) &&
+        attributes[cursor] !== "=" &&
+        attributes[cursor] !== "/"
+      ) {
+        cursor += 1;
+      }
+
+      const attributeName = attributes.slice(nameStart, cursor);
+
+      while (
+        cursor < attributes.length &&
+        this.isWhitespace(attributes[cursor])
+      ) {
+        cursor += 1;
+      }
+
+      if (attributes[cursor] !== "=") {
+        continue;
+      }
+
+      cursor += 1;
+
+      while (
+        cursor < attributes.length &&
+        this.isWhitespace(attributes[cursor])
+      ) {
+        cursor += 1;
+      }
+
+      const quote =
+        attributes[cursor] === '"' || attributes[cursor] === "'"
+          ? attributes[cursor]
+          : undefined;
+
+      if (quote !== undefined) {
+        cursor += 1;
+      }
+
+      const valueStart = cursor;
+
+      if (quote === undefined) {
+        while (
+          cursor < attributes.length &&
+          !this.isWhitespace(attributes[cursor])
+        ) {
+          cursor += 1;
+        }
+      } else {
+        while (cursor < attributes.length && attributes[cursor] !== quote) {
+          cursor += 1;
+        }
+
+        if (cursor >= attributes.length) {
+          return undefined;
+        }
+      }
+
+      const value = attributes.slice(valueStart, cursor);
+
+      if (quote !== undefined) {
+        cursor += 1;
+      }
+
+      if (attributeName === "id") {
+        return value;
+      }
+    }
+
+    return undefined;
   }
 
   private skipDocumentProlog(): void {

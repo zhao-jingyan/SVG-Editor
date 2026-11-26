@@ -1,7 +1,8 @@
 import * as assert from "node:assert/strict";
 import { join } from "node:path";
 import * as vscode from "vscode";
-import { SvgFileDecorationProvider } from "../../file/SvgFileDecorationProvider";
+import { activate } from "../../extension";
+import { SvgDocumentSymbolProvider } from "../../outline/SvgDocumentSymbolProvider";
 
 interface IntegrationTest {
   readonly name: string;
@@ -17,23 +18,72 @@ async function activateExtension(): Promise<void> {
   await extension.activate();
 }
 
-async function verifyFileDecoration(): Promise<void> {
-  await activateExtension();
+function replaceExtensionApiMethod(
+  target: object,
+  propertyName: string,
+  replacement: (...args: unknown[]) => vscode.Disposable,
+): () => void {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(
+    target,
+    propertyName,
+  );
 
+  assert.ok(originalDescriptor, `${propertyName} 应存在于 VSCode API 对象`);
+
+  Object.defineProperty(target, propertyName, {
+    configurable: true,
+    enumerable: originalDescriptor.enumerable,
+    writable: true,
+    value: replacement,
+  });
+
+  return (): void => {
+    Object.defineProperty(target, propertyName, originalDescriptor);
+  };
+}
+
+async function verifyFileDecoration(): Promise<void> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   assert.ok(workspaceFolder, "集成测试必须打开固定工作目录");
 
-  const provider = new SvgFileDecorationProvider();
+  let registeredProvider: vscode.FileDecorationProvider | undefined;
+  const restoreFileDecorationRegistration = replaceExtensionApiMethod(
+    vscode.window,
+    "registerFileDecorationProvider",
+    (provider): vscode.Disposable => {
+      registeredProvider = provider as vscode.FileDecorationProvider;
+      return new vscode.Disposable(() => {});
+    },
+  );
+  const restoreDocumentSymbolRegistration = replaceExtensionApiMethod(
+    vscode.languages,
+    "registerDocumentSymbolProvider",
+    (): vscode.Disposable => new vscode.Disposable(() => {}),
+  );
+  const subscriptions: vscode.Disposable[] = [];
+
+  try {
+    activate({
+      subscriptions,
+    } as unknown as vscode.ExtensionContext);
+  } finally {
+    restoreDocumentSymbolRegistration();
+    restoreFileDecorationRegistration();
+  }
+
+  assert.equal(subscriptions.length, 2, "扩展激活时应注册两个 Provider");
+  assert.ok(registeredProvider, "扩展激活时应注册文件装饰 Provider");
+
   const cancellation = new vscode.CancellationTokenSource();
-  const svgDecoration = await provider.provideFileDecoration(
+  const svgDecoration = await registeredProvider.provideFileDecoration(
     vscode.Uri.file(join(workspaceFolder.uri.fsPath, "example.svg")),
     cancellation.token,
   );
-  const textDecoration = await provider.provideFileDecoration(
+  const textDecoration = await registeredProvider.provideFileDecoration(
     vscode.Uri.file(join(workspaceFolder.uri.fsPath, "notes.txt")),
     cancellation.token,
   );
-  const directoryDecoration = await provider.provideFileDecoration(
+  const directoryDecoration = await registeredProvider.provideFileDecoration(
     vscode.Uri.file(join(workspaceFolder.uri.fsPath, "folder.svg")),
     cancellation.token,
   );
@@ -100,6 +150,18 @@ async function verifyDocumentOutline(): Promise<void> {
     assert.equal(rectangle.name, "rect#start");
     assert.equal(text.name, "text");
 
+    const cancellation = new vscode.CancellationTokenSource();
+    const providerSymbols = new SvgDocumentSymbolProvider().provideDocumentSymbols(
+      document,
+      cancellation.token,
+    );
+    const providerRectangle = providerSymbols[0].children?.[0].children?.[0];
+    cancellation.dispose();
+
+    assert.ok(providerRectangle);
+    assert.equal(providerRectangle.selectionRange.start.line, 3);
+    assert.equal(providerRectangle.selectionRange.start.character, 4);
+
     await replaceDocument(
       document,
       originalContent.replace(
@@ -124,14 +186,45 @@ async function verifyDocumentOutline(): Promise<void> {
   }
 }
 
+async function verifyAttributeValueIsNotTreatedAsId(): Promise<void> {
+  await activateExtension();
+
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+  assert.ok(workspaceFolder, "集成测试必须打开固定工作目录");
+
+  const document = await vscode.workspace.openTextDocument(
+    vscode.Uri.file(join(workspaceFolder.uri.fsPath, "example.svg")),
+  );
+  const originalContent = document.getText();
+  try {
+    await vscode.window.showTextDocument(document);
+    await replaceDocument(
+      document,
+      '<svg><rect data-note="node id=wrong" id="right"/></svg>',
+    );
+
+    const symbols = await executeOutline(document);
+
+    assert.equal(symbols[0].children[0].name, "rect#right");
+  } finally {
+    if (document.getText() !== originalContent) {
+      await replaceDocument(document, originalContent);
+    }
+  }
+}
+
 const tests: readonly IntegrationTest[] = [
   {
-    name: "Explorer 装饰只标记普通 SVG 文件",
+    name: "扩展注册文件装饰并按规则标记普通 SVG 文件",
     run: verifyFileDecoration,
   },
   {
     name: "原生大纲展示层级并在编辑后更新",
     run: verifyDocumentOutline,
+  },
+  {
+    name: "原生大纲不会把属性值中的 id 文本识别为 id",
+    run: verifyAttributeValueIsNotTreatedAsId,
   },
 ];
 
