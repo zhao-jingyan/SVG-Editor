@@ -43,3 +43,5 @@ git cat-file -e "C:src/_plugin/commands/PingCommand/PingCommandPlugin.ts"
 - 方式 B：仓库根 `plugins.config.json` + `--config`
 - 演示分支：`demo/plugin-via-code`、`demo/plugin-via-config`（本地，不合并进 `main`）
 - E2E：`tests/e2e/Cli.test.ts` 含 A/B 同会话断言
+
+删除→加回演示（四个插件各一对提交与标签）的失败测试记录与 git diff 验证见 [plugin-removal-demo.md](./plugin-removal-demo.md)。
