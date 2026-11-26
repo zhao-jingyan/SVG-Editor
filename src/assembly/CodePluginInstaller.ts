@@ -1,5 +1,6 @@
 import { PluginContributes } from "@/protocol/plugins/PluginContributes";
 import { DirCommandPlugin } from "@/_plugin/commands/DirCommand/DirCommandPlugin";
+import { StatsCommandPlugin } from "@/_plugin/commands/StatsCommand/StatsCommandPlugin";
 import { BoxShapePlugin } from "@/_plugin/shapes/BoxShape/BoxShapePlugin";
 import { ModifiedStarPlugin } from "@/_plugin/tree/ModifiedStarPlugin";
 import type { PluginHost } from "@/host/PluginHost";
@@ -13,6 +14,10 @@ export class CodePluginInstaller {
   public constructor(private readonly host: PluginHost) {}
 
   public async install(): Promise<void> {
+    await this.host.activate(
+      new StatsCommandPlugin(),
+      PluginContributes.of({ commands: ["stats"] }),
+    );
     await this.host.activate(
       new DirCommandPlugin(),
       PluginContributes.of({ commands: ["dir"] }),
