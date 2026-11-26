@@ -2,6 +2,7 @@ import { PluginContributes } from "@/protocol/plugins/PluginContributes";
 import { DirCommandPlugin } from "@/_plugin/commands/DirCommand/DirCommandPlugin";
 import { StatsCommandPlugin } from "@/_plugin/commands/StatsCommand/StatsCommandPlugin";
 import { BoxShapePlugin } from "@/_plugin/shapes/BoxShape/BoxShapePlugin";
+import { ModifiedStarPlugin } from "@/_plugin/tree/ModifiedStarPlugin";
 import type { PluginHost } from "@/host/PluginHost";
 
 /**
@@ -28,6 +29,10 @@ export class CodePluginInstaller {
         attributes: ["box-attributes"],
         decorators: ["box-type-label"],
       }),
+    );
+    await this.host.activate(
+      new ModifiedStarPlugin(),
+      PluginContributes.of({ decorators: ["modified-star"] }),
     );
   }
 }
